@@ -1,4 +1,4 @@
-www:
+nodejs:
  buildscript: nodejs/builder
  type: custom
  ports:
