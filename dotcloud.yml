@@ -1,3 +1,9 @@
 www:
- type: nodejs
+ buildscript: nodejs/builder
+ type: custom
+ ports:
+  www: http
+ process: ./node_modules/.bin/coffee dev/game.coffee
  approot: ./
+ node_version: v0.6.17
+ 
