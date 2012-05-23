@@ -1,16 +1,18 @@
-<div id='main'>
+<div id='main' class='lobby'>
   <div class='gameMenu'>
     <div class='btn btn-large'>1 vs 1</div>
   </div>
   <div class='chat'>
     <div class='viewport'>
       <ul class='overview'>
-        <li class='message'>
-          <p>Message 1</p>
-          <span>Łukasz Koprowski</span>
-        </li>
+        {{#each messages}}
+          <li class='message'>
+            <p>{{this.message}}</p>
+            <span>{{this.author}}</span>
+          </li>
+        {{/each}}
       </ul>
-    </div>
+ youny   </div>
     <textarea name='message'></textarea>
   </div>
   <div class='users'>
