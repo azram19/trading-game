@@ -27,7 +27,7 @@ config = require('./config.coffee')(app, express);
 
 app.get '/', ( req, res ) ->
     if req.loggedIn
-      res.redirest 'lobby'
+      res.redirect 'lobby'
     res.render 'index',
       title: 'Signals early chat tests'
 
