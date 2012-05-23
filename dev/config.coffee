@@ -2,15 +2,23 @@ module.exports = ( app, express ) ->
   config = @
 
   app.requireAuth = true;
+  app.usersByFbId = {}
 
   #Everyauth - Facebook
   app.everyauth.facebook
     .appId( '381600771875818' )
     .appSecret( '1cb71dd07064e3d110f0d76695961664' )
+    .scope( 'email' )
     .findOrCreateUser( (session, accessToken, accessTokExtra, fbUserMetadata) ->
-        usersByFbId[fbUserMetadata.id] || ( usersByFbId[fbUserMetadata.id] = addUser( 'facebook', fbUserMetadata ) );
+
+      console.log fbUserMetadata.id
+      app.usersByFbId[fbUserMetadata.id] = fbUserMetadata
     )
-    .redirectPath( '/' );
+    .redirectPath( '/lobby' )
+
+  app.everyauth.everymodule.findUserById (userId, callback) ->
+    user = app.usersByFbId[userId]
+    callback null, user
 
   #generic config
   app.configure ->

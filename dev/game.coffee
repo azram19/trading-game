@@ -1,6 +1,7 @@
 express = require 'express'
 hbs = require 'hbs'
 app = module.exports = express.createServer()
+_ = require( 'underscore' )._
 app.everyauth = require 'everyauth'
 app.everyauth.helpExpress(app)
 
@@ -25,11 +26,19 @@ else
 config = require('./config.coffee')(app, express);
 
 app.get '/', ( req, res ) ->
-  if app.requireAuth and not req.loggedIn
-    #res.redirect('/auth/facebook');
-  #else
-    res.render 'testchat',
+    if req.loggedIn
+      res.redirest 'lobby'
+    res.render 'index',
       title: 'Signals early chat tests'
+
+app.get '/lobby', ( req, res ) ->
+  if app.requireAuth and not req.loggedIn
+    res.redirect '/'
+  else
+    usersArray = _.toArray app.usersByFbId
+    res.render 'lobby'
+      users: usersArray
+      numberOfUsers: usersArray.length
 
 port = process.env.PORT || 3000
 

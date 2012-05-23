@@ -1,0 +1,105 @@
+body {
+  font-family: 'Cabin', Helvetica, Arial, sans-serif;
+
+  padding: 0;
+  margin: 0;
+  color:#bbb;
+  background: #222;
+}
+
+a{
+  text-decoration:none;
+  color:inherit;
+
+  &:hover{
+    color:inherit;
+    text-decoration:none;
+  }
+}
+
+p {
+    font-family: 'Open Sans', sans-serif;
+}
+
+.facebookLogin{
+  font-family: 'Open Sans', sans-serif;
+  font-weight:800;
+
+  width: 400px;
+  height: 60px;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  margin-top: -20px;
+  margin-left: -200px;
+  font-size: 36px;
+  border: 1px solid #333;
+  padding: 0 20px;
+  line-height: 60px;
+  border-radius: 5px;
+  background: #3B5998;
+  color: white;
+  text-shadow: -1px -1px 1px rgba(0, 0, 0, 0.3);
+  box-shadow: 2px 2px 2px rgba(59, 89, 152, 0.6), 3px 3px 12px black;
+  cursor: pointer;
+
+  -webkit-transition: all 0.2s ease-out;
+  transition: all 0.2s ease-out;
+}
+
+.facebookLogin:hover{
+  margin-top: -10px;
+  text-shadow: 0 0 8px rgba(0, 0, 0, 0.7);
+}
+
+#main{
+  background: #333;
+  width: 810px;
+  height: 500px;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  margin-top: -250px;
+  margin-left: -405px;
+  border-radius: 5px;
+  box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.6);
+  border: 1px solid #444;
+
+  .gameMenu{
+  width: 310px;
+  float: left;
+  padding: 40px 0;
+
+    .btn{
+      margin: 0 auto;
+      width: 60px;
+      display: block;
+    }
+  }
+
+  .users{
+    width: 190px;
+    float: left;
+  }
+
+  .chat{
+    width: 310px;
+    float: left;
+    height: 100%;
+    position: relative;
+
+    .viewport{
+      height: 400px;
+      overflow: hidden;
+      padding: 20px 0;
+    }
+
+    textarea{
+      position:absolute;
+      bottom:0;
+    }
+  }
+
+}
+
+
