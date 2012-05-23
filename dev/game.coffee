@@ -40,7 +40,7 @@ app.get '/lobby', ( req, res ) ->
       users: usersArray
       numberOfUsers: usersArray.length
 
-port = process.env['PORT_WWW'] || 8080
+port =  process.env.PORT || process.env['PORT_WWW']  || 8080
 
 app.listen port, ->
   console.log "Listening on " + port

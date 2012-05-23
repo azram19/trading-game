@@ -1,9 +1,11 @@
 nodejs:
  buildscript: nodejs/builder
  type: custom
- ports:
-  www: http
+ ports: http
  process: ./node_modules/.bin/coffee dev/game.coffee
  approot: ./
  node_version: v0.6.17
- 
+
+data:
+  type: redis
+
