@@ -23,7 +23,7 @@ pusher = new Pusher
   #app.redis = require("redis").createClient()
 
 
-config = require('./config.coffee')(app, express);
+config = require('./config.coffee')(app, express)
 app.get '/board', ( req, res) ->
    res.render 'board' 
 

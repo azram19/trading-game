@@ -47,7 +47,7 @@ drawHex = (x, y, size) ->
         strokeColor: 'yellow'
         strokeWidth: 3
         selected: false
-    glow hex, strokeColor: 'yellow', strokeWidth: 10
+    #glow hex, strokeColor: 'yellow', strokeWidth: 10
 
 glow = (path, glow) ->
     glow = glow || {}
@@ -89,19 +89,15 @@ path.add start
 path.lineTo end
 path.strokeColor = '#0000ff'
 path.strokeWidth = 2
-glow path, strokeColor: '#0000ff', strokeWidth: 8
 size = new Size 10, 8
 point = path.getPointAt 0
 rectangle = new Rectangle point, size
 oval = new Path.Oval rectangle
 oval.fillColor = '#0000ff'
 oval.position += new Point(-5, -4)
-glowPaths = glow oval, strokeColor: '#0000ff', strokeWidth: 10
 
 direction = end - start
 onFrame = (event) ->
     if oval.position.x > end.x and oval.position.y > end.y or oval.position.x < start.x and oval.position.y < start.y
         direction = -direction
     oval.position += direction/50
-    glowPaths.forEach (v, i, all) ->
-        v.position += direction/50
