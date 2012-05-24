@@ -100,7 +100,7 @@ glowPaths = glow oval, strokeColor: '#0000ff', strokeWidth: 10
 
 direction = end - start
 onFrame = (event) ->
-    if oval.position.x >= end.x and oval.position.y >= end.y or oval.position.x <= start.x and oval.position.y <= start.y
+    if oval.position.x > end.x and oval.position.y > end.y or oval.position.x < start.x and oval.position.y < start.y
         direction = -direction
     oval.position += direction/50
     glowPaths.forEach (v, i, all) ->

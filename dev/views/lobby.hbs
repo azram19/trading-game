@@ -1,0 +1,28 @@
+<div id='main' class='lobby'>
+  <div class='gameMenu'>
+    <div class='btn btn-large'>1 vs 1</div>
+  </div>
+  <div class='chat'>
+    <div class='viewport'>
+      <ul class='overview'>
+        {{#each messages}}
+          <li class='message'>
+            <p>{{this.message}}</p>
+            <span>{{this.author}}</span>
+          </li>
+        {{/each}}
+      </ul>
+ youny   </div>
+    <textarea name='message'></textarea>
+  </div>
+  <div class='users'>
+    <div class='counter'>
+    Users online: <span class='number'>{{numberOfUsers}}</span>
+    </div>
+    <ul>
+      {{#each users}}
+        {{this.name}}
+      {{/each}}
+    </ul>
+  </div>
+</div>
