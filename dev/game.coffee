@@ -13,23 +13,26 @@ pusher = new Pusher
   secret: '160b340e826a3776e4a6'
 
 # Heroku redistogo connection
-if process.env.REDISTOGO_URL
-  rtg   = require('url').parse process.env.REDISTOGO_URL
-  app.redis = require('redis').createClient rtg.port, rtg.hostname
-  app.redis.auth rtg.auth.split(':')[1] # auth 1st part is username and 2nd is password separated by ":"
-# Localhost
-else
-  app.redis = require("redis").createClient()
+#if process.env.REDISTOGO_URL
+  #rtg   = require('url').parse process.env.REDISTOGO_URL
+  #app.redis = require('redis').createClient rtg.port, rtg.hostname
+  #app.redis.auth rtg.auth.split(':')[1] # auth 1st part is username and 2nd is password separated by ":"
+## Localhost
+#else
+  #app.redis = require("redis").createClient()
 
 
 config = require('./config.coffee')(app, express);
-
-app.get '/', ( req, res ) ->
+app
+app.get '/chat', ( req, res ) ->
   if app.requireAuth and not req.loggedIn
     #res.redirect('/auth/facebook');
   #else
     res.render 'testchat',
       title: 'Signals early chat tests'
+
+app.get '/board', ( req, res) ->
+   res.render 'board' 
 
 port = process.env.PORT || 3000
 
