@@ -11,4 +11,9 @@ make
 make install
 cd ../node
 export PATH=$HOME/Documents/heroku/trading-game/node/bin:$PATH
+<<<<<<< HEAD
 npm install
+=======
+
+npm install
+>>>>>>> 16e2cdab34fdc7dbd3b8397c56ca3604c02b38f9

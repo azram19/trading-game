@@ -2,8 +2,7 @@
   <head>
     <title>{{title}}</title>
     <script src="http://js.pusher.com/1.12/pusher.min.js"></script>
-    <script src="js/paper.js"></script>
-    <script type="text/paperscript" canvas="board" src="js/board.js"></script>
+    <script src="js/libs/paper.js"></script>
     <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
     <script src="/socket.io/socket.io.js"></script>
     <script src="js/libs/underscore-min.js"></script>
@@ -11,9 +10,15 @@
     <script src="js/libs/backbone-min.js"></script>
     <script src="js/libs/handlebars-runtime.js"></script>
     <script src="js/libs/bootstrap.min.js"></script>
-    <script src="js/engine-min.js"></script>
+    <script src="js/libs/keyboard.min.js"></script>
+    <script src="js/templates.js"></script>
+    <script src="js/models.js"></script>
+    <script src="js/collections.js"></script>
+    <script src="js/views.js"></script>
+    <script src="js/signals.js"></script>
     <link href='http://fonts.googleapis.com/css?family=Cabin' rel='stylesheet' type='text/css'>
     <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,800' rel='stylesheet' type='text/css'>
+    <script type="text/paperscript" canvas="board" src="js/renderer.js"></script>
     <link rel='stylesheet' href='css/bootstrap.min.css'>
     <link rel='stylesheet' href='css/style.css'>
   </head>

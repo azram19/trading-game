@@ -1,18 +1,17 @@
 class Communicator
-  constructor: ( @host, @channel ) ->
+  constructor: ( @host ) ->
     self = @
-    _.extend @, Backbone.Events
+    @com = {}
+    
+    _.extend @com, Backbone.Events
 
     @id = null
 
     if @host?
       @host = 'http://localhost:8080'
 
-    #connest to the host
-    if @channel?
-      @socket = io.connect @host + @channel, @socketConfig
-    else
-      @socket = io.connect @host, @socketConfig
+    #connect to the host
+    @socket = io.connect @host, @socketConfig
 
 
     #listening to basic connection events
@@ -27,7 +26,7 @@ class Communicator
     @socket.on 'reconnect_failed', @handleReconnectFailed
 
     #listening to the client game events and pass them to the server
-    @.on 'all', @parseClientEvent, @, false
+    @com.on 'all', @parseClientEvent, @, false
 
 
   ###
@@ -63,33 +62,51 @@ class Communicator
   extend functions to handle events on both communicator and server
   ###
   on: ( events, callback, context, socket ) =>
-    super
+    @com.on events, callback
 
     if not socket? or socket
       @socket.on events, callback
 
   off: ( events, callback, context, socket ) =>
-    super
+    @com.off events, callback
 
     if not socket? or socket
       @socket.removeListener events, callback
 
+  trigger: ( events ) =>
+    @com.trigger.apply @com, arguments
 
   #parse an event
-  parseClientEvent: =>
-    #may be problematic due to bug in some browsers
-    event = arguments[0]
-    data = arguments[1]
-    fn = arguments[2]
+  parseClientEvent: ( event ) =>
+    console.log "Communicator: parse"
 
-   if event is 'disconnect'
-    @socket.disconnect()
-   else
-    @passClientEvent event, data, fn
+    if event is 'disconnect'
+      @socket.disconnect()
+    else
+      @passClientEvent.apply @, arguments
 
   #send an event to the server
   passClientEvent: ( event, data, fn ) =>
+    console.log "Communicator: pass"
     @socket.emit event, data, fn
 
+  #join a channel on the server
+  join: ( channel ) =>
+    @socket.emit 'join:channel', channel, ( confirm ) =>
+      if confirm
+        @com.trigger 'joined'
+        @channel = channel
+
+        console.log "Communicator: joined channel " + channel
+      else
+        @com.trigger 'join_failed'
+        console.error 'Communicator: server does not love you'
+
+  #leave the channel
+  leave: ( channel ) =>
+    if @channel is channel
+      @socket.emit 'leave:channel', channel, ( confirm ) =>
+          @com.trigger 'left'
+          @channel = ''
 
 window['Communicator'] = Communicator
