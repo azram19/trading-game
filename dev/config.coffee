@@ -8,7 +8,7 @@ module.exports = ( app, express ) ->
   sessionSecret = 'veryFuckingSecret'
   sessionKey = 'express.sid'
 
-  app.requireAuth = true;
+  app.requireAuth = true
   app.usersByFbId = {}
 
   #Everyauth - Facebook
@@ -29,7 +29,7 @@ module.exports = ( app, express ) ->
 
   #generic config
   app.configure ->
-    app.set 'views', __dirname + '/views'
+    app.set 'views', __dirname + '/server/views'
     app.set 'view engine', 'hbs'
 
     app.use express.bodyParser()

@@ -41,7 +41,7 @@ glow = (path, glow) ->
     for i in [1..c+1]
         newPath = path.clone()
         newPath.style =
-            strokeColor: s.strokeColor 
+            strokeColor: s.strokeColor
             fillColor: s.fillColor
             strokeJoin: "round"
             strokeCap: "round"
