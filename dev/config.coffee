@@ -17,8 +17,6 @@ module.exports = ( app, express ) ->
     .appSecret( facebookAppSecret )
     .scope( facebookScope )
     .findOrCreateUser( (session, accessToken, accessTokExtra, fbUserMetadata) ->
-
-      console.log fbUserMetadata.id
       app.usersByFbId[fbUserMetadata.id] = fbUserMetadata
     )
     .redirectPath( '/lobby' )
@@ -34,13 +32,6 @@ module.exports = ( app, express ) ->
 
     app.use express.bodyParser()
     app.use express.cookieParser()
-
-    ###
-    express.session
-      secret: process.env.CLIENT_SECRET or "f0501b04ed9b9e6844332fce3f878d5a"
-      maxAge : new Date Date.now() + 7200000 # 2h Session lifetime
-      store: new app.RedisStore {client: app.redis}
-    ###
 
     app.use express.session(
       secret: sessionSecret
