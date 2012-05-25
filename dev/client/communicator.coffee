@@ -3,7 +3,6 @@ class Communicator
     self = @
     _.extend @, Backbone.Events
 
-    @host = 'http://localhost:8080'
     @id = null
 
     if @host?

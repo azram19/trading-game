@@ -32,4 +32,3 @@ rsync -aH ./ $HOME/
 cd $HOME
 [ -f package.json ] && npm install
 
-

@@ -6,6 +6,7 @@ app.io = require 'socket.io'
 app.everyauth = require 'everyauth'
 
 MemoryStore = express.session.MemoryStore
+#Communicator = require('./server/communicator').Communicator
 
 app.sessionStore = new MemoryStore()
 app.RedisStore = require('connect-redis')(express)
@@ -23,6 +24,9 @@ app.everyauth.helpExpress app
 
 #config the app
 config = require('./config.coffee')(app, express)
+
+#app.communicator = new Communicator app
+
 app.get '/board', ( req, res) ->
    res.render 'board' 
 
