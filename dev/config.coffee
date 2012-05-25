@@ -1,14 +1,21 @@
 module.exports = ( app, express ) ->
   config = @
 
+  facebookAppId = '381600771875818'
+  facebookAppSecret = '1cb71dd07064e3d110f0d76695961664'
+  facebookScope = 'email'
+
+  sessionSecret = 'veryFuckingSecret'
+  sessionKey = 'express.sid'
+
   app.requireAuth = true;
   app.usersByFbId = {}
 
   #Everyauth - Facebook
   app.everyauth.facebook
-    .appId( '381600771875818' )
-    .appSecret( '1cb71dd07064e3d110f0d76695961664' )
-    .scope( 'email' )
+    .appId( facebookAppId )
+    .appSecret( facebookAppSecret )
+    .scope( facebookScope )
     .findOrCreateUser( (session, accessToken, accessTokExtra, fbUserMetadata) ->
 
       console.log fbUserMetadata.id
@@ -34,7 +41,12 @@ module.exports = ( app, express ) ->
       maxAge : new Date Date.now() + 7200000 # 2h Session lifetime
       store: new app.RedisStore {client: app.redis}
     ###
-    app.use express.session( secret: "kot" )
+
+    app.use express.session(
+      secret: sessionSecret
+      key: sessionKey
+      store: app.sessionStore
+    )
 
     app.use app.everyauth.middleware()
     app.use express.methodOverride()
