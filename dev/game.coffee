@@ -2,16 +2,15 @@ express = require 'express'
 hbs = require 'hbs'
 app = module.exports = express.createServer()
 _ = require( 'underscore' )._
+app.io = require 'socket.io'
 app.everyauth = require 'everyauth'
-app.everyauth.helpExpress(app)
 
-Pusher = require 'node-pusher'
+MemoryStore = express.session.MemoryStore
+
+app.sessionStore = new MemoryStore()
 app.RedisStore = require('connect-redis')(express)
 
-pusher = new Pusher
-  appId: '21008',
-  key: 'a610720749c820f0e140',
-  secret: '160b340e826a3776e4a6'
+app.everyauth.helpExpress app
 
 # Heroku redistogo connection
 #if process.env.REDISTOGO_URL
@@ -22,7 +21,7 @@ pusher = new Pusher
 #else
   #app.redis = require("redis").createClient()
 
-
+#config the app
 config = require('./config.coffee')(app, express)
 app.get '/board', ( req, res) ->
    res.render 'board' 
