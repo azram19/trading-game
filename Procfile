@@ -1,1 +1,1 @@
-web: ./node_modules/.bin/coffee --nodejs --debug dev/game
+web: ./node_modules/.bin/coffee dev/game
