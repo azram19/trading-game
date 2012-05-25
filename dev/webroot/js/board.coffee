@@ -12,28 +12,6 @@ hitOptions =
 
 view.viewSize = [width,height]
 
-#onMouseDown = (event) ->
-    #path = new Path()
-    #path.strokeColor = '#00000'
-    #path.selected = true
-
-    #path.add event.point
-
-#onMouseDrag = (event) ->
-    #step = event.delta
-    #step.angle += 90
-
-    #top = event.middlePoint + step
-    #bottom = event.middlePoint - step
-    
-    #line = new Path()
-    #line.strokeColor = '#000000'
-    #line.add top
-    #line.add bottom
-
-    #path.add top
-    #path.insert 0, bottom
-
 onMouseMove = (event) ->
     hitResult = project.hitTest event.point, hitOptions
     project.activeLayer.selected = false
