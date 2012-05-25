@@ -8,7 +8,7 @@ js-renderer:
 	node_modules/.bin/coffee -cbj dev/build/renderer.js dev/client/renderer/*
 
 js-templates:
-	find dev/client/templates -name *.handlebars -print0 | xargs -I {} -0 sh -c 'f=`basename {}`; handlebars {} -f dev/build/templates/`basename {}`.js'
+	find dev/client/templates -name *.handlebars -print0 | xargs -I {} -0 sh -c 'f=`basename {}`; node_modules/.bin/handlebars {} -f dev/build/templates/`basename {}`.js'
 	cat dev/build/templates/* > dev/webroot/js/templates.js
 
 js-views:
