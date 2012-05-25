@@ -1,8 +1,11 @@
 class ComClient
   constructor: ( @socket ) ->
-    @id = null
+    @id = 7
 
   getSocket: =>
     @socket
+
+  getId: =>
+    @id
 
 exports.ComClient = ComClient
