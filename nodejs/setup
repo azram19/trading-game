@@ -10,3 +10,5 @@ cd joyent-node-*
 make
 make install
 cd ../node
+setenv PATH $HOME/Documents/heroku/trading-game/node/bin:$PATH
+npm install
