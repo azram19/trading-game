@@ -2,11 +2,11 @@ express = require 'express'
 hbs = require 'hbs'
 app = module.exports = express.createServer()
 _ = require( 'underscore' )._
-app.io = require 'socket.io'
+app.io = require( 'socket.io' ).listen( app )
 app.everyauth = require 'everyauth'
 
 MemoryStore = express.session.MemoryStore
-#Communicator = require('./server/communicator').Communicator
+Communicator = require('./server/communicator').Communicator
 
 app.sessionStore = new MemoryStore()
 app.RedisStore = require('connect-redis')(express)
@@ -25,13 +25,13 @@ app.everyauth.helpExpress app
 #config the app
 config = require('./config.coffee')(app, express)
 
-#app.communicator = new Communicator app
+app.communicator = new Communicator app
 
 app.get '/board', ( req, res) ->
    res.render 'board' 
 
 app.get '/', ( req, res ) ->
-    if req.loggedIn
+    if app.requireAuth and req.loggedIn
       res.redirect 'lobby'
     res.render 'index',
       title: 'Signals early chat tests'

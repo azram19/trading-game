@@ -8,7 +8,7 @@ module.exports = ( app, express ) ->
   sessionSecret = 'veryFuckingSecret'
   sessionKey = 'express.sid'
 
-  app.requireAuth = true
+  app.requireAuth = false
   app.usersByFbId = {}
 
   #Everyauth - Facebook

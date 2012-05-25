@@ -1,7 +1,8 @@
 Session = require( 'connect' ).middleware.session.Session
-ComClient = require './communicationClient'
+ComClient = require( './communicationClient' ).ComClient
 _ = require( 'underscore' )._
 Backbone = require( 'backbone' )
+parseCookie = require('connect').utils.parseCookie
 
 ###
 Stores information about all connected clients, and handles actual
@@ -27,12 +28,12 @@ class Communicator
       if data.headers.cookie
 
         #if there is parse it
-        data.cookie = parseCookie data.header.cookie
+        data.cookie = parseCookie data.headers.cookie
         #get session id
         data.sessionID = data.cookie['express.sid']
 
         #get data from the store
-        sessionStore.get data.sessionID, ( err, session ) ->
+        app.sessionStore.get data.sessionID, ( err, session ) ->
           if err or not session
             #we cannot grab the session so turn the connection down
             accept 'Error', false
@@ -45,15 +46,9 @@ class Communicator
         accept 'No cookie transmitted', false
 
     @sockets.on 'connection', ( socket ) ->
+      hs = socket.handshake
       client = new ComClient socket
-      @clients[ client.getID() ] = client
-
-      #remember to refresh the session
-      intervalId = setInterval( () ->
-          hs.session.reload( () ->
-            hs.session.touch().save()
-          )
-        , 60 * 1000 )
+      @clients[ client.getId() ] = client
 
       #client disconnects
       socket.on 'disconnect', () ->
