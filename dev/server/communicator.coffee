@@ -50,10 +50,39 @@ class Communicator
       client = new ComClient socket
       @clients[ client.getId() ] = client
 
-      #client disconnects
-      socket.on 'disconnect', () ->
-        #clear the scoekt interval to stop refreshing
-        clearInterval intervalId
+      socket.on 'message:add', ( data ) ->
+        socket.broadcast.to( socket.getChannel() ).emit 'message:new', data
+
+      socket.on 'join:channel', ( channel, fn ) ->
+        data = socket.handshake.session
+
+        @clientLeaveChannel client
+        @clientJoinChannel client, channel
+
+        data.currentChannel = channel
+
+        fn true
+
+      socket.on 'leave:channel', ( channel ) ->
+        data = socket.handshake.session
+
+        @clientLeaveChannel client
+        socket.leave channel
+
+        data.currentChannel = null
+
+  clientLeaveChannel: ( client ) ->
+      channel = client.getChannel()
+      
+      if channel?
+        client.getSocket().leave channel
+        client.leaveChannel()
+      
+
+  clientJoinChannel: ( client, channel ) ->
+      client.joinChannel channel
+      client.getSocket().join channel
+  
 
   configHandlers: =>
 
