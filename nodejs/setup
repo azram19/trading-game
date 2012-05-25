@@ -1,0 +1,12 @@
+#!/bin/bash
+
+NODE_VERSION='0.6.17'
+rm -f node-v$NODE_VERSION-release.tar.gz
+wget https://github.com/joyent/node/tarball/v$NODE_VERSION-release -O node-v$NODE_VERSION-release.tar.gz
+tar xvfz node-v$NODE_VERSION-release.tar.gz
+rm -f node-v$NODE_VERSION-release.tar.gz
+cd joyent-node-*
+./configure --prefix=../node
+make
+make install
+cd ../node

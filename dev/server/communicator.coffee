@@ -1,4 +1,7 @@
 Session = require( 'connect' ).middleware.session.Session
+ComClient = require './communicationClient'
+_ = require( 'underscore' )._
+Backbone = require( 'backbone' )
 
 ###
 Stores information about all connected clients, and handles actual
