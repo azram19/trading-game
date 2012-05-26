@@ -11,7 +11,9 @@ message passing to and between clients.
 class Communicator
   constructor: ( @app, @channel ) ->
     self = @
-    _.extend @, Backbone.Events
+    @com = {}
+
+    _.extend @com, Backbone.Events
 
     @connected = 0
     @clients = {}
@@ -51,11 +53,13 @@ class Communicator
       @clients[ client.getId() ] = client
 
       socket.on 'message:add', ( data ) ->
-        socket.broadcast.to( socket.getChannel() ).emit 'message:new', data
+        socket.broadcast.to( client.getChannel() ).emit 'message:new', data
 
+      #client want to join a channel
       socket.on 'join:channel', ( channel, fn ) ->
         data = socket.handshake.session
 
+        #leave a channel user is currently conencted to
         @clientLeaveChannel client
         @clientJoinChannel client, channel
 
@@ -70,6 +74,8 @@ class Communicator
         socket.leave channel
 
         data.currentChannel = null
+
+    setInterval @ping, 1000
 
   clientLeaveChannel: ( client ) ->
       channel = client.getChannel()
@@ -90,16 +96,14 @@ class Communicator
     clients = @sockets.clients()
 
     ping = ( client ) ->
-      data = socket.handshake.session
       startTime = new Date()
 
-      client.volatile.emit 'ping', 1, ->
+      client.emit 'ping'
+      client.once 'pong', ->
 
-        #compute the lag, save it
-        stopTime = new Data()
+        #compute the lag
+        stopTime = new Date()
         lag = ( stopTime - startTime ) / 2
-        data.lag = lag
-        data.save()
 
         #inform client about the lag
         client.emit 'lag', lag
