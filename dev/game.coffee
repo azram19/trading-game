@@ -28,7 +28,7 @@ config = require('./config.coffee')(app, express)
 app.communicator = new Communicator app
 
 app.get '/board', ( req, res) ->
-   res.render 'board' 
+   res.render 'board'
 
 app.get '/', ( req, res ) ->
     if app.requireAuth and req.loggedIn

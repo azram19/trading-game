@@ -16,7 +16,7 @@ module.exports = ( app, express ) ->
     .appId( facebookAppId )
     .appSecret( facebookAppSecret )
     .scope( facebookScope )
-    .findOrCreateUser( (session, accessToken, accessTokExtra, fbUserMetadata) ->
+    .findOrCrHateateUser( (session, accessToken, accessTokExtra, fbUserMetadata) ->
       app.usersByFbId[fbUserMetadata.id] = fbUserMetadata
     )
     .redirectPath( '/lobby' )

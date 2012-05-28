@@ -1,8 +1,8 @@
 class ObjectState
     owner: {}
-    neighbours: []
-    routing: []
+    routing: {}
     signals: []
     life: 0
     resources: 0
+    resourceType: {}
     capacity: 10
