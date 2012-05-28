@@ -1,1 +1,1 @@
-class Channel extends GameObject
+class Channel extends GameObject:

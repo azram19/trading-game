@@ -1,3 +1,4 @@
+
 margin = 20
 size = 40
 count = 12
@@ -79,3 +80,31 @@ onFrame = (event) ->
     if oval.position.x > end.x and oval.position.y > end.y or oval.position.x < start.x and oval.position.y < start.y
         direction = -direction
     oval.position += direction/50
+###
+
+CIRCLE_RADIUS = 10;
+
+init = () ->
+    canvas = document.getElementById("board")
+    bounds = new Rectangle()
+    bounds.width = canvas.width
+    bounds.height = canvas.height
+    stage = new Stage(canvas)
+    g = new Graphics()
+    g.setStrokeStyle(1)
+    g.beginStroke Graphics.getRGB 255, 255, 255, .7
+    g.drawCircle 0, 0, CIRCLE_RADIUS
+    circle = new Shape g
+    circle.x = circleXReset = -CIRCLE_RADIUS
+    circle.y = canvas.height / 2
+    stage.addChild circle
+    stage.update()
+    Ticker.setFPS 24
+    Ticker.addListener this
+
+tick = () ->
+    if circle.x > bounds.width
+        circle.x = circleXReset
+    circle.x += 8
+    stage.update()
+### 
