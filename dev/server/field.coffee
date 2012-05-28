@@ -1,2 +1,0 @@
-class Field extends GameObject
-
