@@ -2,11 +2,10 @@
   <head>
     <title>{{title}}</title>
     <script src="http://js.pusher.com/1.12/pusher.min.js"></script>
-    <script src="js/libs/paper.js"></script>
+    <script src="js/libs/easeljs-0.4.2.min.js"></script>
     <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
     <script src="/socket.io/socket.io.js"></script>
     <script src="js/libs/underscore-min.js"></script>
-    <script src="js/libs/paper.js"></script>
     <script src="js/libs/backbone-min.js"></script>
     <script src="js/libs/handlebars-runtime.js"></script>
     <script src="js/libs/bootstrap.min.js"></script>
@@ -22,7 +21,9 @@
     <link rel='stylesheet' href='css/bootstrap.min.css'>
     <link rel='stylesheet' href='css/style.css'>
   </head>
-  <body>
-    {{{body}}}
-  </body>
+  <body onload="init()">
+    <div width="800" height="600" id="canvasWrapper">
+        <canvas width="800" height="600" id="board"></canvas>
+    </div>
+</body>
 </html>

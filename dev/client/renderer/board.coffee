@@ -1,4 +1,4 @@
-
+###
 margin = 20
 size = 40
 count = 12
@@ -80,31 +80,108 @@ onFrame = (event) ->
     if oval.position.x > end.x and oval.position.y > end.y or oval.position.x < start.x and oval.position.y < start.y
         direction = -direction
     oval.position += direction/50
+
 ###
 
-CIRCLE_RADIUS = 10;
-
+###
+CIRCLE_RADIUS = 15;
+bounds = null
+circle = null
+stage = null
+circleXReset = 0
+unit = 3
 init = () ->
-    canvas = document.getElementById("board")
+    #if not document.createElement('canvas').getContext
+    #    wrapper = document.getElementById "canvasWrapper"
+    #    wrapper.innerHTML = "Your browser does not support canvas"
+    #    return    
+    canvas = document.getElementById "board"
     bounds = new Rectangle()
     bounds.width = canvas.width
     bounds.height = canvas.height
     stage = new Stage(canvas)
     g = new Graphics()
-    g.setStrokeStyle(1)
+    g.setStrokeStyle(3)
     g.beginStroke Graphics.getRGB 255, 255, 255, .7
     g.drawCircle 0, 0, CIRCLE_RADIUS
     circle = new Shape g
-    circle.x = circleXReset = -CIRCLE_RADIUS
+    circle.x = canvas.width / 2
     circle.y = canvas.height / 2
     stage.addChild circle
     stage.update()
-    Ticker.setFPS 24
+    Ticker.setFPS 25
     Ticker.addListener this
 
 tick = () ->
-    if circle.x > bounds.width
-        circle.x = circleXReset
-    circle.x += 8
+    if circle.y > bounds.height || circle.y < 0
+        unit = -unit
+    circle.x += unit
+    circle.y += unit
     stage.update()
-### 
+###
+
+margin = 10
+size = 15
+count = 12
+height = Math.ceil 2*margin+(3*count+1)/2*size
+width = 2*margin+Math.ceil(Math.sqrt(3)*size/2)*25
+tickSize = 5
+stage = null
+
+init = () -> 
+    canvas = document.getElementById "board"
+    bounds = new Rectangle()
+    bounds.width = canvas.width
+    bounds.height = canvas.height
+    stage = new Stage canvas
+    drawBoard()
+    drawLine()
+    #signal = drawOval()
+    #signal.x = path.x1
+    #signal.y = path.y1
+    #stage.addChild path
+    #stage.addChild signal
+    #stage.update()
+    #Ticker.setFPS 24
+    #Ticker.addListener this
+
+tick = () ->
+    if signal.x < path.x1 and signal.y < path.y1 or signal.x > path.x2 and signal.y > path.y2
+            tickSize = -tickSize
+    signal.x += tickSize
+    signal.y += tickSize
+
+drawBoard = () ->
+    horIncrement = Math.ceil Math.sqrt(3)*size
+    verIncrement = Math.ceil 3*size/2
+    offset = false
+    for y in [margin + size..height-margin-size] by verIncrement
+        for x in [(margin + horIncrement/2 + (if offset then horIncrement/2 else 0))..width - margin - (if not offset then horIncrement/2 else 0)] by horIncrement
+            hex = drawHex x, y, size
+            hex.x = x
+            hex.y = y
+            stage.addChild hex
+        offset = not offset
+    stage.update()
+
+drawHex = (x, y, size) ->
+    g = new Graphics()
+    g.beginStroke("#880000").beginFill("#808080").setStrokeStyle(3)
+    g.drawPolyStar x, y, size, 6, 0, 0
+    new Shape g
+
+drawLine = () ->
+    g = new Graphics()
+    start = new Point margin + size, size + margin
+    end = new Point margin + size + horIncrement, margin + size + 2 * verIncrement
+    g.beginStroke("#880000")
+    g.arcTo start.x, start.y, end.x, end.y, 3
+    stage.addChild new Shape g
+    stage.update()
+
+drawOval = () ->
+    g = new Graphics()
+    g.setStrokeStyle 1
+    g.beginStroke Graphics.getRGB 255, 255, 255, .7
+    g.drawCircle 0, 0, 2
+    circle = new Shape g
