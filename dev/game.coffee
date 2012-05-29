@@ -8,19 +8,12 @@ app.everyauth = require 'everyauth'
 MemoryStore = express.session.MemoryStore
 Communicator = require('./server/communicator').Communicator
 
+app.Mongo = require 'mongodb'
+
 app.sessionStore = new MemoryStore()
-app.RedisStore = require('connect-redis')(express)
 
 app.everyauth.helpExpress app
 
-# Heroku redistogo connection
-#if process.env.REDISTOGO_URL
-  #rtg   = require('url').parse process.env.REDISTOGO_URL
-  #app.redis = require('redis').createClient rtg.port, rtg.hostname
-  #app.redis.auth rtg.auth.split(':')[1] # auth 1st part is username and 2nd is password separated by ":"
-## Localhost
-#else
-  #app.redis = require("redis").createClient()
 
 #config the app
 config = require('./config.coffee')(app, express)
