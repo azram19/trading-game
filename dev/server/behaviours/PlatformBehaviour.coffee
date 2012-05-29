@@ -3,25 +3,25 @@ class PlatformBehaviour
     getType: ->
         "platform"
 
-    produce: ( state ) ->
-        production = ->
-            state.signals.push new Signal(state.resourceType.extract()), 1
-            @route state
+    requestAccept: ( signal, state ) ->
+        availableRoutes = _.filter state.routing, (route, direction) ->
+            route.in && route.object is signal.source
+        availableRoutes.length > 0 and state.capacity + 1 <= state.signals.length
 
-        setInterval production, state.productionDelay
+    produce: ( state ) ->
+        state.field.resource.trigger 'produce'
 
     accept: ( signal, state, callback ) ->
-        if state.signals.length is state.capacity
-            callback signal
-        else
-            _.delay state.signals.push, state.delay, signal
-            @route state
+        callback signal
+        signal.source = state.field.platform
+        _.delay state.signals.push, state.delay, signal
+        @route state
 
     route: ( state ) ->
 
-        availableRoutes = _.map state.routing, (route) ->
-            route.object.trigger 'accept', new Signal(1, 1),
+        availableRoutes = _.filter state.routing, (route, direction) ->
+            route.out
 
         _.each state.signals, (signal) ->
-            _.each state.routing (route) ->
-                route.object.trigger 'accept', new Signal(signal, route.amount)
+            availableRoutes[0].object.trigger 'accept', signal, (signal) ->
+                state.signals = _.without state.signals, signal

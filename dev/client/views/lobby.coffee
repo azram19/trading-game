@@ -7,15 +7,17 @@ class LobbyView extends Backbone.View
 
     #Get temaplates
     @messageTemplate = Handlebars.templates['lobbyMessage']
+    console.debug Handlebars.templates
     @messagesTemplate = Handlebars.templates['lobbyMessages']
 
     #Bind to changes and update the view
-    @collection.bind 'add', @addMessage 
+    @collection.bind 'add', @addMessage
 
     #Listen to the server
     @communicator.on 'message:new', @handleServerMessage
 
-    KeyboardJS.bind.key 'enter', @newMessage, () -> 
+    KeyboardJS.bind.key 'enter', @newMessage, () ->
+      console.debug @$el.find( 'textarea:focus' )
       @$el.find( 'textarea:focus' ).val ''
 
   #Add new message to the chat
@@ -37,7 +39,7 @@ class LobbyView extends Backbone.View
 
       #set message attributes
       author = 'cat'
-      message = textarea.val() 
+      message = textarea.val()
 
       #clean textarea value
       textarea.val ''

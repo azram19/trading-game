@@ -1,25 +1,28 @@
 class ChannelBehaviour
+
+    getType: ->
+        "channel"
+
+    requestAccept: ( signal, state ) ->
+        availableRoutes = _.filter state.routes, (route) ->
+            route.in and route.object is signal.source
+        availableRoutes.length > 0 and state.capacity + 1 <= state.signals.length
+
     produce: ( state ) ->
+        null
 
     accept: ( signal, state, callback ) ->
-        if state.signals.length is state.capacity
-            callback signal
-        else
-            _.delay state.signals.push, state.delay, signal
-            @route state
+        callback signal
+        _.delay state.signals.push, state.delay, signal
+        @route state
 
     route: ( state ) ->
-        self = @
        _.each state.signals, (signal, index) ->
-           destination = {}
-           if signal.source is state.neighbours[0]
-               destination = state.neighbours[1]
-           else
-                destination = state.neighbours[0]
-            
-            remove = true
-            destination.trigger 'accept', signal, (signal) ->
-                remove = false
+           availableRoutes = _.filter state.routing, (route, direction) ->
+                route? and route.object isnt signal.source
+           destination = availableRoutes[0]
+           if destination.requestAccept signal
+               destinatio.trigger 'accept', signal, (signal) ->
+                   state.signals = _.without state.signals, signal
 
-            
-
+module.exports = exports = ChannelBehaviour
