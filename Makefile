@@ -9,6 +9,7 @@ js-renderer:
 
 js-templates:
 	find dev/client/templates -name *.handlebars -print0 | xargs -I {} -0 sh -c 'f=`basename {}`; node_modules/.bin/handlebars {} -f dev/build/templates/`basename {}`.js'
+	rm -f dev/webroot/js/templates.js
 	cat dev/build/templates/* > dev/webroot/js/templates.js
 
 js-views:
@@ -24,4 +25,4 @@ js: js-templates js-views js-models js-collections js-renderer
 	find dev/client -maxdepth 1 -name *.coffee -exec node_modules/.bin/coffee -cj dev/build/signals.js {} +
 
 loc:
-	find dev -name *.coffee -exec cat {} + | grep -v '^\\( *#\\|\\s*$\\)' | wc -l | tr -s ' '
+	find dev -name *.coffee -exec cat {} + | grep -v '^( *#|s*$)' | wc -l | tr -s ' '

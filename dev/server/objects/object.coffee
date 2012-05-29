@@ -7,17 +7,18 @@ class GameObject
         @behaviour = behaviour
         @state = state
         @.on 'accept', @accept, @
-        @.on 'route', @route, @
         @.on 'produce', @produce, @
 
     type: ->
         @behaviour.getType()
-
-    route: ->
-       @behaviour.route @state
+    
+    requestAccept: ( signal, state ) ->
+        @behaviour.requestAccept source, @state
 
     accept: ( signal, callback ) ->
         @behaviour.accept signal, @state, callback
 
     produce: ->
         @behaviour.produce @state
+
+module.exports = exports = GameObject

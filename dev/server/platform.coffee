@@ -1,1 +1,0 @@
-class Platform extends GameObject
