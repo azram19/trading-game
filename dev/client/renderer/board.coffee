@@ -127,8 +127,11 @@ height = Math.ceil 2*margin+(3*count+1)/2*size
 width = 2*margin+Math.ceil(Math.sqrt(3)*size/2)*25
 tickSize = 5
 stage = null
+horIncrement = 0
+verIncrement = 0
+view = {}
 
-init = () -> 
+init = () ->
     canvas = document.getElementById "board"
     bounds = new Rectangle()
     bounds.width = canvas.width
@@ -185,3 +188,8 @@ drawOval = () ->
     g.beginStroke Graphics.getRGB 255, 255, 255, .7
     g.drawCircle 0, 0, 2
     circle = new Shape g
+
+
+$ -> 
+    if $("#board").length > 0
+        init()
