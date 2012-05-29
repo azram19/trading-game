@@ -1,22 +1,39 @@
 module.exports = ( app, express ) ->
   config = @
 
-  facebookAppId = '381600771875818'
-  facebookAppSecret = '1cb71dd07064e3d110f0d76695961664'
-  facebookScope = 'email'
+  app.facebookAppId = '381600771875818'
+  app.facebookAppSecret = '1cb71dd07064e3d110f0d76695961664'
+  app.facebookScope = 'email'
 
-  sessionSecret = 'veryFuckingSecret'
-  sessionKey = 'express.sid'
+  app.sessionSecret = 'veryFuckingSecret'
+  app.sessionKey = 'express.sid'
 
   app.requireAuth = false
   app.usersByFbId = {}
+
+  app.mongoURL = 'mongodb://signal:signals11@ds033097.mongolab.com:33097/heroku_app4770943'
+
+
+  #abstraction of database connection
+  app.connectDb = ( fn ) =>
+    self = @
+
+    #connect
+    app.Mongo.Db.connect app.mongoURL, (err, db) ->
+
+      #check if there are no errors
+      app.Mongo.assert.equal null, err
+
+      #execute the opreation
+      fn.apply self, arguments
+
 
   #Everyauth - Facebook
   app.everyauth.facebook
     .appId( facebookAppId )
     .appSecret( facebookAppSecret )
     .scope( facebookScope )
-    .findOrCreateUser( (session, accessToken, accessTokExtra, fbUserMetadata) ->
+    .findOrCrHateateUser( (session, accessToken, accessTokExtra, fbUserMetadata) ->
       app.usersByFbId[fbUserMetadata.id] = fbUserMetadata
     )
     .redirectPath( '/lobby' )
