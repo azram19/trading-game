@@ -30,10 +30,10 @@ module.exports = ( app, express ) ->
 
   #Everyauth - Facebook
   app.everyauth.facebook
-    .appId( facebookAppId )
-    .appSecret( facebookAppSecret )
-    .scope( facebookScope )
-    .findOrCrHateateUser( (session, accessToken, accessTokExtra, fbUserMetadata) ->
+    .appId( app.facebookAppId )
+    .appSecret( app.facebookAppSecret )
+    .scope( app.facebookScope )
+    .findOrCreateUser( (session, accessToken, accessTokExtra, fbUserMetadata) ->
       app.usersByFbId[fbUserMetadata.id] = fbUserMetadata
     )
     .redirectPath( '/lobby' )
@@ -51,8 +51,8 @@ module.exports = ( app, express ) ->
     app.use express.cookieParser()
 
     app.use express.session(
-      secret: sessionSecret
-      key: sessionKey
+      secret: app.sessionSecret
+      key: app.sessionKey
       store: app.sessionStore
     )
 

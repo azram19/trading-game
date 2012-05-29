@@ -23,6 +23,9 @@ app.communicator = new Communicator app
 app.get '/board', ( req, res) ->
    res.render 'board'
 
+app.get '/radialDemo', ( req, res) ->
+   res.render 'radialDemo'
+
 app.get '/', ( req, res ) ->
     if app.requireAuth and req.loggedIn
       res.redirect 'lobby'
