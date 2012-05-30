@@ -1,7 +1,9 @@
 class ResourceBehaviour
 
+    constructor: ( @resourceType ) ->
+
     getType: ->
-        "resource"
+        @resourceType
 
     requestAccept: ( signal, state ) ->
 
@@ -11,9 +13,12 @@ class ResourceBehaviour
 
     produce: ( state ) ->
         production = =>
-            newSignal = new Signal(100, state.type)
+            state.life -= state.extraction
+            newSignal = new Signal state.extraction, @resourceType, state.field.resource
             signals.push newSignal
             state.field.platform.trigger "accept", newSignal, (signal) ->
                 state.signals = _.without state.signals, signal
 
         setInterval produciton, state.delay
+
+module.exports = exports = ResourceBehaviour

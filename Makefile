@@ -5,7 +5,7 @@ dir:
 	mkdir -p dev/build/templates
 
 js-renderer:
-	node_modules/.bin/coffee -cbj dev/build/renderer.js dev/client/renderer/*
+	find dev/client/renderer -name *.coffee -exec node_modules/.bin/coffee -cj dev/build/renderer.js {} +
 
 js-templates:
 	find dev/client/templates -name *.handlebars -print0 | xargs -I {} -0 sh -c 'f=`basename {}`; node_modules/.bin/handlebars {} -f dev/build/templates/`basename {}`.js'
