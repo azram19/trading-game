@@ -17,4 +17,6 @@ class Signal
     # Whole path signal has travelled since creation
     path: []
 
+    constructor: ( @strength, @type, @source ) ->
+
 module.exports = exports = Signal

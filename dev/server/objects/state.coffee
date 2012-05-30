@@ -15,5 +15,7 @@ class ObjectState
     capacity: 10
     # Amount of time each signal must wait at the platform before being routed
     delay: 1000
+    # Amount of resources that are produced each time
+    extraction: 20
 
 module.exports = exports = ObjectState
