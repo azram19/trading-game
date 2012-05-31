@@ -120,6 +120,109 @@ tick = () ->
     stage.update()
 ###
 
+class BoardState
+    constructor: (@id, @grid, @stage) ->
+        @drawer = new BoardDrawer id, grid, stage
+    
+    update: (x, y, element) ->
+        grid[x][y] = element
+
+    draw: () ->
+        @drawer.drawBoard()
+
+class BoardDrawer
+    canvas: {}
+    margin: 100
+    size: 30
+    stage: {}
+    bounds: {}
+    minRow: 4
+    maxRow: 9
+    tickSizeX: 0
+    tickSizeY: 0
+
+    constructor: (@id, @grid, @stage) ->
+
+    init: () ->
+        canvas = document.getElementById "board"
+        bounds = new Rectangle()
+        bounds.width = canvas.width
+        bounds.height = canvas.height
+        stage = new Stage canvas
+
+    tick: () ->
+        if (signal.x < path.x1 and signal.y < path.y1) or (signal.x > path.x2 and signal.y > path.y2)
+                @tickSizeX = -@tickSizeX
+                @tickSizeY = -@tickSizeY
+        signal.x += @tickSizeX
+        signal.y += @tickSizeY
+        @stage.update()
+
+    drawBoard: () ->
+        offset = {}
+        diffRows = @maxRow - @minRow
+        horIncrement = Math.ceil Math.sqrt(3)*@size/2
+        verIncrement = Math.ceil 3*@size/2
+        for j in [0 ... (2*diffRows + 1)]
+            y = @margin + j*verIncrement
+            offset = @margin + Math.abs(diffRows - j)*horIncrement
+            for i in [0 ... @maxRow - Math.abs(diffRows - j)]
+                x = offset + 2*i*horIncrement
+                hex = @drawHex(x, y, @size, @grid[j][i])
+                @stage.addChild hex
+        @stage.update()
+
+    drawHex: (x, y, size, element) ->
+        g = new Graphics()
+        g.beginStroke("#616166")
+            .setStrokeStyle(3)
+        switch element
+            when 1 then g.beginFill("#274E7D")
+            when 2 then g.beginFill("#A60C00")
+            else
+        g.drawPolyStar(x, y, size, 6, 0, 90)
+        new Shape g
+
+    drawLine: (m, n) ->
+        g = new Graphics()
+        g.moveTo(m.x, m.y)
+            .setStrokeStyle(3)
+            .beginStroke("#FFFF00")
+            .beginFill("#FFFF00")
+            .lineTo(n.x, n.y)
+        path = new Shape g
+        path.x1 = m.x
+        path.y1 = m.y
+        path.x2 = n.x
+        path.y2 = n.y
+        path
+
+    drawOval: () ->
+        g = new Graphics()
+        g.setStrokeStyle(1)
+            .beginStroke("#FFFF00") 
+            .drawCircle(0, 0, 8)
+        signal = new Shape g
+
+
+
+#grid1 = [[2,1],[2,1,2],[2,1]]
+grid2 = [[1,1,2,2],[1,2,2,2,1],[1,2,1,2,1,2],[2,1,2,2,2,1,1],[2,2,1,1,1,2,1,2],[1,1,1,2,2,1,2,1,1],[2,2,1,1,1,2,1,2],[2,1,2,2,2,1,1],[1,2,1,2,1,2],[1,2,2,2,1],[1,1,2,2]]
+
+$ -> 
+    if $("#board").length > 0
+        init()
+
+init = () ->
+    canvas = document.getElementById "board"
+    stage = new Stage canvas
+    state = new BoardState 1, grid2, stage
+    state.draw()
+
+
+
+
+###
 margin = 100
 size = 30
 count = 12
@@ -214,3 +317,4 @@ drawOval = () ->
 $ -> 
     if $("#board").length > 0
         init()
+###
