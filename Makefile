@@ -25,4 +25,4 @@ js: js-templates js-views js-models js-collections js-renderer
 	find dev/client -maxdepth 1 -name *.coffee -exec node_modules/.bin/coffee -cj dev/build/signals.js {} +
 
 loc:
-	find dev -name *.coffee -exec cat {} + | grep -v '^( *#|s*$)' | wc -l | tr -s ' '
+	find dev -name *.coffee -exec cat {} + | grep -v '^( *#|s*$$)' | wc -l | tr -s ' '

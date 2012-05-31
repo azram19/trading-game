@@ -133,7 +133,7 @@ class BoardState
 class BoardDrawer
     canvas: {}
     margin: 100
-    size: 30
+    size: 40
     stage: {}
     bounds: {}
     minRow: 4
@@ -200,7 +200,7 @@ class BoardDrawer
     drawOval: () ->
         g = new Graphics()
         g.setStrokeStyle(1)
-            .beginStroke("#FFFF00") 
+            .beginStroke("#FFFF00")
             .drawCircle(0, 0, 8)
         signal = new Shape g
 
@@ -209,15 +209,14 @@ class BoardDrawer
 #grid1 = [[2,1],[2,1,2],[2,1]]
 grid2 = [[1,1,2,2],[1,2,2,2,1],[1,2,1,2,1,2],[2,1,2,2,2,1,1],[2,2,1,1,1,2,1,2],[1,1,1,2,2,1,2,1,1],[2,2,1,1,1,2,1,2],[2,1,2,2,2,1,1],[1,2,1,2,1,2],[1,2,2,2,1],[1,1,2,2]]
 
-$ -> 
+$ ->
     if $("#board").length > 0
-        init()
-
-init = () ->
-    canvas = document.getElementById "board"
-    stage = new Stage canvas
-    state = new BoardState 1, grid2, stage
-    state.draw()
+        ( ->
+            canvas = document.getElementById "board"
+            stage = new Stage canvas
+            state = new BoardState 1, grid2, stage
+            state.draw()
+        )()
 
 
 
