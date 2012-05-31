@@ -1,7 +1,9 @@
 class PlatformBehaviour
 
+    constructor: ( @platformType ) ->
+
     getType: ->
-        "platform"
+        @platformType
 
     requestAccept: ( signal, state ) ->
         availableRoutes = _.filter state.routing, (route, direction) ->
@@ -18,10 +20,11 @@ class PlatformBehaviour
         @route state
 
     route: ( state ) ->
-
         availableRoutes = _.filter state.routing, (route, direction) ->
             route.out
 
         _.each state.signals, (signal) ->
             availableRoutes[0].object.trigger 'accept', signal, (signal) ->
                 state.signals = _.without state.signals, signal
+
+module.exports = exports = PlatformBehaviour
