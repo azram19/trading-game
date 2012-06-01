@@ -120,35 +120,12 @@ tick = () ->
     stage.update()
 ###
 
-class BoardState
-    constructor: (@id, @grid, @stage) ->
-        @drawer = new BoardDrawer id, grid, stage
-    
-    update: (x, y, element) ->
-        grid[x][y] = element
-
-    draw: () ->
-        @drawer.drawBoard()
-
-class BoardDrawer
-    canvas: {}
-    margin: 100
-    size: 40
+class BoardAnimation
     stage: {}
-    bounds: {}
-    minRow: 4
-    maxRow: 9
     tickSizeX: 0
     tickSizeY: 0
-
-    constructor: (@id, @grid, @stage) ->
-
-    init: () ->
-        canvas = document.getElementById "board"
-        bounds = new Rectangle()
-        bounds.width = canvas.width
-        bounds.height = canvas.height
-        stage = new Stage canvas
+    
+    constructor: () ->
 
     tick: () ->
         if (signal.x < path.x1 and signal.y < path.y1) or (signal.x > path.x2 and signal.y > path.y2)
@@ -158,67 +135,139 @@ class BoardDrawer
         signal.y += @tickSizeY
         @stage.update()
 
-    drawBoard: () ->
-        offset = {}
-        diffRows = @maxRow - @minRow
-        horIncrement = Math.ceil Math.sqrt(3)*@size/2
-        verIncrement = Math.ceil 3*@size/2
-        for j in [0 ... (2*diffRows + 1)]
-            y = @margin + j*verIncrement
-            offset = @margin + Math.abs(diffRows - j)*horIncrement
-            for i in [0 ... @maxRow - Math.abs(diffRows - j)]
-                x = offset + 2*i*horIncrement
-                hex = @drawHex(x, y, @size, @grid[j][i])
-                @stage.addChild hex
-        @stage.update()
+class BoardDrawer
+    stage: {}
+    margin: 100
+    size: 40
+    horIncrement: 0
+    verIncrement: 0
+    diffRows: 0
 
-    drawHex: (x, y, size, element) ->
+    init: () ->
+        @horIncrement = Math.ceil Math.sqrt(3)*@size/2
+        @verIncrement = Math.ceil 3*@size/2
+        @diffRows = @maxRow - @minRow
+
+    constructor: (@id, @stage, @minRow, @maxRow) ->
+        init()
+
+    getPoint: (i, j) ->
+        offset = @margin + Math.abs(@diffRows - j)*@horIncrement
+        x = getOffset(j) + 2*i*@horIncrement
+        y = @margin + j*@verIncrement
+        new Point(x, y)
+
+    drawHex: (point, fieldState) ->
+        drawStroke(point)
+        drawOwnership(point, fieldState.owner)
+        drawPlatform(point, fieldState.field.platform)
+        drawResource(point, fieldState.field.resource)
+
+    drawPlatform: (point, platform) ->
+        g = new Graphics()
+        switch platform
+            when 1 then g.beginFill("#A6B4B0")
+        g.drawPolyStar(point.x, point.y, @size/2, 6, 0, 90)
+        @stage.addChild new Shape g
+
+    drawStroke: (point) ->
         g = new Graphics()
         g.beginStroke("#616166")
             .setStrokeStyle(3)
-        switch element
+            .drawPolyStar(point.x, point.y, @size, 6, 0, 90)
+        @stage.addChild new Shape g
+
+    drawOwnership: (point, owner) ->
+        g = new Graphics()
+        switch owner
+            when 0 then g.beginFill("#000000")
             when 1 then g.beginFill("#274E7D")
             when 2 then g.beginFill("#A60C00")
             else
-        g.drawPolyStar(x, y, size, 6, 0, 90)
-        new Shape g
-
-    drawLine: (m, n) ->
+        g.drawPolyStar(point.x, point.y, @size, 6, 0, 90)
+        @stage.addChild new Shape g
+    
+    drawResource: (point, resource) ->
         g = new Graphics()
-        g.moveTo(m.x, m.y)
+        switch resource
+            when 1 then g.beginFill("#FFFFFF")
+            when 2 then g.beginFill("#256025")
+            else
+        g.drawCircle(point.x, point.y, 6)
+        @stage.addChild new Shape g
+
+
+    drawChannel: (point, channelState) ->
+        g = new Graphics()
+        x = point.x
+        y = point.y
+        switch channelState.routing
+            when 0 then x -= @horIncrement
+                        y -= @verIncrement
+            when 1 then x += @horIncrement
+                        y -= @verIncrement 
+            when 2 then x += 2*@horIncrement
+            when 3 then x += @horIncrement
+                        y += @verIncrement 
+            when 4 then x -= @horIncrement
+                        y += @verIncrement 
+            when 5 then x -= 2*@horIncrement
+        g.moveTo(point.x, point.y)
             .setStrokeStyle(3)
             .beginStroke("#FFFF00")
             .beginFill("#FFFF00")
-            .lineTo(n.x, n.y)
-        path = new Shape g
-        path.x1 = m.x
-        path.y1 = m.y
-        path.x2 = n.x
-        path.y2 = n.y
-        path
+            .lineTo(x, y)
+        @stage.addChild new Shape g
 
-    drawOval: () ->
+
+    drawSignal: (point) ->
         g = new Graphics()
         g.setStrokeStyle(1)
             .beginStroke("#FFFF00")
-            .drawCircle(0, 0, 8)
-        signal = new Shape g
+            .drawCircle(point.x, point.y, 8)
+        @stage.addChild new Shape g
 
+#---------------Interface---------------#
 
+    createPlatfrom: (i, j, fieldState)->
+        point = getPoint(i, j)
+        drawOwnership(point, fieldState.owner)
+        drawPlatform(point, fieldState.field.platform)
+        @stage.update()
 
-#grid1 = [[2,1],[2,1,2],[2,1]]
-grid2 = [[1,1,2,2],[1,2,2,2,1],[1,2,1,2,1,2],[2,1,2,2,2,1,1],[2,2,1,1,1,2,1,2],[1,1,1,2,2,1,2,1,1],[2,2,1,1,1,2,1,2],[2,1,2,2,2,1,1],[1,2,1,2,1,2],[1,2,2,2,1],[1,1,2,2]]
+    createChannel: (i, j, channelState) -> 
+        point = getPoint(i, j)
+        drawOwnership(point, channelState.owner)
+        drawChannel(point, channelState.routing)
+        @stage.update()
+
+    createResource: (i, j, fieldState) ->
+        point = getPoint(i, j)
+        drawResource(point, fieldState.field.resource)
+        @stage.update()
+
+    drawState: (boardState) ->      
+        for j in [0 ... (2*@diffRows + 1)]
+            for i in [0 ... @maxRow - Math.abs(@diffRows - j)]
+                point = getPoint(i, j)
+                @drawHex(point, boardState.fields.get(i, j))
+                for channel in boardState.channels.get(i,j)
+                    @drawChannel(point, channel)
+        @stage.update()
 
 $ ->
     if $("#board").length > 0
         ( ->
             canvas = document.getElementById "board"
             stage = new Stage canvas
-            state = new BoardState 1, grid2, stage
+            state = new BoardState 1
+            drawer = new BoardDrawer 1, stage, 4, 9
             state.draw()
         )()
 
 
+#grid1 = [[2,1],[2,1,2],[2,1]]
+#grid2 = [[1,1,2,2],[1,2,2,2,1],[1,2,1,2,1,2],[2,1,2,2,2,1,1],[2,2,1,1,1,2,1,2],[1,1,1,2,2,1,2,1,1],[2,2,1,1,1,2,1,2],[2,1,2,2,2,1,1],[1,2,1,2,1,2],[1,2,2,2,1],[1,1,2,2]]
 
 
 ###
