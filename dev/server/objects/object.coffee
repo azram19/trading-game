@@ -1,17 +1,20 @@
+#node.js requirements
+if require?
+  _ = require 'underscore'
+  Backbone = require 'backbone'
+
 class GameObject
     behaviour: {}
     state: {}
 
-    constructor: ( behaviour, state ) ->
+    constructor: ( @behaviour, @state ) ->
         _.extend @, Backbone.Events
-        @behaviour = behaviour
-        @state = state
         @.on 'accept', @accept, @
         @.on 'produce', @produce, @
 
     type: ->
         @behaviour.getType()
-    
+
     requestAccept: ( signal, state ) ->
         @behaviour.requestAccept source, @state
 
@@ -21,4 +24,7 @@ class GameObject
     produce: ->
         @behaviour.produce @state
 
-module.exports = exports = GameObject
+if module? and module.exports
+    exports = module.exports = GameObject
+else
+    root['GameObject'] = GameObject
