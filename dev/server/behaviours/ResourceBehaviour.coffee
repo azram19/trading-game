@@ -18,7 +18,7 @@ class ResourceBehaviour
                 #resource depleted
                 newSignal = new Signal 0, @resourceType, state.field.resource
                 state.field.platform.trigger "depleted", newSignal
-            else 
+            else
                 #we have enough rousrces, mining...
                 newSignal = new Signal state.extraction, @resourceType, state.field.resource
                                 
@@ -35,4 +35,8 @@ class ResourceBehaviour
 
         setInterval production, state.delay
 
-module.exports = exports = ResourceBehaviour
+if exports?
+  if module? and module.exports
+    exports = module.exports = ResourceBehaviour
+else
+  root['ResourceBehaviour'] = ResourceBehaviour

@@ -16,14 +16,14 @@ class gameManager
 
     HQs = createHQ user  for user in @users
 
-    @map = new Map() 
+    @map = new Map()
     @initialMapState( @map, HQs, startPoints )
 
   initialMapState: ( map, HQs, startPoints ) ->
-    map.addField HQs[i], startPoints[i] for i in [0..HQs.length] 
+    map.addField HQs[i], startPoints[i] for i in [0..HQs.length]
 
 if exports?
   if module? and module.exports
     exports = module.exports = gameManager
-else 
+else
   root['gameManager'] = gameManager

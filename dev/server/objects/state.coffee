@@ -23,7 +23,7 @@ class ObjectState
         (@routing[i] =
             in: true
             out: true
-            object: null ) for i in [0..6] 
+            object: null ) for i in [0..6]
 
 
 module.exports = exports = ObjectState
