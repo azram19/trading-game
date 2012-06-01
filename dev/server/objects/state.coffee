@@ -3,7 +3,7 @@ class ObjectState
 
     # Field the game object belongs to
     field: {}
-    # Player object 
+    # Player object
     owner: {}
     # Routing table for given object
     routing: {}
@@ -19,11 +19,15 @@ class ObjectState
     extraction: 20
 
     constructor: ( @owner ) ->
-        #default routing 
+        #default routing
         (@routing[i] =
             in: true
             out: true
-            object: null ) for i in [0..6] 
+            object: null ) for i in [0..6]
 
 
-module.exports = exports = ObjectState
+if exports?
+  if module? and module.exports
+    exports = module.exports = ObjectState
+else
+  root['ObjectState'] = ObjectState
