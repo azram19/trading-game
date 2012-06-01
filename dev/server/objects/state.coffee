@@ -25,9 +25,13 @@ class ObjectState
             out: true
             object: null ) for i in [0..6]
 
+        @delay = 1000
+        @extraction = 20
+        @capacity = 10
+        @life = 100
 
-if exports?
-  if module? and module.exports
-    exports = module.exports = ObjectState
+
+if module? and module.exports
+  exports = module.exports = ObjectState
 else
   root['ObjectState'] = ObjectState

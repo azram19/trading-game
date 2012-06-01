@@ -12,16 +12,18 @@ class HQBehaviour
             true
 
     produce: ( state ) ->
-        state.field.resource.trigger 'produce'
+        console.log state
+        if state.field.resource.type?
+            state.field.resource.trigger 'produce'
         production = =>
-                state.owner.addResources new Type1Resource(), state.extraction
-                state.owner.addResources new Type2Resource(), state.extraction
+                state.owner.addResource 'money', state.extraction
+                state.owner.addResource 'bitches', state.extraction
         setInterval production, state.delay
 
     accept: ( signal, state, callback ) ->
         callback signal
         if signal.owner is state.owner
-            state.owner.addResources signal
+            state.owner.addResource signal
         else
             state.life -= signal.strength
             if state.life <= 0
@@ -31,8 +33,7 @@ class HQBehaviour
 
     route: ( state ) ->
 
-if exports?
-  if module? and module.exports
-    exports = module.exports = HQBehaviour
+if module? and module.exports
+  exports = module.exports = HQBehaviour
 else
   root['HQBehaviour'] = HQBehaviour

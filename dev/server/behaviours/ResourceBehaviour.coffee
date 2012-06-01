@@ -40,8 +40,7 @@ class ResourceBehaviour
 
         setInterval production, state.delay
 
-if exports?
-  if module? and module.exports
-    exports = module.exports = ResourceBehaviour
+if module? and module.exports
+  exports = module.exports = ResourceBehaviour
 else
   root['ResourceBehaviour'] = ResourceBehaviour

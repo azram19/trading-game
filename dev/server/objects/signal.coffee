@@ -13,7 +13,7 @@ class Signal
     # Most recent source of the signal
     source: {}
     # Type of signal in case we\'re carrying resources
-    type: {}
+    type: ""
     # Whole path signal has travelled since creation
     path: []
     # Player who generated the channel
