@@ -16,8 +16,11 @@ class Signal
     type: {}
     # Whole path signal has travelled since creation
     path: []
+    # Player who generated the channel
+    owner: {}
 
     constructor: ( @strength, @type, @source ) ->
+        @owner = @source.owner
 
 if exports?
   if module? and module.exports
