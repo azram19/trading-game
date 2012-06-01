@@ -290,10 +290,14 @@ class BoardDrawer
     moveSignal: (i, j, channelState) ->
         start = getPoint(i, j)
         dest = getDestination(start, channelState.routing)
+        drawSignal(point)
+
 
     tick: () ->
         for signal in signals
             if (signal.x == signal.closestDest.x and signal.y == signal.closestDest.y)
+                # stage.update
+                # break
                 dest = getDestination(new Point(signal.x, signal.y), channelState.routing)
                 signal.setRouting(dest)
             signal.x += signal.tickSizeX
