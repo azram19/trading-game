@@ -202,15 +202,15 @@ class BoardDrawer
         x = point.x
         y = point.y
         switch channelState.routing
-            when 0 then x -= @horIncrement
-                        y -= @verIncrement
-            when 1 then x += @horIncrement
-                        y -= @verIncrement 
+            when 0 then (x -= @horIncrement
+            y -= @verIncrement)
+            when 1 then (x += @horIncrement
+            y -= @verIncrement)
             when 2 then x += 2*@horIncrement
-            when 3 then x += @horIncrement
-                        y += @verIncrement 
-            when 4 then x -= @horIncrement
-                        y += @verIncrement 
+            when 3 then (x += @horIncrement
+            y += @verIncrement)
+            when 4 then (x -= @horIncrement
+            y += @verIncrement)
             when 5 then x -= 2*@horIncrement
         g.moveTo(point.x, point.y)
             .setStrokeStyle(3)
