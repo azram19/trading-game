@@ -124,6 +124,7 @@ class GSignal extends Shape
     tickSizeX: 0
     tickSizeY: 0
     closestDest: {}
+    div = 24
 
     constructor: (@g) ->
         super g
@@ -143,8 +144,8 @@ class GSignal extends Shape
 
     setRouting: (dest) ->
         @closestDest = dest
-        setTickSizeX((closestDest.x - @x)/24)
-        setTickSizeY((closestDest.y - @y)/24)
+        setTickSizeX((closestDest.x - @x)/div)
+        setTickSizeY((closestDest.y - @y)/div)
 
 class BoardDrawer
     margin: 100
@@ -167,6 +168,7 @@ class BoardDrawer
         @stage.addChild signals
 
         Ticker.setFPS 25
+        Ticker.addListener signals
 
     constructor: (@id, @stage, @minRow, @maxRow) ->
         init()
@@ -255,7 +257,6 @@ class BoardDrawer
             .beginStroke("#FFFF00")
             .drawCircle(point.x, point.y, 8)
         signal = new GSignal g 
-        Ticker.addListener signal
         @signals.addChild signal
         
 
