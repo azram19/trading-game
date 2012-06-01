@@ -136,7 +136,6 @@ class BoardAnimation
         @stage.update()
 
 class BoardDrawer
-    stage: {}
     margin: 100
     size: 40
     horIncrement: 0
@@ -147,6 +146,7 @@ class BoardDrawer
         @horIncrement = Math.ceil Math.sqrt(3)*@size/2
         @verIncrement = Math.ceil 3*@size/2
         @diffRows = @maxRow - @minRow
+        @stage.enableMouseOver()
 
     constructor: (@id, @stage, @minRow, @maxRow) ->
         init()
@@ -162,6 +162,7 @@ class BoardDrawer
         drawOwnership(point, fieldState.owner)
         drawPlatform(point, fieldState.field.platform)
         drawResource(point, fieldState.field.resource)
+        setBacklight(point)
 
     drawPlatform: (point, platform) ->
         g = new Graphics()
@@ -219,13 +220,33 @@ class BoardDrawer
             .lineTo(x, y)
         @stage.addChild new Shape g
 
-
     drawSignal: (point) ->
         g = new Graphics()
         g.setStrokeStyle(1)
             .beginStroke("#FFFF00")
             .drawCircle(point.x, point.y, 8)
         @stage.addChild new Shape g
+
+    setBacklight: (point) ->
+        g = new Graphics()
+        g.drawPolyStar(point.x, point.y, @size, 6, 0, 90)
+        overlay = new Shape g
+        overlay.onMouseOver = mouseOverField
+        @stage.addchild overlay
+
+    mouseOverField: (event) ->
+        g = new Graphics()
+        g.beginStroke("#ED903E")
+            .setStrokeStyle(3)
+            .drawPolyStar(event.target.x, event.target.y, @size, 6, 0, 90)
+        overlay = new Shape g
+        overlay.onMouseOut = mouseOutField
+        @stage.addchild overlay
+
+    mouseOutField: (event) ->
+        @stage.removeChild(event.target)
+
+    mouseOnClickRadial: (event) ->
 
 #---------------Interface---------------#
 
