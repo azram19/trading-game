@@ -18,4 +18,12 @@ class ObjectState
     # Amount of resources that are produced each time
     extraction: 20
 
+    constructor: ( @owner ) ->
+        #default routing 
+        (@routing[i] =
+            in: true
+            out: true
+            object: null ) for i in [0..6] 
+
+
 module.exports = exports = ObjectState
