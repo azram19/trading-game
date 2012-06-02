@@ -21,9 +21,9 @@ class Signal
 
     constructor: ( @strength, @type, @source ) ->
         @owner = @source.owner
+        @path = []
 
-if exports?
-  if module? and module.exports
-    exports = module.exports = Signal
+if module? and module.exports
+  exports = module.exports = Signal
 else
   root['Signal'] = Signal

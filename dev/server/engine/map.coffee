@@ -58,7 +58,7 @@ class Map
     @channels[x][y] ?= {}
     @channels[x][y][k] = channel
 
-  dump: () ->
+  dump: ->
     print = ( o, x, y ) ->
       if o.resource.type?
         console.log x + " " + y + " res"
