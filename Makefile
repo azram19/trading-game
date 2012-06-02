@@ -21,8 +21,11 @@ js-models:
 js-collections:
 	find dev/client/collections -name *.coffee -exec node_modules/.bin/coffee -cj dev/build/collections.js {} +
 
-js: js-templates js-views js-models js-collections js-renderer
+js: js-templates js-views js-models js-collections js-renderer js-engine
 	find dev/client -maxdepth 1 -name *.coffee -exec node_modules/.bin/coffee -cj dev/build/signals.js {} +
+
+js-engine:
+	find dev/common -name *.coffee -exec node_modules/.bin/coffee -cj dev/build/engine.js {} +
 
 loc:
 	find dev -name *.coffee -exec cat {} + | sed '/^\s*#/d;/^\s*$$/d' | wc -l
