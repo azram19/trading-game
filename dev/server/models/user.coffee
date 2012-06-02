@@ -3,9 +3,9 @@ if require?
   _ = require 'underscore'
   Backbone = require 'backbone'
 
-
 class User extends Backbone.Model
   initialize: () ->
+
     @resources = {}
 
   addResource: ( s ) ->

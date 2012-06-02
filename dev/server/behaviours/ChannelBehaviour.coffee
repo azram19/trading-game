@@ -34,8 +34,7 @@ class ChannelBehaviour
                destinatio.trigger 'accept', signal, (signal) ->
                    state.signals = _.without state.signals, signal
 
-if exports?
-  if module? and module.exports
-    exports = module.exports = ChannelBehaviour
+if module? and module.exports
+  exports = module.exports = ChannelBehaviour
 else
   root['ChannelBehaviour'] = ChannelBehaviour

@@ -34,8 +34,7 @@ class PlatformBehaviour
             availableRoutes[0].object.trigger 'accept', signal, (signal) ->
                 state.signals = _.without state.signals, signal
 
-if exports?
-  if module? and module.exports
-    exports = module.exports = PlatformBehaviour
+if module? and module.exports
+  exports = module.exports = PlatformBehaviour
 else
   root['PlatformBehaviour'] = PlatformBehaviour
