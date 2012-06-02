@@ -1,7 +1,8 @@
 #node.js requirements
 if require?
   _ = require 'underscore'
-  Signal = require '../objects/signal'
+  SignalFactory = require '../config/SignalFactory'
+  Types = require '../config/Types'
 
 class ResourceBehaviour
 
@@ -21,11 +22,12 @@ class ResourceBehaviour
             #check if we have engough resources to extract
             if state.life < state.extraction
                 #resource depleted
-                newSignal = new Signal 0, @resourceType, state.field.resource
-                state.field.platform.trigger "depleted", newSignal
+                if @PID?
+                    clearInterval @PID
             else
-                #we have enough rousrces, mining...
-                newSignal = new Signal state.extraction, @resourceType, state.field.resource
+                #we have enough resources, mining...
+                newSignal = SignalFactory.build Types.Entities.Signal, state.extraction, Types.Resources[@resourceType], state.field.platform.state.owner
+                newSignal.path.push state.field.resource
 
                 #can the platform accept the signal
                 acceptable = state.field.platform.requestAccept newSignal
@@ -33,12 +35,12 @@ class ResourceBehaviour
                 if acceptable
                     #send the signal
                     state.life -= state.extraction
-                    signals.push newSignal
+                    state.signals.push newSignal
 
                     state.field.platform.trigger "accept", newSignal, (signal) ->
                         state.signals = _.without state.signals, signal
 
-        setInterval production, state.delay
+        @PID = setInterval production, state.delay
 
 if module? and module.exports
   exports = module.exports = ResourceBehaviour

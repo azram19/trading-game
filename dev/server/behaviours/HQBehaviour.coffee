@@ -1,3 +1,7 @@
+if require?
+    SignalFactory = require '../config/SignalFactory'
+    Types = require '../config/Types'
+
 class HQBehaviour
 
     getType: ->
@@ -15,8 +19,9 @@ class HQBehaviour
         if state.field.resource.type?
             state.field.resource.trigger 'produce'
         production = =>
-                state.owner.addResource 'money', state.extraction
-                state.owner.addResource 'bitches', state.extraction
+                (
+                    state.owner.addResource(SignalFactory.build Types.Entities.Signal, state.extraction, res, state.owner)
+                ) for res in Types.Resources.Names
         setInterval production, state.delay
 
     accept: ( signal, state, callback ) ->

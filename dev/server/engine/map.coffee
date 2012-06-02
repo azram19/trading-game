@@ -28,15 +28,16 @@ class Map
     initializeResource = ( o, y, x ) =>
       chance = 0.42
       res = Math.random()
-      type = Math.random()
 
       if res < chance
         kind = ''
-        if type > 0.5
+        if res > 0.5
             kind = Types.Resources.Metal
         else
             kind = Types.Resources.Tritium
-        o.resource = ObjectFactory.build kind, @nonUser
+        resource = ObjectFactory.build kind, @nonUser
+        resource.state.field = o
+        o.resource = resource
         o
       else
         o

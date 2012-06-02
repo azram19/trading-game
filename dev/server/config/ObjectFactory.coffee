@@ -3,7 +3,9 @@ if require?
     Properties = require './Properties'
     Types = require './Types'
     User = require '../models/user'
+    Uid = require './Uid'
     GameObject = require '../objects/object'
+    SignalFactory = require './SignalFactory'
     ObjectState = require '../objects/state'
     HQBehaviour = require '../behaviours/HQBehaviour'
     ChannelBehaviour = require '../behaviours/ChannelBehaviour'
@@ -14,55 +16,54 @@ class ObjectFactory
 
     constructor: ->
         @builders = {}
-        @builders[Types.Entities.Platform] = (args) =>
+        @builders[Types.Entities.Platform] = (id, args) =>
             owner = args[0]
             type = args[1]
-            name = 'Platform' + @uid
+            name = 'Platform' + id
             state = _.extend new ObjectState(), _.clone(Properties.platform)
-            state = _.extend state, {'name': name, 'id': @uid, 'owner': owner}
+            state = _.extend state, {'name': name, 'id': id, 'owner': owner}
             object = new GameObject new PlatformBehaviour(type), state
 
-        @builders[Types.Entities.HQ] = (args) =>
+        @builders[Types.Entities.HQ] = (id, args) =>
             owner = args[0]
-            name = 'HQ' + @uid
+            name = 'HQ' + id
             state = _.extend new ObjectState(), _.clone(Properties.HQ)
-            state = _.extend state, {'name': name, 'id': @uid, 'owner': owner}
+            state = _.extend state, {'name': name, 'id': id, 'owner': owner}
             object = new GameObject new HQBehaviour(), state
 
-        @builders[Types.Entities.Channel] = (args) =>
+        @builders[Types.Entities.Channel] = (id, args) =>
             owner = args[0]
-            name = 'Channel' + @uid
+            name = 'Channel' + id
             state = _.extend new ObjectState(), _.clone(Properties.channel)
-            state = _.extend state, {'name': name, 'id': @uid, 'owner': owner}
+            state = _.extend state, {'name': name, 'id': id, 'owner': owner}
             object = new GameObject new ChannelBehaviour(), state
 
-        @builders[Types.Entities.User] = (args) =>
+        @builders[Types.Entities.User] = (id, args) =>
             user = _.extend new User(), _.clone( Properties.user )
-            name = 'User' + @uid
-            _.extend user, {'name': name, 'id': @uid}
+            name = 'User' + id
+            _.extend user, {'name': name, 'id': id}
 
-        @builders[Types.Entities.Signal] = (args) =>
-            strength = args[0]
-            type = args[1]
-            source = args[2]
-            name = 'Signal' + @uid
-            signal = _.extend new Signal(strength, type, source), _.clone(Properties.signal)
-            signal = _.extend signal, {'name': name, 'id': @uid}
+        #@builders[Types.Entities.Signal] = (id, args) =>
+            #strength = args[0]
+            #type = args[1]
+            #source = args[2]
+            #name = 'Signal' + id
+            #signal = _.extend new Signal(strength, type, source), {'name': name, 'id': id}
 
-        @builders[Types.Resources.Metal] = (args) =>
+        @builders[Types.Resources.Metal] = (id, args) =>
             owner = args[0]
-            name = 'Metal' + @uid
+            name = 'Metal' + id
             state = _.extend new ObjectState(), _.clone(Properties.resource)
-            state = _.extend state, {'name': name, 'id': @uid, 'owner': owner}
+            state = _.extend state, {'name': name, 'id': id, 'owner': owner}
             object = new GameObject new ResourceBehaviour(Types.Resources.Names[0]), state
 
-        @builders[Types.Resources.Tritium] = (args) =>
+        @builders[Types.Resources.Tritium] = (id, args) =>
             owner = args[0]
-            name = 'Tritium' + @uid
+            name = 'Tritium' + id
             state = _.extend new ObjectState(), _.clone(Properties.resource)
-            state = _.extend state, {'name': name, 'id': @uid, 'owner': owner}
+            state = _.extend state, {'name': name, 'id': id, 'owner': owner}
             object = new GameObject new ResourceBehaviour(Types.Resources.Names[1]), state
-        @uid = -1
+        _.extend @builders, SignalFactory.builders
 
     build: ( kind, args... ) ->
         if not kind
@@ -70,8 +71,7 @@ class ObjectFactory
         if not _.isFunction @builders[kind]
             throw Error kind + " is not a valid Entity type"
 
-        @uid++
-        @builders[kind](args)
+        @builders[kind](Uid.get(), args)
 
 
 if module? and module.exports
