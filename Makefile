@@ -1,4 +1,4 @@
-all: dir | js
+all: dir | js css
 	cp dev/build/*.js dev/webroot/js
 
 dir:
@@ -26,6 +26,9 @@ js: js-templates js-views js-models js-collections js-renderer js-engine
 
 js-engine:
 	find dev/common -name *.coffee -exec node_modules/.bin/coffee -cj dev/build/engine.js {} +
+
+css:
+	node_modules/.bin/lessc -x dev/webroot/css/style.less > dev/webroot/css/style.css
 
 loc:
 	find dev -name *.coffee -exec cat {} + | sed '/^\s*#/d;/^\s*$$/d' | wc -l

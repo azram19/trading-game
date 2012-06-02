@@ -489,7 +489,7 @@ state = {
   }
 
 $ ->
-    canvas = document.getElementById "board"
+    canvas = document.getElementById "board4"
     if canvas?
         stage = new Stage canvas
         drawer = new BoardDrawer 1, stage, 2, 3
