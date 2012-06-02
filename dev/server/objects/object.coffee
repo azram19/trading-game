@@ -15,8 +15,8 @@ class GameObject
     type: ->
         @behaviour.getType()
 
-    requestAccept: ( signal, state ) ->
-        @behaviour.requestAccept source, @state
+    requestAccept: ( signal ) ->
+        @behaviour.requestAccept signal, @state
 
     accept: ( signal, callback ) ->
         @behaviour.accept signal, @state, callback

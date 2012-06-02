@@ -1,13 +1,13 @@
 Types =
     Entities:
-        HQ: 0
-        Platform: 1
-        Channel: 2
-        Signal: 3
-        User: 4
+        HQ: 1
+        Platform: 2
+        Channel: 3
+        Signal: 4
+        User: 5
     Resources:
-        Metal: 5
-        Tritium: 6
+        Metal: 6
+        Tritium: 7
         Names: [
             "Metal"
             "Tritium"
