@@ -10,14 +10,14 @@ class gameManager
   #number of players
   #game state - map
   #user objects
-  constructor: ( @users, startPoints, width, height ) ->
+  constructor: ( @users, startPoints, minWidth, maxWidth ) ->
     createHQ = ( user ) ->
       id = Math.random()
       ObjectFactory.build Types.Entities.HQ, user
 
     HQs = (createHQ user for user in @users)
     @nonUser = ObjectFactory.build Types.Entities.User
-    @map = new Map width, height, @nonUser
+    @map = new Map minWidth, maxWidth, @nonUser
 
     @initialMapState( @map, HQs, startPoints )
     #@map.dump()
@@ -43,6 +43,4 @@ util = require 'util'
 
 user1 = ObjectFactory.build Types.Entities.User
 manager = new gameManager [user1], [[2,2]], 4, 6
-
 console.log (util.inspect manager.map, false, 50)
-
