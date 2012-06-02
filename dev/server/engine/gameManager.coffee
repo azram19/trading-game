@@ -2,11 +2,9 @@
 if require?
   _ = require 'underscore'
   Field = require '../objects/field'
-  GameObject = require '../objects/object'
-  HQBehaviour = require '../behaviours/HQBehaviour'
-  ObjectState = require '../objects/state'
+  ObjectFactory = require '../config/ObjectFactory'
+  Types = require '../config/Types'
   Map = require './map'
-  User = require '../models/user'
 
 class gameManager
   #number of players
@@ -14,18 +12,13 @@ class gameManager
   #user objects
   constructor: ( @users, startPoints, width, height ) ->
     createHQ = ( user ) ->
-      stateHQ = new ObjectState user
+      id = Math.random()
+      ObjectFactory.build Types.Entities.HQ, user
 
-      objectHQ = new GameObject( new HQBehaviour(), stateHQ )
-      objectHQ
-
-    console.log "Manager: initial HQ"
     HQs = (createHQ user for user in @users)
+    @nonUser = ObjectFactory.build Types.Entities.User
+    @map = new Map width, height, @nonUser
 
-    console.log "Manager: create map"
-    @map = new Map width, height
-
-    console.log "Manager: configure map"
     @initialMapState( @map, HQs, startPoints )
     #@map.dump()
 
@@ -46,7 +39,10 @@ if module? and module.exports
 else
   root['gameManager'] = gameManager
 
-user1 = new User()
+util = require 'util'
+
+user1 = ObjectFactory.build Types.Entities.User
 manager = new gameManager [user1], [[2,2]], 4, 6
 
-manager.map.dump()
+console.log (util.inspect manager.map, false, 50)
+

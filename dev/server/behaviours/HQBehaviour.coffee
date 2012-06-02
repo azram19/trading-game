@@ -12,7 +12,6 @@ class HQBehaviour
             true
 
     produce: ( state ) ->
-        console.log state
         if state.field.resource.type?
             state.field.resource.trigger 'produce'
         production = =>

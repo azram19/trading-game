@@ -14,10 +14,16 @@ class radialMenu
   showTime: 200
 
 
-  constructor: ( @engine, @canvas, @x, @y ) ->
+  constructor: ( @engine, @canvas, @x, @y, @text, @desc ) ->
     if not @mousedownLister
       @canvas.addEventListener this
       @mousedownListener = true
+
+    @$title = $ "<div/>"
+    @$title.text @text
+    @$title.appendTo 'body'
+    @$title.click =>
+      @click()
 
     @context2d = @canvas.getContext '2d'
     @stage = new Stage @canvas
@@ -29,11 +35,12 @@ class radialMenu
     @x_origin = @x
     @y_origin = @y
 
-    @length = 120
+    @length = 60
     @expand_length = @length * 1
-    @compact_length = @length * 0.4
+    @compact_length = @length * 0.5
 
     @radius = 10
+    @compact_radius = @radius * 0.5
 
     @alpha = Math.PI / 3
     @beta = Math.PI * 2/2
@@ -113,6 +120,19 @@ class radialMenu
       .beginFill( "red" )
       .drawCircle( @x, @y, @radius )
 
+
+    P = @button.localToGlobal @x + 2 * @radius, @y - 10
+
+    @$title.css
+      'position': 'absolute'
+      'left': P.x
+      'top': P.y
+      'opacity' : 1
+      'cursor' : 'pointer'
+
+    @$title.show()
+
+
     if not redraw
       @stage.addChild @button
 
@@ -157,12 +177,20 @@ class radialMenu
     @hideChildren()
     @expanded = false
 
+    radius = @radius
+
     @computeP( @compact_length )
 
     @button.graphics.clear()
     @line.graphics.clear()
+
+    @radius = @compact_radius
     @draw()
 
+    @$title.css
+      'opacity' : 0.5
+
+    @radius = radius
     @computeP()
 
     #TODO
@@ -175,6 +203,7 @@ class radialMenu
     @hideChildren()
 
     @button.visible = false
+    @$title.hide()
 
     if @line?
       @line.visible = false
@@ -202,14 +231,16 @@ $ ->
   if canvas?
     window.Mouse = new MouseClass canvas
 
-    window.r = r = new radialMenu null, canvas, 100, 100
+    window.r = r = new radialMenu null, canvas, 100, 100, "piesek"
 
-    r2 = new radialMenu null, canvas
-    r3 = new radialMenu null, canvas
-    r4 = new radialMenu null, canvas
-    r5 = new radialMenu null, canvas
-    r6 = new radialMenu null, canvas
-    r7 = new radialMenu null, canvas
+    r2 = new radialMenu null, canvas, 0, 0, "kotek"
+    r3 = new radialMenu null, canvas, 0, 0, "malpka"
+    r4 = new radialMenu null, canvas, 0, 0, "ptaszek"
+    r5 = new radialMenu null, canvas, 0, 0, "gawron"
+    r6 = new radialMenu null, canvas, 0, 0, "slon"
+    r7 = new radialMenu null, canvas, 0, 0, "dzwon"
+    r8 = new radialMenu null, canvas, 0, 0, "dzwon1"
+    r9 = new radialMenu null, canvas, 0, 0, "dzwon2"
 
     r.addChild r2
     r.addChild r3
@@ -217,5 +248,9 @@ $ ->
     r4.addChild r5
     r4.addChild r6
     r4.addChild r7
+    r4.addChild r8
+    r4.addChild r9
+
 
     r.drawAsRoot()
+

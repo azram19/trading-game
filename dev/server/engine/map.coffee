@@ -2,15 +2,16 @@
 if require?
   _ = require 'underscore'
   Field = require '../objects/field'
-  GameObject = require '../objects/object'
-  ObjectState = require '../objects/state'
-  ResourceBehaviour = require '../behaviours/ResourceBehaviour'
+  ObjectFactory = require '../config/ObjectFactory'
+  Types = require '../config/Types'
 
 class Map
-  fields: {} #level 0 on the map, resources and shit
-  channels: {} #channels connecting fields
+  #fields: {} #level 0 on the map, resources and shit
+  #channels: {} #channels connecting fields
 
-  constructor: ( @widthMin, @widthMax ) ->
+  constructor: ( @widthMin, @widthMax, @nonUser ) ->
+    @fields = {}
+    @channles = {}
     #initialize an empty map
     (
       @addField {}, x, y for x in [0...(@widthMin+y)]
@@ -27,15 +28,18 @@ class Map
       field
 
     #generate resources
-    initializeResource = ( o, x, y ) ->
+    initializeResource = ( o, x, y ) =>
       chance = 0.42
       res = Math.random()
+      type = Math.random()
 
       if res < chance
-        behaviour = new ResourceBehaviour ("money")
-        resource = new GameObject behaviour, (new ObjectState())
-        o.resource = resource
-        #console.log x + " " + y + ":res"
+        kind = ''
+        if type > 0.5
+            kind = Types.Resources.Metal
+        else
+            kind = Types.Resources.Tritium
+        o.resource = ObjectFactory.build kind, @nonUser
         o
       else
         o
