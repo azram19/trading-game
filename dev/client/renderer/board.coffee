@@ -123,12 +123,11 @@ tick = () ->
 class GSignal extends Shape
     tickSizeX: 0
     tickSizeY: 0
-    closestDest: {}
     div = 24
 
-    constructor: (@g) ->
+    constructor: (g, @closestDest) ->
         super g
-        closestDest = new Point @x @y
+        setRouting()
 
     setTickSizeX: (t) ->
         tickSizeX = t
@@ -144,8 +143,11 @@ class GSignal extends Shape
 
     setRouting: (dest) ->
         @closestDest = dest
-        setTickSizeX((closestDest.x - @x)/div)
-        setTickSizeY((closestDest.y - @y)/div)
+        setRouting()
+
+    setRouting: () ->
+        setTickSizeX((@closestDest.x - @x)/div)
+        setTickSizeY((@closestDest.y - @y)/div)
 
 class BoardDrawer
     margin: 100
@@ -241,9 +243,9 @@ class BoardDrawer
         @stage.addChild new Shape g
 
 
-    drawChannel: (point, channelState) ->
+    drawChannel: (point, direction) ->
         g = new Graphics()
-        point2 = getDestination(point)
+        point2 = getDestination(point, direction)
         g.moveTo(point.x, point.y)
             .setStrokeStyle(3)
             .beginStroke("#FFFF00")
@@ -251,12 +253,13 @@ class BoardDrawer
             .lineTo(point2.x, point2.y)
         @stage.addChild new Shape g
 
-    drawSignal: (point) ->
+    drawSignal: (point, direction) ->
         g = new Graphics()
         g.setStrokeStyle(1)
             .beginStroke("#FFFF00")
             .drawCircle(point.x, point.y, 8)
-        signal = new GSignal g 
+        dest = getDestination(point, direction)
+        signal = new GSignal(g, dest)
         @signals.addChild signal
         
 
@@ -295,13 +298,13 @@ class BoardDrawer
 
     tick: () ->
         for signal in signals
-            if (signal.x == signal.closestDest.x and signal.y == signal.closestDest.y)
-                # stage.update
-                # break
-                dest = getDestination(new Point(signal.x, signal.y), channelState.routing)
-                signal.setRouting(dest)
-            signal.x += signal.tickSizeX
-            signal.y += signal.tickSizeY
+            if (signal.x == signal.closestDest.x and signal.y == signal.closestDest.y)  
+                @signals.removeChild(signal)
+                # dest = getDestination(new Point(signal.x, signal.y), channelState.routing)
+                # signal.setRouting(dest)
+            else
+                signal.x += signal.tickSizeX
+                signal.y += signal.tickSizeY
             @stage.update()
 
 
@@ -324,9 +327,9 @@ class BoardDrawer
         drawResource(point, fieldState.field.resource)
         @stage.update()
 
-    createSignal: (i, j) ->
+    createSignal: (i, j, channelState) ->
         point = getPoint(i, j)
-        drawSignal(point)
+        drawSignal(point, channelState.routing)
         @stage.update()
 
     drawState: (boardState) ->
