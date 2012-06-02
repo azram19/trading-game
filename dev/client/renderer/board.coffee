@@ -120,20 +120,32 @@ tick = () ->
     stage.update()
 ###
 
-class BoardAnimation
-    stage: {}
+class GSignal extends Shape
     tickSizeX: 0
     tickSizeY: 0
-    
-    constructor: () ->
+    closestDest: {}
+    div = 24
 
-    tick: () ->
-        if (signal.x < path.x1 and signal.y < path.y1) or (signal.x > path.x2 and signal.y > path.y2)
-                @tickSizeX = -@tickSizeX
-                @tickSizeY = -@tickSizeY
-        signal.x += @tickSizeX
-        signal.y += @tickSizeY
-        @stage.update()
+    constructor: (@g) ->
+        super g
+        closestDest = new Point @x @y
+
+    setTickSizeX: (t) ->
+        tickSizeX = t
+    
+    getTickSizeX: () ->
+        tickSizeX
+    
+    setTickSizeY: (t) ->
+        tickSizeY = t
+    
+    getTickSizeY: () ->
+        tickSizeY
+
+    setRouting: (dest) ->
+        @closestDest = dest
+        setTickSizeX((closestDest.x - @x)/div)
+        setTickSizeY((closestDest.y - @y)/div)
 
 class BoardDrawer
     margin: 100
@@ -141,21 +153,52 @@ class BoardDrawer
     horIncrement: 0
     verIncrement: 0
     diffRows: 0
+    signals: {}
+    basePoint1: {}
+    basePoint2: {}
 
     init: () ->
         @horIncrement = Math.ceil Math.sqrt(3)*@size/2
         @verIncrement = Math.ceil 3*@size/2
         @diffRows = @maxRow - @minRow
+
         @stage.enableMouseOver()
+
+        @signals = new Container
+        @stage.addChild signals
+
+        Ticker.setFPS 25
+        Ticker.addListener signals
 
     constructor: (@id, @stage, @minRow, @maxRow) ->
         init()
+
+    setSize: (size) ->
+        @size = size
+    
+    setMargin: (margin) ->
+        @margin = margin
 
     getPoint: (i, j) ->
         offset = @margin + Math.abs(@diffRows - j)*@horIncrement
         x = getOffset(j) + 2*i*@horIncrement
         y = @margin + j*@verIncrement
         new Point(x, y)
+
+    getDestination: (point, dir) ->
+        p = new Point(point.x, point.y)
+        switch dir
+            when 0 then (p.x -= @horIncrement
+            p.y -= @verIncrement)
+            when 1 then (p.x += @horIncrement
+            p.y -= @verIncrement)
+            when 2 then p.x += 2*@horIncrement
+            when 3 then (p.x += @horIncrement
+            p.y += @verIncrement)
+            when 4 then (p.x -= @horIncrement
+            p.y += @verIncrement)
+            when 5 then p.x -= 2*@horIncrement
+        p
 
     drawHex: (point, fieldState) ->
         drawStroke(point)
@@ -200,24 +243,12 @@ class BoardDrawer
 
     drawChannel: (point, channelState) ->
         g = new Graphics()
-        x = point.x
-        y = point.y
-        switch channelState.routing
-            when 0 then (x -= @horIncrement
-            y -= @verIncrement)
-            when 1 then (x += @horIncrement
-            y -= @verIncrement)
-            when 2 then x += 2*@horIncrement
-            when 3 then (x += @horIncrement
-            y += @verIncrement)
-            when 4 then (x -= @horIncrement
-            y += @verIncrement)
-            when 5 then x -= 2*@horIncrement
+        point2 = getDestination(point)
         g.moveTo(point.x, point.y)
             .setStrokeStyle(3)
             .beginStroke("#FFFF00")
             .beginFill("#FFFF00")
-            .lineTo(x, y)
+            .lineTo(point2.x, point2.y)
         @stage.addChild new Shape g
 
     drawSignal: (point) ->
@@ -225,7 +256,9 @@ class BoardDrawer
         g.setStrokeStyle(1)
             .beginStroke("#FFFF00")
             .drawCircle(point.x, point.y, 8)
-        @stage.addChild new Shape g
+        signal = new GSignal g 
+        @signals.addChild signal
+        
 
     setBacklight: (point) ->
         g = new Graphics()
@@ -233,6 +266,9 @@ class BoardDrawer
         overlay = new Shape g
         overlay.onMouseOver = mouseOverField
         @stage.addchild overlay
+
+
+#----------------Events-----------------#
 
     mouseOverField: (event) ->
         g = new Graphics()
@@ -248,9 +284,30 @@ class BoardDrawer
 
     mouseOnClickRadial: (event) ->
 
+
+#---------------Animation---------------#
+
+    moveSignal: (i, j, channelState) ->
+        start = getPoint(i, j)
+        dest = getDestination(start, channelState.routing)
+        drawSignal(point)
+
+
+    tick: () ->
+        for signal in signals
+            if (signal.x == signal.closestDest.x and signal.y == signal.closestDest.y)
+                # stage.update
+                # break
+                dest = getDestination(new Point(signal.x, signal.y), channelState.routing)
+                signal.setRouting(dest)
+            signal.x += signal.tickSizeX
+            signal.y += signal.tickSizeY
+            @stage.update()
+
+
 #---------------Interface---------------#
 
-    createPlatfrom: (i, j, fieldState)->
+    createPlatfrom: (i, j, fieldState) ->
         point = getPoint(i, j)
         drawOwnership(point, fieldState.owner)
         drawPlatform(point, fieldState.field.platform)
@@ -267,7 +324,13 @@ class BoardDrawer
         drawResource(point, fieldState.field.resource)
         @stage.update()
 
-    drawState: (boardState) ->      
+    createSignal: (i, j) ->
+        point = getPoint(i, j)
+        drawSignal(point)
+        @stage.update()
+
+    drawState: (boardState) ->
+        @stage.removeAllChildren()
         for j in [0 ... (2*@diffRows + 1)]
             for i in [0 ... @maxRow - Math.abs(@diffRows - j)]
                 point = getPoint(i, j)
