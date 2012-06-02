@@ -7,10 +7,12 @@ if require?
   ResourceBehaviour = require '../behaviours/ResourceBehaviour'
 
 class Map
-  fields: {} #level 0 on the map, resources and shit
-  channels: {} #channels connecting fields
+  #fields: {} #level 0 on the map, resources and shit
+  #channels: {} #channels connecting fields
 
   constructor: ( @widthMin, @widthMax ) ->
+    @fields = {}
+    @channles = {}
     #initialize an empty map
     (
       @addField {}, x, y for x in [0...(@widthMin+y)]
