@@ -1,153 +1,26 @@
-###
-margin = 20
-size = 40
-count = 12
-height = Math.ceil 2*margin+(3*count+1)/2*size
-width = 2*margin+Math.ceil(Math.sqrt(3)*size/2)*25
-
-hitOptions =
-    segments: true
-    stroke: true
-    fill: true
-    tolerance: 2
-
-view.viewSize = [width,height]
-
-onMouseMove = (event) ->
-    hitResult = project.hitTest event.point, hitOptions
-    project.activeLayer.selected = false
-    if hitResult and hitResult.item
-        hitResult.item.selected = true
-
-drawHex = (x, y, size) ->
-    hex = new Path.RegularPolygon new Point(x, y), 6, size
-    hex.style =
-        fillColor: new RgbColor 0, 0, 0, 0
-        strokeColor: 'yellow'
-        strokeWidth: 3
-        selected: false
-    #glow hex, strokeColor: 'yellow', strokeWidth: 10
-
-glow = (path, glow) ->
-    glow = glow || {}
-    s =
-        strokeWidth: (glow.strokeWidth || 10) + path.strokeWidth
-        fillColor: glow.fillColor || new RgbColor 0, 0, 0, 0
-        opacity: glow.opacity || .5
-        translatePoint: glow.translatePoint || new Point 0, 0
-        strokeColor: glow.strokeColor || "#000"
-
-    c = s.strokeWidth / 2
-    out = []
-    for i in [1..c+1]
-        newPath = path.clone()
-        newPath.style =
-            strokeColor: s.strokeColor
-            fillColor: s.fillColor
-            strokeJoin: "round"
-            strokeCap: "round"
-            strokeWidth: +(s.strokeWidth / c * i).toFixed(3)
-        newPath.strokeColor.alpha = +(s.opacity / c).toFixed(3)
-        newPath.moveBelow path
-        out.push newPath
-    out
-
-horIncrement = Math.ceil Math.sqrt(3)*size
-verIncrement = Math.ceil 3*size/2
-offset = false
-
-for y in [margin + size..height-margin-size] by verIncrement
-    for x in [(margin + horIncrement/2 + (if offset then horIncrement/2 else 0))..width - margin - (if not offset then horIncrement/2 else 0)] by horIncrement
-        drawHex x, y, size
-    offset = not offset
-
-path = new Path()
-start = new Point margin + size, size + margin
-end = new Point margin + size + horIncrement, margin+size+2*verIncrement
-path.add start
-path.lineTo end
-path.strokeColor = '#0000ff'
-path.strokeWidth = 2
-size = new Size 10, 8
-point = path.getPointAt 0
-rectangle = new Rectangle point, size
-oval = new Path.Oval rectangle
-oval.fillColor = '#0000ff'
-oval.position += new Point(-5, -4)
-
-direction = end - start
-onFrame = (event) ->
-    if oval.position.x > end.x and oval.position.y > end.y or oval.position.x < start.x and oval.position.y < start.y
-        direction = -direction
-    oval.position += direction/50
-
-###
-
-###
-CIRCLE_RADIUS = 15;
-bounds = null
-circle = null
-stage = null
-circleXReset = 0
-unit = 3
-init = () ->
-    #if not document.createElement('canvas').getContext
-    #    wrapper = document.getElementById "canvasWrapper"
-    #    wrapper.innerHTML = "Your browser does not support canvas"
-    #    return    
-    canvas = document.getElementById "board"
-    bounds = new Rectangle()
-    bounds.width = canvas.width
-    bounds.height = canvas.height
-    stage = new Stage(canvas)
-    g = new Graphics()
-    g.setStrokeStyle(3)
-    g.beginStroke Graphics.getRGB 255, 255, 255, .7
-    g.drawCircle 0, 0, CIRCLE_RADIUS
-    circle = new Shape g
-    circle.x = canvas.width / 2
-    circle.y = canvas.height / 2
-    stage.addChild circle
-    stage.update()
-    Ticker.setFPS 25
-    Ticker.addListener this
-
-tick = () ->
-    if circle.y > bounds.height || circle.y < 0
-        unit = -unit
-    circle.x += unit
-    circle.y += unit
-    stage.update()
-###
-
-class GSignal extends Shape
+class GSignal
     tickSizeX: 0
     tickSizeY: 0
-    div = 24
+    div: 24
 
-    constructor: (g, @closestDest) ->
-        super g
-        setRouting()
+    constructor: (@shape, @closestDest) ->
+        @setRouting()
 
     setTickSizeX: (t) ->
-        tickSizeX = t
+        @tickSizeX = t
     
     getTickSizeX: () ->
-        tickSizeX
+        @tickSizeX
     
     setTickSizeY: (t) ->
-        tickSizeY = t
+        @tickSizeY = t
     
     getTickSizeY: () ->
-        tickSizeY
-
-    setRouting: (dest) ->
-        @closestDest = dest
-        setRouting()
+        @tickSizeY
 
     setRouting: () ->
-        setTickSizeX((@closestDest.x - @x)/div)
-        setTickSizeY((@closestDest.y - @y)/div)
+        @setTickSizeX((@closestDest.x - @shape.x)/@div)
+        @setTickSizeY((@closestDest.y - @shape.y)/@div)
 
 class BoardDrawer
     margin: 100
@@ -159,7 +32,7 @@ class BoardDrawer
     basePoint1: {}
     basePoint2: {}
 
-    init: () ->
+    constructor: (@id, @stage, @minRow, @maxRow) ->
         @horIncrement = Math.ceil Math.sqrt(3)*@size/2
         @verIncrement = Math.ceil 3*@size/2
         @diffRows = @maxRow - @minRow
@@ -167,13 +40,10 @@ class BoardDrawer
         @stage.enableMouseOver()
 
         @signals = new Container
-        @stage.addChild signals
+        @stage.addChild(@signals)
 
-        Ticker.setFPS 25
-        Ticker.addListener signals
-
-    constructor: (@id, @stage, @minRow, @maxRow) ->
-        init()
+        #Ticker.setFPS 25
+        #Ticker.addListener this
 
     setSize: (size) ->
         @size = size
@@ -183,31 +53,35 @@ class BoardDrawer
 
     getPoint: (i, j) ->
         offset = @margin + Math.abs(@diffRows - j)*@horIncrement
-        x = getOffset(j) + 2*i*@horIncrement
+        x = offset + 2*i*@horIncrement
         y = @margin + j*@verIncrement
         new Point(x, y)
 
     getDestination: (point, dir) ->
         p = new Point(point.x, point.y)
         switch dir
-            when 0 then (p.x -= @horIncrement
-            p.y -= @verIncrement)
-            when 1 then (p.x += @horIncrement
-            p.y -= @verIncrement)
+            when 0 then (
+                p.x -= @horIncrement
+                p.y -= @verIncrement)
+            when 1 then (
+                p.x += @horIncrement
+                p.y -= @verIncrement)
             when 2 then p.x += 2*@horIncrement
-            when 3 then (p.x += @horIncrement
-            p.y += @verIncrement)
-            when 4 then (p.x -= @horIncrement
-            p.y += @verIncrement)
+            when 3 then (
+                p.x += @horIncrement
+                p.y += @verIncrement)
+            when 4 then (
+                p.x -= @horIncrement
+                p.y += @verIncrement)
             when 5 then p.x -= 2*@horIncrement
         p
 
     drawHex: (point, fieldState) ->
-        drawStroke(point)
-        drawOwnership(point, fieldState.owner)
-        drawPlatform(point, fieldState.field.platform)
-        drawResource(point, fieldState.field.resource)
-        setBacklight(point)
+        @drawStroke(point)
+        @drawOwnership(point, fieldState.platform.state.owner)
+        @drawPlatform(point, fieldState.platform.behaviour.platformType)
+        @drawResource(point, fieldState.resource.behaviour.resourceType)
+        @setBacklight(point)
 
     drawPlatform: (point, platform) ->
         g = new Graphics()
@@ -237,7 +111,7 @@ class BoardDrawer
         g = new Graphics()
         switch resource
             when 1 then g.beginFill("#FFFFFF")
-            when 2 then g.beginFill("#256025")
+            when 2 then g.beginFill("#000000")
             else
         g.drawCircle(point.x, point.y, 6)
         @stage.addChild new Shape g
@@ -245,7 +119,7 @@ class BoardDrawer
 
     drawChannel: (point, direction) ->
         g = new Graphics()
-        point2 = getDestination(point, direction)
+        point2 = @getDestination(point, direction)
         g.moveTo(point.x, point.y)
             .setStrokeStyle(3)
             .beginStroke("#FFFF00")
@@ -258,32 +132,35 @@ class BoardDrawer
         g.setStrokeStyle(1)
             .beginStroke("#FFFF00")
             .drawCircle(point.x, point.y, 8)
-        dest = getDestination(point, direction)
-        signal = new GSignal(g, dest)
+        dest = @getDestination(point, direction)
+        shape = new Shape g
+        console.log shape
+        dest.x -= shape.parent.x
+        dest.y -= shape.parent.y
+        console.log shape
+        signal = new GSignal(shape, dest)
         @signals.addChild signal
-        
+        @stage.addChild signal.shape
 
     setBacklight: (point) ->
         g = new Graphics()
-        g.drawPolyStar(point.x, point.y, @size, 6, 0, 90)
+        g.beginStroke("#ED903E")
+            .setStrokeStyle(3)
+            .drawPolyStar(point.x, point.y, @size, 6, 0, 90)
         overlay = new Shape g
-        overlay.onMouseOver = mouseOverField
-        @stage.addchild overlay
+        overlay.visible = false
+        overlay.onMouseOver = @mouseOverField
+        overlay.onMouseOut = @mouseOutField
+        @stage.addChild overlay
 
 
 #----------------Events-----------------#
 
     mouseOverField: (event) ->
-        g = new Graphics()
-        g.beginStroke("#ED903E")
-            .setStrokeStyle(3)
-            .drawPolyStar(event.target.x, event.target.y, @size, 6, 0, 90)
-        overlay = new Shape g
-        overlay.onMouseOut = mouseOutField
-        @stage.addchild overlay
+        event.target.visible = true
 
     mouseOutField: (event) ->
-        @stage.removeChild(event.target)
+        event.target.visible = false
 
     mouseOnClickRadial: (event) ->
 
@@ -291,66 +168,334 @@ class BoardDrawer
 #---------------Animation---------------#
 
     moveSignal: (i, j, channelState) ->
-        start = getPoint(i, j)
-        dest = getDestination(start, channelState.routing)
-        drawSignal(point)
+        start = @getPoint(i, j)
+        dest = @getDestination(start, channelState.routing)
+        @drawSignal(point)
 
 
     tick: () ->
-        for signal in signals
-            if (signal.x == signal.closestDest.x and signal.y == signal.closestDest.y)  
+        for signal in @signals.children
+            if (signal.shape.x == signal.closestDest.x and signal.shape.y == signal.closestDest.y)  
                 @signals.removeChild(signal)
+                console.log "here1"
                 # dest = getDestination(new Point(signal.x, signal.y), channelState.routing)
                 # signal.setRouting(dest)
             else
-                signal.x += signal.tickSizeX
-                signal.y += signal.tickSizeY
+                console.log "here2"
+                signal.shape.x += signal.tickSizeX
+                signal.shape.y += signal.tickSizeY
             @stage.update()
 
 
 #---------------Interface---------------#
 
-    createPlatfrom: (i, j, fieldState) ->
-        point = getPoint(i, j)
-        drawOwnership(point, fieldState.owner)
-        drawPlatform(point, fieldState.field.platform)
+    createPlatfrom: (y, x, fieldState) ->
+        point = @getPoint(x, y)
+        @drawOwnership(point, fieldState.platform.state.owner)
+        @drawPlatform(point, fieldState.platform.behaviour.platformType)
         @stage.update()
 
-    createChannel: (i, j, channelState) -> 
-        point = getPoint(i, j)
-        drawOwnership(point, channelState.owner)
-        drawChannel(point, channelState.routing)
+    createChannel: (y, x, direction) -> 
+        point = @getPoint(x, y)
+        @drawOwnership(point, channelState.platform.state.owner)
+        @drawChannel(point, direction)
         @stage.update()
 
-    createResource: (i, j, fieldState) ->
-        point = getPoint(i, j)
-        drawResource(point, fieldState.field.resource)
+    createResource: (y, x, fieldState) ->
+        point = @getPoint(x, y)
+        @drawResource(point, fieldState.resource.behaviuor.resourceType)
         @stage.update()
 
-    createSignal: (i, j, channelState) ->
-        point = getPoint(i, j)
-        drawSignal(point, channelState.routing)
+    createSignal: (y, x, direction) ->
+        point = @getPoint(x, y)
+        @drawSignal(point, direction)
         @stage.update()
 
     drawState: (boardState) ->
         @stage.removeAllChildren()
         for j in [0 ... (2*@diffRows + 1)]
             for i in [0 ... @maxRow - Math.abs(@diffRows - j)]
-                point = getPoint(i, j)
-                @drawHex(point, boardState.fields.get(i, j))
-                for channel in boardState.channels.get(i,j)
-                    @drawChannel(point, channel)
+                point = @getPoint(i, j)
+                @drawHex(point, boardState.fields[j][i])
+                #for k in [0 .. 5]
+                #    if boardState.channels[j][i][k].state?
+                #        @drawChannel(point, k)
         @stage.update()
 
+#----------------------------------------#
+
+state = {
+  channels: [
+    [
+        [
+            {
+                state: null
+            },
+            {
+                state: {}
+            },
+            {
+                state: {}
+            },
+            {
+                state: {}
+            },
+            {
+                state: {}
+            },
+            {
+                state: {}
+            }
+        ]
+        [
+            {
+                state: {}
+            },
+            {
+                state: null
+            },
+            {
+                state: {}
+            },
+            {
+                state: {}
+            },
+            {
+                state: {}
+            },
+            {
+                state: {}
+            }
+        ]
+    ]
+    [
+        [
+            {
+                state: {}
+            },
+            {
+                state: {}
+            },
+            {
+                state: {}
+            },
+            {
+                state: {}
+            },
+            {
+                state: {}
+            },
+            {
+                state: null
+            }
+        ]
+        [
+            {
+                state: {}
+            },
+            {
+                state: {}
+            },
+            {
+                state: {}
+            },
+            {
+                state: {}
+            },
+            {
+                state: {}
+            },
+            {
+                state: {}
+            }
+        ]
+        [
+            {
+                state: {}
+            },
+            {
+                state: {}
+            },
+            {
+                state: null
+            },
+            {
+                state: {}
+            },
+            {
+                state: {}
+            },
+            {
+                state: {}
+            }
+        ]
+    ]
+    [
+        [
+            {
+                state: {}
+            },
+            {
+                state: {}
+            },
+            {
+                state: {}
+            },
+            {
+                state: {}
+            },
+            {
+                state: null
+            },
+            {
+                state: {}
+            }
+        ]
+        [
+            {
+                state: {}
+            },
+            {
+                state: {}
+            },
+            {
+                state: {}
+            },
+            {
+                state: null
+            },
+            {
+                state: {}
+            },
+            {
+                state: {}
+            }
+        ]
+    ]
+   ]
+
+  fields: [
+    [
+      {
+      platform: 
+          {
+            behaviour:
+              platformType: {}
+            state:
+              owner: 1
+          }
+      resource: 
+          {
+            behaviour:
+              resourceType: 1
+            state: {}
+          }
+      },
+      {
+      platform: 
+          {
+            behaviour:
+              platformType: {}
+            state:
+              owner: 2
+          }
+      resource: 
+          {
+            behaviour:
+              resourceType: 2
+            state: {}
+          }
+      }
+    ]
+    [
+     {
+      platform: 
+          {
+            behaviour:
+              platformType: 1
+            state:
+              owner: 1
+          }
+      resource: 
+          {
+            behaviour:
+              resourceType: {}
+            state: {}
+          }
+      },
+      {
+      platform: 
+          {
+            behaviour:
+              platformType: {}
+            state:
+              owner: 1
+          }
+      resource: 
+          {
+            behaviour:
+              resourceType: {}
+            state: {}
+          }
+      },
+      {
+      platform: 
+          {
+            behaviour:
+              platformType: {}
+            state:
+              owner: 1
+          }
+      resource: 
+          {
+            behaviour:
+              resourceType: {}
+            state: {}
+          }
+      }
+    ],
+    [
+      {
+      platform: 
+          {
+            behaviour:
+              platformType: {}
+            state:
+              owner: 2
+          }
+      resource: 
+          {
+            behaviour:
+              resourceType: 2
+            state: {}
+          }
+      },
+      {
+      platform: 
+          {
+            behaviour:
+              platformType: 1
+            state:
+              owner: 2
+          }
+      resource: 
+          {
+            behaviour:
+              resourceType: 2
+            state: {}
+          }
+      },
+    ]
+   ]
+  }
+
 $ ->
-    if $("#board").length > 0
-        ( ->
-            canvas = document.getElementById "board"
-            stage = new Stage canvas
-            state = new BoardState 1
-            drawer = new BoardDrawer 1, stage, 4, 9
-            state.draw()
-        )()
+    canvas = document.getElementById "board"
+    if canvas?
+        stage = new Stage canvas
+        drawer = new BoardDrawer 1, stage, 2, 3
+        drawer.drawState(state)
+        drawer.createSignal 1, 1, 2
 
 
 #grid1 = [[2,1],[2,1,2],[2,1]]

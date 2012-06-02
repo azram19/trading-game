@@ -16,8 +16,8 @@ class radialMenu
 
   constructor: ( @engine, @canvas, @x, @y ) ->
     if not @mousedownLister
-      @canvas.addEventListener
-      @mousedownListenerr = true
+      @canvas.addEventListener this
+      @mousedownListener = true
 
     @context2d = @canvas.getContext '2d'
     @stage = new Stage @canvas
@@ -199,22 +199,23 @@ class radialMenu
 
 $ ->
   canvas = document.getElementById "radial"
-  window.Mouse = new MouseClass canvas
+  if canvas?
+    window.Mouse = new MouseClass canvas
 
-  window.r = r = new radialMenu null, canvas, 100, 100
+    window.r = r = new radialMenu null, canvas, 100, 100
 
-  r2 = new radialMenu null, canvas
-  r3 = new radialMenu null, canvas
-  r4 = new radialMenu null, canvas
-  r5 = new radialMenu null, canvas
-  r6 = new radialMenu null, canvas
-  r7 = new radialMenu null, canvas
+    r2 = new radialMenu null, canvas
+    r3 = new radialMenu null, canvas
+    r4 = new radialMenu null, canvas
+    r5 = new radialMenu null, canvas
+    r6 = new radialMenu null, canvas
+    r7 = new radialMenu null, canvas
 
-  r.addChild r2
-  r.addChild r3
-  r.addChild r4
-  r4.addChild r5
-  r4.addChild r6
-  r4.addChild r7
+    r.addChild r2
+    r.addChild r3
+    r.addChild r4
+    r4.addChild r5
+    r4.addChild r6
+    r4.addChild r7
 
-  r.drawAsRoot()
+    r.drawAsRoot()
