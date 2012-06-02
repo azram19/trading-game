@@ -1,9 +1,12 @@
 class GSignal
     tickSizeX: 0
     tickSizeY: 0
-    div: 24
+    div: 48
+    closestDest: {}
 
-    constructor: (@shape, @closestDest) ->
+
+    constructor: (@shape, source, dest) ->
+        @closestDest = new Point(dest.x - source.x, dest.y - source.y)
         @setRouting()
 
     setTickSizeX: (t) ->
@@ -19,8 +22,8 @@ class GSignal
         @tickSizeY
 
     setRouting: () ->
-        @setTickSizeX((@closestDest.x - @shape.x)/@div)
-        @setTickSizeY((@closestDest.y - @shape.y)/@div)
+        @setTickSizeX(@closestDest.x/@div)
+        @setTickSizeY(@closestDest.y/@div)
 
 class BoardDrawer
     margin: 100
@@ -42,8 +45,8 @@ class BoardDrawer
         @signals = new Container
         @stage.addChild(@signals)
 
-        #Ticker.setFPS 25
-        #Ticker.addListener this
+        Ticker.setFPS 50
+        Ticker.addListener this
 
     setSize: (size) ->
         @size = size
@@ -134,11 +137,7 @@ class BoardDrawer
             .drawCircle(point.x, point.y, 8)
         dest = @getDestination(point, direction)
         shape = new Shape g
-        console.log shape
-        dest.x -= shape.parent.x
-        dest.y -= shape.parent.y
-        console.log shape
-        signal = new GSignal(shape, dest)
+        signal = new GSignal(shape, point, dest)
         @signals.addChild signal
         @stage.addChild signal.shape
 
@@ -175,16 +174,16 @@ class BoardDrawer
 
     tick: () ->
         for signal in @signals.children
-            if (signal.shape.x == signal.closestDest.x and signal.shape.y == signal.closestDest.y)  
-                @signals.removeChild(signal)
-                console.log "here1"
+            if (Math.abs(signal.shape.x) >= Math.abs(signal.closestDest.x) and 
+            Math.abs(signal.shape.y) >= Math.abs(signal.closestDest.y))
+                signal.shape.visible = false
                 # dest = getDestination(new Point(signal.x, signal.y), channelState.routing)
                 # signal.setRouting(dest)
             else
-                console.log "here2"
                 signal.shape.x += signal.tickSizeX
                 signal.shape.y += signal.tickSizeY
             @stage.update()
+
 
 
 #---------------Interface---------------#
@@ -217,9 +216,9 @@ class BoardDrawer
             for i in [0 ... @maxRow - Math.abs(@diffRows - j)]
                 point = @getPoint(i, j)
                 @drawHex(point, boardState.fields[j][i])
-                #for k in [0 .. 5]
-                #    if boardState.channels[j][i][k].state?
-                #        @drawChannel(point, k)
+                for k in [0 .. 5]
+                    if boardState.channels[j][i][k].state?
+                        @drawChannel(point, k)
         @stage.update()
 
 #----------------------------------------#
@@ -495,7 +494,12 @@ $ ->
         stage = new Stage canvas
         drawer = new BoardDrawer 1, stage, 2, 3
         drawer.drawState(state)
+        drawer.createSignal 1, 1, 0
+        drawer.createSignal 1, 1, 1
         drawer.createSignal 1, 1, 2
+        drawer.createSignal 1, 1, 3
+        drawer.createSignal 1, 1, 4
+        drawer.createSignal 1, 1, 5
 
 
 #grid1 = [[2,1],[2,1,2],[2,1]]
