@@ -488,11 +488,25 @@ state = {
    ]
   }
 
+
+stageBackground = {}
 $ ->
-    canvas = document.getElementById "board4"
-    if canvas?
-        stage = new Stage canvas
-        drawer = new BoardDrawer 1, stage, 2, 3
+    canvasBoard = document.getElementById "board"
+    canvasBackground = document.getElementById "background"
+    #canvasSignals = document.getElementById "signals"
+    #canvasChannels = document.getElementById "channels"
+    if canvasBackground?
+        stageBackground = new Stage canvasBackground
+        img = new Image
+        img.src = "http://www.celebritywallpaperbase.com/wp-content/uploads/2011/01/Emilie-De-Ravin-Wallpaper-4.jpg"
+        img.onload = setBg   
+    if canvasBoard?
+        stageBoard = new Stage canvasBoard
+        drawer = new BoardDrawer 1, stageBoard, 2, 3
         drawer.drawState(state)
-        drawer.createSignal 1, 1, 0
-        drawer.createSignal 1, 1, 1
+
+setBg = (event) ->
+    bg = new Bitmap event.target
+    console.log event
+    stageBackground.addChild bg
+    stageBackground.update()

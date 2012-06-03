@@ -102,17 +102,29 @@ p {
 
 }
 
-.canvasWrapper {
-  #board1 {
-    z-index: 0;
+#canvasWrapper {
+  position:relative;
+
+  & > canvas{
+    position:absolute;
+    top:0;
+    left:0;
   }
-  #board2 {
-    z-index: 2;
+
+  #background {
+    z-index: 10;
+    background: transparent;
   }
-  #board3 {
+  #board {
+    z-index: 8;
+    background: transparent;
+  }
+  #signals {
     z-index: 4;
+    background: transparent;
   }
-  #board4 {
+  #channels {
     z-index: 6;
+    background: transparent;
   }
 }
