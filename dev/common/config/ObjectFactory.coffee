@@ -1,4 +1,8 @@
-if require?
+###
+load dependencies for server and client
+coffee declraes all varialbes in
+###
+if require? #server
     _ = require('underscore')._
     Properties = require './Properties'
     Types = require './Types'
@@ -11,7 +15,7 @@ if require?
     ChannelBehaviour = require '../behaviours/ChannelBehaviour'
     PlatformBehaviour = require '../behaviours/PlatformBehaviour'
     ResourceBehaviour = require '../behaviours/ResourceBehaviour'
-else
+else #client
     _ = window._
     Properties = window.Properties
     Types = window.Types

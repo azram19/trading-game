@@ -6,6 +6,7 @@ all: dir | js css
 
 clean:
 	rm -rf dev/build
+	rm -f dev/webroot/js/*.js
 
 dir:
 	mkdir -p dev/build/templates
