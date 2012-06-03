@@ -7,12 +7,10 @@ class Mouse
 
     #quad tree of the items
     @tree = new QuadTree
-      {
-        x:0
-        y:0
-        width: @width
-        height:@height
-      },
+      x:0
+      y:0
+      width: @width
+      height:@height,
       false,
       4,
       8
@@ -39,10 +37,10 @@ class Mouse
       [canvasX, canvasY]
 
     #event handler
-    ev_handler = ( e ) ->
+    ev_handler = ( e ) =>
       #retrieves real coordinates of an event
       e ?= arguments[0]
-      [x,y] = self.getXY e
+      [x,y] = getXY e
 
       #retrieves objects in the area of an event
       handlersObjs = @tree.retrieve
@@ -52,7 +50,10 @@ class Mouse
         height: 2
 
       #sorts elements by priority and then selects those with the highest priority
-      handlersObjs = _.chain( handlersObjs ).sortBy( ( o ) -> -o.p ).filter( (o, i, l) -> o.p == _.first l ).value()
+      handlersObjs = _.chain( handlersObjs ).sortBy( ( o ) -> -o.p ).filter( (o, i, l) -> o.p == (_.first l).p ).value()
+
+      console.debug [x,y]
+      console.debug handlersObjs
 
       #executes a callback
       (
@@ -64,10 +65,10 @@ class Mouse
 
     $canvas = $ @canvas
 
-    $canvas.on 'mousedown', ev_handler_mousedown
-    $canvas.on 'mouseup', ev_handler_mouseup
-    $canvas.on 'mousemove', ev_handler_move
-    $canvas.on 'click', ev_handler_click
+    #$canvas.on 'mousedown', ev_handler
+    #$canvas.on 'mouseup', ev_handler
+    #$canvas.on 'mousemove', ev_handler
+    $canvas.on 'click', ev_handler
 
     Ticker.addListener @, true
 
@@ -88,13 +89,19 @@ class Mouse
 
     p ?= 0
 
-    b.f = f
-    b.es = es
-    b.p = p
-    b.id = id
+    console.debug b
 
-    @tree.insert b
-    @items.push b
+    o = {}
+    o.b = b #reference
+    o.f = f
+    o.es = es
+    o.p = p
+    o.id = id
+
+    _.extend o, b #values
+
+    @tree.insert o
+    @items.push o
 
     id
 
@@ -104,6 +111,9 @@ class Mouse
   #updates the quad tree in case coordinates, boundaries or elements changed
   tick: =>
     @tree.clear()
-    @tree.insert @items
+    items = _.map @items, ( i ) ->
+      _.extend i, i.b
+
+    @tree.insert items
 
 window.MouseClass = Mouse

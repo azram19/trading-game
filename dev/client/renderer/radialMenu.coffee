@@ -49,10 +49,10 @@ class radialMenu
 
 
     @boundaries =
-      x:
-      y:
-      width:
-      height:
+      x: @x - @radius
+      y: @y - @radius
+      width: @radius * 2
+      height: @radius * 2
 
     @mId = Mouse.register @boundaries, @click, ['click']
 
@@ -172,9 +172,10 @@ class radialMenu
     @computeP()
 
   expandChild: ( child ) ->
-    ( if c != child
+    (
+      if c != child
         c.compact()
-      ) for c in @children
+    ) for c in @children
 
     child.expand()
 
