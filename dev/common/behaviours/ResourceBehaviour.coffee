@@ -3,6 +3,10 @@ if require?
   _ = require 'underscore'
   SignalFactory = require '../config/SignalFactory'
   Types = require '../config/Types'
+else
+  _ = window._
+  SignalFactory = window.SignalFactory
+  Types = window.Types
 
 class ResourceBehaviour
 

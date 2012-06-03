@@ -1,6 +1,9 @@
 if require?
     SignalFactory = require '../config/SignalFactory'
     Types = require '../config/Types'
+else
+    Types = window.Types
+    SignalFactory = window.SignalFactory
 
 class HQBehaviour
 

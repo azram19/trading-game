@@ -5,6 +5,12 @@ if require?
   ObjectFactory = require '../config/ObjectFactory'
   Types = require '../config/Types'
   Map = require './Map'
+else
+  _ = window._
+  Field = window.Field
+  ObjectFactory = window.ObjectFactory
+  Types = window.Types
+  Map = window.Map
 
 class GameManager
   #number of players
