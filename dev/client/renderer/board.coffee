@@ -4,7 +4,6 @@ class GSignal
     div: 48
     closestDest: {}
 
-
     constructor: (@shape, source, dest) ->
         @closestDest = new Point(dest.x - source.x, dest.y - source.y)
         @setRouting()
@@ -25,7 +24,26 @@ class GSignal
         @setTickSizeX(@closestDest.x/@div)
         @setTickSizeY(@closestDest.y/@div)
 
-class BoardDrawer
+###
+class ChannelDrawer extends Drawer
+class SignalsDrawer extends Drawer
+class BoardDrawer extends Drawer
+    to dicuss
+    or an array of canvas as a property
+###
+
+class BackgroundDrawer
+    constructor: (@stage) ->
+        img = new Image
+        img.src = "address"
+        img.onload = @setBg
+
+    setBg: (event) =>
+        bg = new Bitmap event.target
+        @stage.addChild bg
+        @stage.update()
+
+class Drawer
     margin: 100
     size: 40
     horIncrement: 0
@@ -43,7 +61,6 @@ class BoardDrawer
         @stage.enableMouseOver()
 
         @signals = new Container
-        @stage.addChild(@signals)
 
         Ticker.setFPS 50
         Ticker.addListener this
@@ -119,7 +136,6 @@ class BoardDrawer
         g.drawCircle(point.x, point.y, 6)
         @stage.addChild new Shape g
 
-
     drawChannel: (point, direction) ->
         g = new Graphics()
         point2 = @getDestination(point, direction)
@@ -152,7 +168,6 @@ class BoardDrawer
         overlay.onMouseOut = @mouseOutField
         @stage.addChild overlay
 
-
 #----------------Events-----------------#
 
     mouseOverField: (event) ->
@@ -163,14 +178,12 @@ class BoardDrawer
 
     mouseOnClickRadial: (event) ->
 
-
 #---------------Animation---------------#
 
     moveSignal: (i, j, channelState) ->
         start = @getPoint(i, j)
         dest = @getDestination(start, channelState.routing)
         @drawSignal(point)
-
 
     tick: () ->
         for signal in @signals.children
@@ -183,8 +196,6 @@ class BoardDrawer
                 signal.shape.x += signal.tickSizeX
                 signal.shape.y += signal.tickSizeY
             @stage.update()
-
-
 
 #---------------Interface---------------#
 
@@ -231,6 +242,68 @@ state = {
                 state: null
             },
             {
+                state: null
+            },
+            {
+                state: {}
+            },
+            {
+                state: {}
+            },
+            {
+                state: {}
+            },
+            {
+                state: null
+            }
+        ]
+        [
+            {
+                state: null
+            },
+            {
+                state: null
+            },
+            {
+                state: null
+            },
+            {
+                state: {}
+            },
+            {
+                state: {}
+            },
+            {
+                state: {}
+            }
+        ]
+    ]
+    [
+        [
+            {
+                state: null
+            },
+            {
+                state: {}
+            },
+            {
+                state: {}
+            },
+            {
+                state: {}
+            },
+            {
+                state: null
+            },
+            {
+                state: null
+            }
+        ]
+        [
+            {
+                state: {}
+            },
+            {
                 state: {}
             },
             {
@@ -254,10 +327,10 @@ state = {
                 state: null
             },
             {
-                state: {}
+                state: null
             },
             {
-                state: {}
+                state: null
             },
             {
                 state: {}
@@ -279,10 +352,10 @@ state = {
                 state: {}
             },
             {
-                state: {}
+                state: null
             },
             {
-                state: {}
+                state: null
             },
             {
                 state: null
@@ -296,75 +369,13 @@ state = {
                 state: {}
             },
             {
-                state: {}
-            },
-            {
-                state: {}
-            },
-            {
-                state: {}
-            },
-            {
-                state: {}
-            }
-        ]
-        [
-            {
-                state: {}
-            },
-            {
-                state: {}
+                state: null
             },
             {
                 state: null
             },
             {
-                state: {}
-            },
-            {
-                state: {}
-            },
-            {
-                state: {}
-            }
-        ]
-    ]
-    [
-        [
-            {
-                state: {}
-            },
-            {
-                state: {}
-            },
-            {
-                state: {}
-            },
-            {
-                state: {}
-            },
-            {
                 state: null
-            },
-            {
-                state: {}
-            }
-        ]
-        [
-            {
-                state: {}
-            },
-            {
-                state: {}
-            },
-            {
-                state: {}
-            },
-            {
-                state: null
-            },
-            {
-                state: {}
             },
             {
                 state: {}
@@ -426,7 +437,7 @@ state = {
       platform: 
           {
             behaviour:
-              platformType: {}
+              platformType: 1
             state:
               owner: 1
           }
@@ -488,17 +499,6 @@ state = {
    ]
   }
 
-class BackgroundDrawer
-    constructor: (@stage) ->
-        img = new Image
-        img.src = "http://www.celebritywallpaperbase.com/wp-content/uploads/2011/01/Emilie-De-Ravin-Wallpaper-4.jpg"
-        img.onload = @setBg
-
-    setBg: (event) =>
-        bg = new Bitmap event.target
-        @stage.addChild bg
-        @stage.update()
-
 $ ->
     canvasBoard = document.getElementById "board"
     canvasBackground = document.getElementById "background"
@@ -511,6 +511,27 @@ $ ->
     ###
     if canvasBoard?
         stageBoard = new Stage canvasBoard
-        drawer = new BoardDrawer 1, stageBoard, 2, 3
-        drawer.drawState(state)
+        boardDrawer = new Drawer 1, stageBoard, 2, 3
+        boardDrawer.drawState(state)
+    if canvasChannels?
+        stageChannels = new Stage canvasChannels
+        channelDrawer = new Drawer 2, stageChannels, 2, 3
+    
+    if canvasSignals?
+        stageSignals = new Stage canvasSignals
+        signalsDrawer = new Drawer 3, stageSignals, 2, 3
+        signalsDrawer.createSignal 1, 1, 0
+        signalsDrawer.createSignal 1, 1, 1
+        signalsDrawer.createSignal 1, 1, 2
+        signalsDrawer.createSignal 1, 1, 3
+        signalsDrawer.createSignal 1, 1, 4
+        signalsDrawer.createSignal 1, 1, 5
+        console.log "Aaa"
 
+
+###
+Plan for today
+    - signal animation on separate canvas
+    - rasterize as much as possible
+    - introduce events with mouse actions
+    - further optimialisations if there is enough time
