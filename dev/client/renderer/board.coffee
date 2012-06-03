@@ -504,9 +504,11 @@ $ ->
     canvasBackground = document.getElementById "background"
     canvasSignals = document.getElementById "signals"
     canvasChannels = document.getElementById "channels"
+    ###
     if canvasBackground?
         stageBackground = new Stage canvasBackground
         bgDrawer = new BackgroundDrawer stageBackground
+    ###
     if canvasBoard?
         stageBoard = new Stage canvasBoard
         drawer = new BoardDrawer 1, stageBoard, 2, 3
