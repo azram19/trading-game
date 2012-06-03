@@ -492,12 +492,12 @@ class BackgroundDrawer
     constructor: (@stage) ->
         img = new Image
         img.src = "http://www.celebritywallpaperbase.com/wp-content/uploads/2011/01/Emilie-De-Ravin-Wallpaper-4.jpg"
-        img.onload = setBg
+        img.onload = @setBg
 
-    setBg = (event) ->
+    setBg: (event) =>
         bg = new Bitmap event.target
-        stage.addChild bg
-        stage.update()
+        @stage.addChild bg
+        @stage.update()
 
 $ ->
     canvasBoard = document.getElementById "board"
@@ -506,6 +506,7 @@ $ ->
     canvasChannels = document.getElementById "channels"
     if canvasBackground?
         stageBackground = new Stage canvasBackground
+        bgDrawer = new BackgroundDrawer stageBackground
     if canvasBoard?
         stageBoard = new Stage canvasBoard
         drawer = new BoardDrawer 1, stageBoard, 2, 3
