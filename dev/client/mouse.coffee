@@ -1,50 +1,64 @@
 class Mouse
-  constructor: ( @canvas ) ->
+  constructor: ( @canvas, @width, @height ) ->
     self = @
 
-    @mousedown = []
-    @mouseup = []
-    @mousemove = []
-    @click = []
+    #all items in the tree
+    @items = []
 
-    ev_handler_click = ( e ) ->
-      [x,y] = self.getXY e
+    #quad tree of the items
+    @tree = new QuadTree
+      {
+        x:0
+        y:0
+        width: @width
+        height:@height
+      },
+      false,
+      4,
+      8
+
+    #returns canvas absolute coordinates
+    getXY = ( ev ) =>
+      totalOffsetX = 0
+      totalOffsetY = 0
+      canvasX = 0
+      canvasY = 0
+      currentElement = @canvas
+
+      totalOffsetX += currentElement.offsetLeft
+      totalOffsetY += currentElement.offsetTop
 
       (
-        if o.in x, y
-          o?.click e, x, y
-      ) for o in self.click
+          totalOffsetX += currentElement.offsetLeft
+          totalOffsetY += currentElement.offsetTop
+      ) while currentElement = currentElement.offsetParent
 
-      null
+      canvasX = ev.pageX - totalOffsetX;
+      canvasY = ev.pageY - totalOffsetY;
 
-    ev_handler_mouseup = ( e ) ->
+      [canvasX, canvasY]
+
+    #event handler
+    ev_handler = ( e ) ->
+      #retrieves real coordinates of an event
       e ?= arguments[0]
       [x,y] = self.getXY e
+
+      #retrieves objects in the area of an event
+      handlersObjs = @tree.retrieve
+        x: x
+        y: y
+        width: 2
+        height: 2
+
+      #sorts elements by priority and then selects those with the highest priority
+      handlersObjs = _.chain( handlersObjs ).sortBy( ( o ) -> -o.p ).filter( (o, i, l) -> o.p == _.first l ).value()
+
+      #executes a callback
       (
-        if o.in x, y
-          o?.mouseup e, x, y
-      ) for o in self.mouseup
-
-      null
-
-    ev_handler_mousedown = ( e ) ->
-      e ?= arguments[0]
-      [x,y] = self.getXY e
-      (
-        if o.in x, y
-          o?.mousedown e, x, y
-      ) for o in self.mousedown
-
-      null
-
-    ev_handler_move = ( e ) ->
-      e ?= arguments[0]
-      [x,y] = self.getXY e
-
-      (
-        if o.in x, y
-          o?.mousemove e, x, y
-      ) for o in self.mousemove
+        if e.type in o.es
+          o.f e, x, y
+      ) for o in handlersObjs
 
       null
 
@@ -55,30 +69,41 @@ class Mouse
     $canvas.on 'mousemove', ev_handler_move
     $canvas.on 'click', ev_handler_click
 
+    Ticker.addListener @, true
 
+  ###
+  registers a callback for when the event happened within the boundaries
 
+  arguments:
+  b - {x,y,width,height - reference!!!! to an object
+  f - ( e, x, y ) ->
+  es - [events]
+  p - priority
 
-  register: ( o, e ) ->
-    @[e].push o
+  return:
+  unique id for the element, neede to deregister an object
+  ###
+  register: ( b, f, es, p) ->
+    id = _.uniqueId 'object_'
 
-  getXY: ( ev ) =>
-    totalOffsetX = 0
-    totalOffsetY = 0
-    canvasX = 0
-    canvasY = 0
-    currentElement = @canvas
+    p ?= 0
 
-    totalOffsetX += currentElement.offsetLeft
-    totalOffsetY += currentElement.offsetTop
+    b.f = f
+    b.es = es
+    b.p = p
+    b.id = id
 
-    (
-        totalOffsetX += currentElement.offsetLeft
-        totalOffsetY += currentElement.offsetTop
-    ) while currentElement = currentElement.offsetParent
+    @tree.insert b
+    @items.push b
 
-    canvasX = ev.pageX - totalOffsetX;
-    canvasY = ev.pageY - totalOffsetY;
+    id
 
-    [canvasX, canvasY]
+  deregister: ( id ) ->
+    @items = _.reject @items, ( o ) -> o.id == id
+
+  #updates the quad tree in case coordinates, boundaries or elements changed
+  tick: =>
+    @tree.clear()
+    @tree.insert @items
 
 window.MouseClass = Mouse

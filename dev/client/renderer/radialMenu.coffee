@@ -47,7 +47,14 @@ class radialMenu
 
     @children = []
 
-    Mouse.register @, 'click'
+
+    @boundaries =
+      x:
+      y:
+      width:
+      height:
+
+    @mId = Mouse.register @boundaries, @click, ['click']
 
   addChild: ( menu ) ->
     menu.setXO @x
