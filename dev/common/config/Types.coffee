@@ -22,4 +22,4 @@ Types =
 if module? and module.exports
   exports = module.exports = Types
 else
-  root['Types'] = Types
+  window['Types'] = Types

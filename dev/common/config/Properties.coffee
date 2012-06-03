@@ -1,6 +1,9 @@
 if require?
     Types = require './Types'
     _ = require('underscore')._
+else
+    Types = window.Types
+    _ = window._
 
 Properties =
     platform:
@@ -75,4 +78,4 @@ defaultRoute =
 if module? and module.exports
   exports = module.exports = Properties
 else
-  root['Properties'] = Properties
+  window['Properties'] = Properties

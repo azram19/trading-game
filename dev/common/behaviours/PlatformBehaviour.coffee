@@ -42,4 +42,4 @@ class PlatformBehaviour
 if module? and module.exports
   exports = module.exports = PlatformBehaviour
 else
-  root['PlatformBehaviour'] = PlatformBehaviour
+  window['PlatformBehaviour'] = PlatformBehaviour

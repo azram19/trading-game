@@ -45,4 +45,4 @@ class ResourceBehaviour
 if module? and module.exports
   exports = module.exports = ResourceBehaviour
 else
-  root['ResourceBehaviour'] = ResourceBehaviour
+  window['ResourceBehaviour'] = ResourceBehaviour

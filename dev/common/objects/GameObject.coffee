@@ -27,4 +27,4 @@ class GameObject
 if module? and module.exports
     exports = module.exports = GameObject
 else
-    root['GameObject'] = GameObject
+    window['GameObject'] = GameObject

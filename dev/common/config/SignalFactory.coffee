@@ -2,7 +2,11 @@ if require?
     _ = require('underscore')._
     Types = require './Types'
     Uid = require './Uid'
-    Signal = require '../objects/signal'
+    Signal = require '../objects/Signal'
+else
+    Signals = window.Signals
+    Uid = window.Uid
+    Types = window.Types
 
 class SignalFactory
 
@@ -26,4 +30,4 @@ class SignalFactory
 if module? and module.exports
   exports = module.exports = new SignalFactory()
 else
-  root['SignalFactory'] = new SignalFactory()
+  window['SignalFactory'] = new SignalFactory()

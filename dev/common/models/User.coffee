@@ -43,4 +43,4 @@ class User extends Backbone.Model
 if module? and module.exports
   exports = module.exports = User
 else
-  root['User'] = User
+  window['User'] = User

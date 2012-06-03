@@ -2,15 +2,28 @@ if require?
     _ = require('underscore')._
     Properties = require './Properties'
     Types = require './Types'
-    User = require '../models/user'
+    User = require '../models/User'
     Uid = require './Uid'
-    GameObject = require '../objects/object'
+    GameObject = require '../objects/GameObject'
     SignalFactory = require './SignalFactory'
-    ObjectState = require '../objects/state'
+    ObjectState = require '../objects/ObjectState'
     HQBehaviour = require '../behaviours/HQBehaviour'
     ChannelBehaviour = require '../behaviours/ChannelBehaviour'
     PlatformBehaviour = require '../behaviours/PlatformBehaviour'
     ResourceBehaviour = require '../behaviours/ResourceBehaviour'
+else
+    _ = window._
+    Properties = window.Properties
+    Types = window.Types
+    User = window.User
+    Uid = window.Uid
+    GameObject = window.GameObject
+    SignalFactory = window.SignalFactory
+    ObjectState = window.ObjectState
+    HQBehaviour = window.HQBehaviour
+    ChannelBehaviour = window.ChannelBehaviour
+    PlatformBehaviour = window.PlatformBehaviour
+    ResourceBehaviour = window.ResourceBehaviour
 
 class ObjectFactory
 
@@ -63,6 +76,9 @@ class ObjectFactory
             state = _.extend new ObjectState(), _.clone(Properties.resource)
             state = _.extend state, {'name': name, 'id': id, 'owner': owner}
             object = new GameObject new ResourceBehaviour(Types.Resources.Names[1]), state
+
+        console.log "SF"
+        console.debug SignalFactory
         _.extend @builders, SignalFactory.builders
 
     build: ( kind, args... ) ->
@@ -77,4 +93,4 @@ class ObjectFactory
 if module? and module.exports
   exports = module.exports = new ObjectFactory()
 else
-  root['ObjectFactory'] = new ObjectFactory()
+  window['ObjectFactory'] = new ObjectFactory()
