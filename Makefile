@@ -1,5 +1,5 @@
 # Order is EXTREMELY important here
-ENGINE = GameObject.js ObjectState.js Field.js Signal.js Types.js Properties.js Uid.js SignalFactory.js HQBehaviour.js ChannelBehaviour.js PlatformBehaviour.js ResourceBehaviour.js ObjectFactory.js Map.js GameManager.js 
+ENGINE = config/Types.coffee objects/GameObject.coffee objects/ObjectState.coffee objects/Field.coffee objects/Signal.coffee config/Properties.coffee config/Uid.coffee config/SignalFactory.coffee behaviours/HQBehaviour.coffee behaviours/ChannelBehaviour.coffee behaviours/PlatformBehaviour.coffee behaviours/ResourceBehaviour.coffee config/ObjectFactory.coffee engine/Map.coffee engine/GameManager.coffee 
 
 all: dir | js css
 	cp dev/build/*.js dev/webroot/js
@@ -32,9 +32,8 @@ js: js-templates js-views js-models js-collections js-renderer js-engine
 	find dev/client -maxdepth 1 -name *.coffee -exec node_modules/.bin/coffee -cj dev/build/signals.js {} +
 
 js-engine:
-	find dev/common -name *.coffee -exec node_modules/.bin/coffee -co dev/build/engine {} +
-	cd dev/build/engine; \
-	cat $(ENGINE) > ../../webroot/js/engine.js
+	cd dev/common; \
+	../../node_modules/.bin/coffee -cbj ../build/engine.js $(ENGINE)
 
 css:
 	node_modules/.bin/lessc -x dev/webroot/css/style.less > dev/webroot/css/style.css
