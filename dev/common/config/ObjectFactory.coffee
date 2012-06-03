@@ -81,8 +81,6 @@ class ObjectFactory
             state = _.extend state, {'name': name, 'id': id, 'owner': owner}
             object = new GameObject new ResourceBehaviour(Types.Resources.Names[1]), state
 
-        console.log "SF"
-        console.debug SignalFactory
         _.extend @builders, SignalFactory.builders
 
     build: ( kind, args... ) ->
