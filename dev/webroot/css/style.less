@@ -102,7 +102,15 @@ p {
 
 }
 
-.canvasWrapper {
+#canvasWrapper {
+  position:relative;
+
+  & > canvas{
+    position:absolute;
+    top:0;
+    left:0;
+  }
+
   #background {
     z-index: 10;
     background: transparent;
