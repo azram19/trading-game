@@ -7,7 +7,6 @@ if require? #server
     Properties = require './Properties'
     Types = require './Types'
     User = require '../models/User'
-    Uid = require './Uid'
     GameObject = require '../objects/GameObject'
     SignalFactory = require './SignalFactory'
     ObjectState = require '../objects/ObjectState'
@@ -20,7 +19,6 @@ else #client
     Properties = window.Properties
     Types = window.Types
     User = window.User
-    Uid = window.Uid
     GameObject = window.GameObject
     SignalFactory = window.SignalFactory
     ObjectState = window.ObjectState
@@ -89,7 +87,8 @@ class ObjectFactory
         if not _.isFunction @builders[kind]
             throw Error kind + " is not a valid Entity type"
 
-        @builders[kind](Uid.get(), args)
+        uid = _.uniqueId()
+        @builders[kind](uid, args)
 
 
 if module? and module.exports

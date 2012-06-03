@@ -1,11 +1,9 @@
 if require?
     _ = require('underscore')._
     Types = require './Types'
-    Uid = require './Uid'
     Signal = require '../objects/Signal'
 else
     Signals = window.Signals
-    Uid = window.Uid
     Types = window.Types
 
 class SignalFactory
@@ -25,7 +23,8 @@ class SignalFactory
         if not _.isFunction @builders[kind]
             throw Error kind + " is not a valid Entity type"
 
-        @builders[kind](Uid.get(), args)
+        uid = _.uniqueId()
+        @builders[kind](uid, args)
 
 if module? and module.exports
   exports = module.exports = new SignalFactory()
