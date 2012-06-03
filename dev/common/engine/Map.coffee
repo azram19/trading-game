@@ -1,7 +1,7 @@
 #node.js requirements
 if require?
   _ = require 'underscore'
-  Field = require '../objects/field'
+  Field = require '../objects/Field'
   ObjectFactory = require '../config/ObjectFactory'
   Types = require '../config/Types'
 

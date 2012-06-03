@@ -2,7 +2,7 @@ if require?
     _ = require('underscore')._
     Types = require './Types'
     Uid = require './Uid'
-    Signal = require '../objects/signal'
+    Signal = require '../objects/Signal'
 
 class SignalFactory
 

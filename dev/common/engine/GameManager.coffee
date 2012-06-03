@@ -1,12 +1,12 @@
 #node.js requirements
 if require?
   _ = require 'underscore'
-  Field = require '../objects/field'
+  Field = require '../objects/Field'
   ObjectFactory = require '../config/ObjectFactory'
   Types = require '../config/Types'
-  Map = require './map'
+  Map = require './Map'
 
-class gameManager
+class GameManager
   #number of players
   #game state - map
   #user objects
@@ -35,12 +35,12 @@ class gameManager
     ) for i in [0...HQs.length]
 
 if module? and module.exports
-  exports = module.exports = gameManager
+  exports = module.exports = GameManager
 else
-  window['gameManager'] = gameManager
+  window['GameManager'] = GameManager
 
 #util = require 'util'
 
 #user1 = ObjectFactory.build Types.Entities.User
-#manager = new gameManager [user1], [[2,2]], 4, 6
-#console.log (util.inspect maconfignager.map, false, 50)
+#manager = new GameManager [user1], [[2,2]], 4, 6
+#console.log (util.inspect manager.map, false, 50)
