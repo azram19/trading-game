@@ -1,6 +1,9 @@
 if require?
     Types = require './Types'
     _ = require('underscore')._
+else
+    Types = window.Types
+    _ = window._
 
 Properties =
     platform:

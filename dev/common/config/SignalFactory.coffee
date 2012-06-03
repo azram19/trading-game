@@ -3,6 +3,10 @@ if require?
     Types = require './Types'
     Uid = require './Uid'
     Signal = require '../objects/Signal'
+else
+    Signals = window.Signals
+    Uid = window.Uid
+    Types = window.Types
 
 class SignalFactory
 
