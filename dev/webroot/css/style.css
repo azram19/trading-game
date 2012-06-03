@@ -7,7 +7,7 @@ p{font-family:'Open Sans',sans-serif;}
 #main .users{width:190px;float:left;}
 #main .chat{width:310px;float:left;height:100%;position:relative;}#main .chat .viewport{height:400px;overflow:hidden;padding:20px 0;}
 #main .chat textarea{position:absolute;bottom:0;}
-.canvasWrapper #board1{z-index:0;}
-.canvasWrapper #board2{z-index:2;}
-.canvasWrapper #board3{z-index:4;}
-.canvasWrapper #board4{z-index:6;}
+.canvasWrapper #background{z-index:10;background:transparent;}
+.canvasWrapper #board{z-index:8;background:transparent;}
+.canvasWrapper #signals{z-index:4;background:transparent;}
+.canvasWrapper #channels{z-index:6;background:transparent;}
