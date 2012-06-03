@@ -2,6 +2,9 @@
 if require?
   _ = require 'underscore'
   Backbone = require 'backbone'
+else
+  _ = window._
+  Backbone = window.Backbone
 
 class GameObject
     behaviour: {}

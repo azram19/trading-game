@@ -4,6 +4,11 @@ if require?
   Field = require '../objects/Field'
   ObjectFactory = require '../config/ObjectFactory'
   Types = require '../config/Types'
+else
+  _ = window._
+  Field = window.Field
+  ObjectFactory = window.ObjectFactory
+  Types = window.Types
 
 class Map
   #fields: {} #level 0 on the map, resources and shit
