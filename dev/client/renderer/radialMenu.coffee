@@ -54,7 +54,7 @@ class radialMenu
       width: @radius * 2
       height: @radius * 2
 
-    @mId = Mouse.register @boundaries, @click, ['click']
+    @mId = Mouse.register @, @click, ['click']
 
   addChild: ( menu ) ->
     menu.setXO @x
@@ -147,6 +147,16 @@ class radialMenu
 
     if @line?
       @line.visible = true
+
+    #update boundaries
+    @boundaries =
+      x: @x - @radius
+      y: @y - @radius
+      width: @radius * 2
+      height: @radius * 2
+
+    #force tree update
+    Mouse.stick()
 
     @stage.update()
 

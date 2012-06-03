@@ -13,7 +13,7 @@ class Mouse
       height:@height,
       false,
       4,
-      8
+      4
 
     #returns canvas absolute coordinates
     getXY = ( ev ) =>
@@ -49,8 +49,12 @@ class Mouse
         width: 2
         height: 2
 
+      inBoundaries = ( o ) ->
+        bs = o.b.boundaries
+        bs.x < x and bs.y < y and bs.x + bs.width > x and bs.y + bs.height > y
+
       #sorts elements by priority and then selects those with the highest priority
-      handlersObjs = _.chain( handlersObjs ).sortBy( ( o ) -> -o.p ).filter( (o, i, l) -> o.p == (_.first l).p ).value()
+      handlersObjs = _.chain( handlersObjs ).sortBy( ( o ) -> -o.p ).filter( (o, i, l) -> o.p == (_.first l).p ).filter( inBoundaries ).value()
 
       console.debug [x,y]
       console.debug handlersObjs
@@ -76,7 +80,7 @@ class Mouse
   registers a callback for when the event happened within the boundaries
 
   arguments:
-  b - {x,y,width,height - reference!!!! to an object
+  b - reference to an object with boundaries object {x,y,width,height}
   f - ( e, x, y ) ->
   es - [events]
   p - priority
@@ -98,7 +102,7 @@ class Mouse
     o.p = p
     o.id = id
 
-    _.extend o, b #values
+    _.extend o, b.boundaries #values
 
     @tree.insert o
     @items.push o
@@ -111,8 +115,9 @@ class Mouse
   #updates the quad tree in case coordinates, boundaries or elements changed
   tick: =>
     @tree.clear()
+
     items = _.map @items, ( i ) ->
-      _.extend i, i.b
+      _.extend i, i.b.boundaries
 
     @tree.insert items
 
