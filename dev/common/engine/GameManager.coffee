@@ -37,10 +37,10 @@ class gameManager
 if module? and module.exports
   exports = module.exports = gameManager
 else
-  root['gameManager'] = gameManager
+  window['gameManager'] = gameManager
 
-util = require 'util'
+#util = require 'util'
 
-user1 = ObjectFactory.build Types.Entities.User
-manager = new gameManager [user1], [[2,2]], 4, 6
+#user1 = ObjectFactory.build Types.Entities.User
+#manager = new gameManager [user1], [[2,2]], 4, 6
 #console.log (util.inspect maconfignager.map, false, 50)

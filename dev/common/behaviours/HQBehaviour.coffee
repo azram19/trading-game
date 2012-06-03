@@ -40,4 +40,4 @@ class HQBehaviour
 if module? and module.exports
   exports = module.exports = HQBehaviour
 else
-  root['HQBehaviour'] = HQBehaviour
+  window['HQBehaviour'] = HQBehaviour

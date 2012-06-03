@@ -30,4 +30,4 @@ class ObjectState
 if module? and module.exports
   exports = module.exports = ObjectState
 else
-  root['ObjectState'] = ObjectState
+  window['ObjectState'] = ObjectState

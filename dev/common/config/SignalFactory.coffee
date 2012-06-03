@@ -26,4 +26,4 @@ class SignalFactory
 if module? and module.exports
   exports = module.exports = new SignalFactory()
 else
-  root['SignalFactory'] = new SignalFactory()
+  window['SignalFactory'] = new SignalFactory()

@@ -77,4 +77,4 @@ class ObjectFactory
 if module? and module.exports
   exports = module.exports = new ObjectFactory()
 else
-  root['ObjectFactory'] = new ObjectFactory()
+  window['ObjectFactory'] = new ObjectFactory()

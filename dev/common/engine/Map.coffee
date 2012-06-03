@@ -85,4 +85,4 @@ class Map
 if module? and module.exports
   exports = module.exports = Map
 else
-  root['Map'] = Map
+  window['Map'] = Map

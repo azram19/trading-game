@@ -37,4 +37,4 @@ class ChannelBehaviour
 if module? and module.exports
   exports = module.exports = ChannelBehaviour
 else
-  root['ChannelBehaviour'] = ChannelBehaviour
+  window['ChannelBehaviour'] = ChannelBehaviour

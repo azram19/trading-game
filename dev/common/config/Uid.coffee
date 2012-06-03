@@ -10,4 +10,4 @@ class Uid
 if module? and module.exports
   exports = module.exports = new Uid()
 else
-  root['Uid'] = new Uid()
+  window['Uid'] = new Uid()
