@@ -10,13 +10,13 @@ class GSignal
 
     setTickSizeX: (t) ->
         @tickSizeX = t
-    
+
     getTickSizeX: () ->
         @tickSizeX
-    
+
     setTickSizeY: (t) ->
         @tickSizeY = t
-    
+
     getTickSizeY: () ->
         @tickSizeY
 
@@ -59,7 +59,7 @@ class Drawer
 
     setSize: (size) ->
         @size = size
-    
+
     setMargin: (margin) ->
         @margin = margin
 
@@ -118,7 +118,7 @@ class Drawer
             else
         g.drawPolyStar(point.x, point.y, @size, 6, 0, 90)
         @stage.addChild new Shape g
-    
+
     drawResource: (point, resource) ->
         g = new Graphics()
         switch resource
@@ -174,7 +174,7 @@ class Drawer
 
     tick: () ->
         for signal in @signals.children
-            if (Math.abs(signal.shape.x) >= Math.abs(signal.closestDest.x) and 
+            if (Math.abs(signal.shape.x) >= Math.abs(signal.closestDest.x) and
             Math.abs(signal.shape.y) >= Math.abs(signal.closestDest.y))
                 signal.shape.visible = false
             else
@@ -190,7 +190,7 @@ class Drawer
         @drawPlatform(point, fieldState.platform.behaviour.platformType)
         @stage.update()
 
-    createChannel: (y, x, direction) -> 
+    createChannel: (y, x, direction) ->
         point = @getPoint(x, y)
         @drawOwnership(point, channelState.platform.state.owner)
         @drawChannel(point, direction)
@@ -395,14 +395,14 @@ state = {
   fields: [
     [
       {
-      platform: 
+      platform:
           {
             behaviour:
               platformType: {}
             state:
               owner: 1
           }
-      resource: 
+      resource:
           {
             behaviour:
               resourceType: 1
@@ -410,14 +410,14 @@ state = {
           }
       },
       {
-      platform: 
+      platform:
           {
             behaviour:
               platformType: {}
             state:
               owner: 2
           }
-      resource: 
+      resource:
           {
             behaviour:
               resourceType: 2
@@ -427,14 +427,14 @@ state = {
     ]
     [
      {
-      platform: 
+      platform:
           {
             behaviour:
               platformType: 1
             state:
               owner: 1
           }
-      resource: 
+      resource:
           {
             behaviour:
               resourceType: {}
@@ -442,14 +442,14 @@ state = {
           }
       },
       {
-      platform: 
+      platform:
           {
             behaviour:
               platformType: 1
             state:
               owner: 1
           }
-      resource: 
+      resource:
           {
             behaviour:
               resourceType: {}
@@ -457,14 +457,14 @@ state = {
           }
       },
       {
-      platform: 
+      platform:
           {
             behaviour:
               platformType: {}
             state:
               owner: 1
           }
-      resource: 
+      resource:
           {
             behaviour:
               resourceType: {}
@@ -474,14 +474,14 @@ state = {
     ],
     [
       {
-      platform: 
+      platform:
           {
             behaviour:
               platformType: {}
             state:
               owner: 2
           }
-      resource: 
+      resource:
           {
             behaviour:
               resourceType: 2
@@ -489,14 +489,14 @@ state = {
           }
       },
       {
-      platform: 
+      platform:
           {
             behaviour:
               platformType: 1
             state:
               owner: 2
           }
-      resource: 
+      resource:
           {
             behaviour:
               resourceType: 2
@@ -527,7 +527,7 @@ $ ->
         boardDrawer.drawState(state)
     if canvasChannels?
         stageChannels = new Stage canvasChannels
-        channelDrawer = new Drawer 2, stageChannels, 2, 3   
+        channelDrawer = new Drawer 2, stageChannels, 2, 3
     if canvasSignals?
         stageSignals = new Stage canvasSignals
         signalsDrawer = new Drawer 3, stageSignals, 2, 3
@@ -541,3 +541,4 @@ Plan for today
     - rasterize as much as possible
     - introduce events with mouse actions
     - further optimialisations if there is enough time
+###
