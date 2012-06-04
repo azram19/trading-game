@@ -22,7 +22,11 @@ class radialMenu
     @$title = $ "<div/>"
     @$title.text @text
     @$title.appendTo 'body'
-    @$title.css 'display', 'none'
+    @$title.css
+      display: 'none'
+      position: 'absolute'
+      cursor : 'pointer'
+
     @$title.click =>
       @click()
 
@@ -149,11 +153,10 @@ class radialMenu
     P = @button.localToGlobal @x, @y
 
     @$title.css
-      'position': 'absolute'
       'left': P.x
       'top': P.y
       'opacity' : 1
-      'cursor' : 'pointer'
+
 
     if not @parent?
       @stage.addChild @button
@@ -173,7 +176,7 @@ class radialMenu
 
     c.draw() for c in @children
 
-    @button.cache @x-@radius, @x-@radius, @radius * 2, @radius * 2
+    @button.cache @x-@radius, @y-@radius, @radius * 2, @radius * 2
 
     ###
     Register us as a listener for the Mouse and the Ticker
@@ -359,15 +362,12 @@ class radialMenu
     if not child.descDisplayed
       return
 
-    console.log 'undisplay'
-
     angle = (-(Math.PI*7/6) - (child.childIndex) * @alpha)
 
     child.beta = angle
     child.hideText()
 
   showText: () =>
-    console.log "show"
     global = @parent.container.localToGlobal @x, @y
 
     @$desc.css
@@ -378,8 +378,6 @@ class radialMenu
     @descDisplayed = true
 
   hideText: () =>
-    console.log "hide"
-    console.debug @$desc
     @$desc.hide()
     @descDisplayed = false
 
