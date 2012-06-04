@@ -1,11 +1,12 @@
 # Order is EXTREMELY important here
-ENGINE = GameObject.js ObjectState.js Field.js Signal.js Types.js Properties.js Uid.js SignalFactory.js HQBehaviour.js ChannelBehaviour.js PlatformBehaviour.js ResourceBehaviour.js ObjectFactory.js Map.js GameManager.js
+ENGINE = GameObject.js ObjectState.js Field.js Signal.js Types.js Properties.js SignalFactory.js HQBehaviour.js ChannelBehaviour.js PlatformBehaviour.js ResourceBehaviour.js ObjectFactory.js Map.js GameManager.js
 
 all: dir | js css
 	cp dev/build/*.js dev/webroot/js
 
 clean:
 	rm -rf dev/build
+	rm -f dev/webroot/js/*.js
 
 dir:
 	mkdir -p dev/build/templates

@@ -3,11 +3,10 @@ class GSignal
     tickSizeY: 0
     div: 48
     closestDest: {}
-
+    index: 0
 
     constructor: (@shape, source, dest) ->
-        @closestDest = new Point(dest.x - source.x, dest.y - source.y)
-        @setRouting()
+        @setNextTarget(source, dest)
 
     setTickSizeX: (t) ->
         @tickSizeX = t
@@ -21,11 +20,22 @@ class GSignal
     getTickSizeY: () ->
         @tickSizeY
 
+    hasNext: () ->
+        @index < @directions.length
+
+    getNext: () ->
+        @index++
+        @directions[@index]
+
+    setNextTarget: (source, dest) ->
+        @closestDest = new Point(dest.x - source.x, dest.y - source.y)
+        @setRouting()
+
     setRouting: () ->
         @setTickSizeX(@closestDest.x/@div)
         @setTickSizeY(@closestDest.y/@div)
 
-class BoardDrawer
+class Drawer
     margin: 100
     size: 40
     horIncrement: 0
@@ -41,12 +51,11 @@ class BoardDrawer
         @diffRows = @maxRow - @minRow
 
         @stage.enableMouseOver()
-
         @signals = new Container
-        @stage.addChild(@signals)
 
-        Ticker.setFPS 50
         Ticker.addListener this
+        Ticker.useRAF = true
+        Ticker.setFPS 60
 
     setSize: (size) ->
         @size = size
@@ -119,7 +128,6 @@ class BoardDrawer
         g.drawCircle(point.x, point.y, 6)
         @stage.addChild new Shape g
 
-
     drawChannel: (point, direction) ->
         g = new Graphics()
         point2 = @getDestination(point, direction)
@@ -152,7 +160,6 @@ class BoardDrawer
         overlay.onMouseOut = @mouseOutField
         @stage.addChild overlay
 
-
 #----------------Events-----------------#
 
     mouseOverField: (event) ->
@@ -163,28 +170,17 @@ class BoardDrawer
 
     mouseOnClickRadial: (event) ->
 
-
 #---------------Animation---------------#
-
-    moveSignal: (i, j, channelState) ->
-        start = @getPoint(i, j)
-        dest = @getDestination(start, channelState.routing)
-        @drawSignal(point)
-
 
     tick: () ->
         for signal in @signals.children
             if (Math.abs(signal.shape.x) >= Math.abs(signal.closestDest.x) and 
             Math.abs(signal.shape.y) >= Math.abs(signal.closestDest.y))
                 signal.shape.visible = false
-                # dest = getDestination(new Point(signal.x, signal.y), channelState.routing)
-                # signal.setRouting(dest)
             else
                 signal.shape.x += signal.tickSizeX
                 signal.shape.y += signal.tickSizeY
             @stage.update()
-
-
 
 #---------------Interface---------------#
 
@@ -221,6 +217,29 @@ class BoardDrawer
                         @drawChannel(point, k)
         @stage.update()
 
+class ChannelDrawer
+    constructor: (@id, @stage, @minRow, @maxRow) ->
+        super @id, @stage, @minRow, @maxRow
+
+class SignalsDrawer
+    constructor: (@id, @stage, @minRow, @maxRow) ->
+        super @id, @stage, @minRow, @maxRow
+
+class BoardDrawer
+    constructor: (@id, @stage, @minRow, @maxRow) ->
+        super @id, @stage, @minRow, @maxRow
+
+class BackgroundDrawer
+    constructor: (@stage) ->
+        img = new Image
+        img.src = "address"
+        img.onload = @setBg
+
+    setBg: (event) =>
+        bg = new Bitmap event.target
+        @stage.addChild bg
+        @stage.update()
+
 #----------------------------------------#
 
 state = {
@@ -231,22 +250,8 @@ state = {
                 state: null
             },
             {
-                state: {}
+                state: null
             },
-            {
-                state: {}
-            },
-            {
-                state: {}
-            },
-            {
-                state: {}
-            },
-            {
-                state: {}
-            }
-        ]
-        [
             {
                 state: {}
             },
@@ -257,10 +262,24 @@ state = {
                 state: {}
             },
             {
-                state: {}
+                state: null
+            }
+        ]
+        [
+            {
+                state: null
+            },
+            {
+                state: null
+            },
+            {
+                state: null
             },
             {
                 state: {}
+            },
+            {
+                state: null
             },
             {
                 state: {}
@@ -270,47 +289,7 @@ state = {
     [
         [
             {
-                state: {}
-            },
-            {
-                state: {}
-            },
-            {
-                state: {}
-            },
-            {
-                state: {}
-            },
-            {
-                state: {}
-            },
-            {
                 state: null
-            }
-        ]
-        [
-            {
-                state: {}
-            },
-            {
-                state: {}
-            },
-            {
-                state: {}
-            },
-            {
-                state: {}
-            },
-            {
-                state: {}
-            },
-            {
-                state: {}
-            }
-        ]
-        [
-            {
-                state: {}
             },
             {
                 state: {}
@@ -322,10 +301,50 @@ state = {
                 state: {}
             },
             {
+                state: null
+            },
+            {
+                state: null
+            }
+        ]
+        [
+            {
+                state: null
+            },
+            {
+                state: null
+            },
+            {
+                state: null
+            },
+            {
+                state: null
+            },
+            {
+                state: null
+            },
+            {
+                state: null
+            }
+        ]
+        [
+            {
                 state: {}
             },
             {
+                state: null
+            },
+            {
+                state: null
+            },
+            {
+                state: null
+            },
+            {
                 state: {}
+            },
+            {
+                state: null
             }
         ]
     ]
@@ -335,10 +354,7 @@ state = {
                 state: {}
             },
             {
-                state: {}
-            },
-            {
-                state: {}
+                state: null
             },
             {
                 state: {}
@@ -347,15 +363,15 @@ state = {
                 state: null
             },
             {
-                state: {}
+                state: null
+            },
+            {
+                state: null
             }
         ]
         [
             {
-                state: {}
-            },
-            {
-                state: {}
+                state: null
             },
             {
                 state: {}
@@ -364,7 +380,10 @@ state = {
                 state: null
             },
             {
-                state: {}
+                state: null
+            },
+            {
+                state: null
             },
             {
                 state: {}
@@ -426,7 +445,7 @@ state = {
       platform: 
           {
             behaviour:
-              platformType: {}
+              platformType: 1
             state:
               owner: 1
           }
@@ -488,22 +507,15 @@ state = {
    ]
   }
 
-class BackgroundDrawer
-    constructor: (@stage) ->
-        img = new Image
-        img.src = "http://www.celebritywallpaperbase.com/wp-content/uploads/2011/01/Emilie-De-Ravin-Wallpaper-4.jpg"
-        img.onload = @setBg
-
-    setBg: (event) =>
-        bg = new Bitmap event.target
-        @stage.addChild bg
-        @stage.update()
-
 $ ->
     canvasBoard = document.getElementById "board"
     canvasBackground = document.getElementById "background"
     canvasSignals = document.getElementById "signals"
     canvasChannels = document.getElementById "channels"
+    prerendered = document.getElementById "prerendered"
+    if prerendered?
+        context = new Stage prerendered
+        dr = new Drawer 0, context, 2, 3
     ###
     if canvasBackground?
         stageBackground = new Stage canvasBackground
@@ -511,6 +523,21 @@ $ ->
     ###
     if canvasBoard?
         stageBoard = new Stage canvasBoard
-        drawer = new BoardDrawer 1, stageBoard, 2, 3
-        drawer.drawState(state)
+        boardDrawer = new Drawer 1, stageBoard, 2, 3
+        boardDrawer.drawState(state)
+    if canvasChannels?
+        stageChannels = new Stage canvasChannels
+        channelDrawer = new Drawer 2, stageChannels, 2, 3   
+    if canvasSignals?
+        stageSignals = new Stage canvasSignals
+        signalsDrawer = new Drawer 3, stageSignals, 2, 3
+        signalsDrawer.createSignal 0, 0, 2
 
+
+
+###
+Plan for today
+    - signal animation on separate canvas
+    - rasterize as much as possible
+    - introduce events with mouse actions
+    - further optimialisations if there is enough time
