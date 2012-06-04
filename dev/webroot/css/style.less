@@ -93,61 +93,19 @@ p {
       bottom:0;
     }
 
-    #chatScroll {
-      width: 310px;
-      clear: both;
-      margin: 20px 0 10px;
+	#chatScroll {
+		width: 100%;
+		margin: 20px 0px 10px;
 
-    .viewport {
-      width: 280px;
-      height: 400px;
-      overflow: hidden;
-      position: relative;
-    }
+		.viewport {
+			width: 290px;
+			height: 400px;
+		}
 
-    .overview {
-      list-style: none;
-      position: absolute;
-      left: 0;
-      top: 0;
-    }
-
-    .thumb {
-      background-color: #003d5d;
-      height: 20px;
-      width: 13px;
-      cursor: pointer;
-      overflow: hidden;
-      position: absolute;
-      top: 0;
-
-        .end {
-          background-color: #003d5d;
-          overflow: hidden;
-          height: 5px;
-          width: 13px;
-        }
-    }
-
-    .scrollbar {
-      position: relative;
-      float: right;
-      width: 15px;
-    }
-
-    .track {
-      background-color: #d8eefd;
-      height: 100%;
-      width: 13px;
-      position: relative;
-      padding: 0 1px;
-    }
-
-    .disable {
-      display: none;
-    }
-
-    }
+		.overview {
+			position: absolute;
+		}
+	}
 
   }
 
@@ -179,3 +137,12 @@ p {
     background: transparent;
   }
 }
+
+.fsScrollbar { overflow:hidden; clear: both; }
+	.fsScrollbar .viewport { position: relative; }
+	.fsScrollbar .overview { list-style: none; left: 0; top: 0;	}
+	.fsScrollbar .scrollbar { position: relative; float: right; width: 7px; padding-bottom: 2px; z-index: 9995; }
+		.fsScrollbar .scrollbar .track { background-color: #333; height: 100%; width:7px; position: relative;  -moz-border-radius: 5px; border-radius: 5px; z-index: 9996; cursor: pointer; }
+		.fsScrollbar .scrollbar .thumb { height: 20px; width: 7px; cursor: pointer; overflow: hidden; position: absolute; top: 0; left:0px; background-color:#737373;  -moz-border-radius: 7px; border-radius: 7px; z-index: 9997; }
+		.fsScrollbar .scrollbar .thumb .end { overflow: hidden; height: 5px; width: 5px; z-index: 9998; }
+		.fsScrollbar .scrollbar.disable { display: none; }

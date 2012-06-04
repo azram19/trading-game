@@ -9,7 +9,7 @@ $ ->
 
   lobby.render()
 
-  $('#chatScroll').tinyscrollbar()
+  $('#chatScroll').tinyscrollbar {autohide: true}
 
   w.newMessage = new Message
     author: 'kot'
