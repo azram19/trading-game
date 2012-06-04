@@ -82,22 +82,28 @@ p {
     float: left;
   }
 
-  .chat{
+  .chat {
     width: 310px;
     float: left;
     height: 100%;
     position: relative;
 
-    .viewport{
-      height: 400px;
-      overflow: hidden;
-      padding: 20px 0;
-    }
-
-    textarea{
+    textarea {
       position:absolute;
       bottom:0;
     }
+    
+    #chatScroll { width: 300px; clear: both; margin: 20px 10px 10px 0px; 
+    }
+#chatScroll .viewport { width: 280px; height: 400px; overflow: hidden; position: relative; }
+#chatScroll .overview { list-style: none; position: absolute; left: 0; top: 0; }
+#chatScroll .thumb .end,
+#chatScroll .thumb { background-color: #003d5d; }
+#chatScroll .scrollbar { position: relative; float: right; width: 15px; }
+#chatScroll .track { background-color: #d8eefd; height: 100%; width:13px; position: relative; padding: 0 1px; }
+#chatScroll .thumb { height: 20px; width: 13px; cursor: pointer; overflow: hidden; position: absolute; top: 0; }
+#chatScroll .thumb .end { overflow: hidden; height: 5px; width: 13px; }
+#chatScroll .disable{ display: none; }
   }
 
 }
