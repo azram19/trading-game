@@ -6,7 +6,7 @@ if require? #server
     _ = require('underscore')._
     Properties = require './Properties'
     Types = require './Types'
-    User = require '../models/User'
+    Player = require '../models/Player'
     GameObject = require '../objects/GameObject'
     SignalFactory = require './SignalFactory'
     ObjectState = require '../objects/ObjectState'
@@ -18,7 +18,7 @@ else #client
     _ = window._
     Properties = window.Properties
     Types = window.Types
-    User = window.User
+    Player = window.Player
     GameObject = window.GameObject
     SignalFactory = window.SignalFactory
     ObjectState = window.ObjectState
@@ -53,10 +53,10 @@ class ObjectFactory
             state = _.extend state, {'name': name, 'id': id, 'owner': owner}
             object = new GameObject new ChannelBehaviour(), state
 
-        @builders[Types.Entities.User] = (id, args) =>
-            user = _.extend new User(), _.clone( Properties.user )
-            name = 'User' + id
-            _.extend user, {'name': name, 'id': id}
+        @builders[Types.Entities.Player] = (id, args) =>
+            player = _.extend new Player(), _.clone( Properties.player )
+            name = 'Player_' + id
+            _.extend player, {'name': name, 'id': id}
 
         #@builders[Types.Entities.Signal] = (id, args) =>
             #strength = args[0]

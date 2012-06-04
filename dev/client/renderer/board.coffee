@@ -5,18 +5,18 @@ class GSignal
     closestDest: {}
     index: 0
 
-    constructor: (@shape, source, dest) ->
+    constructor: (@shape, @source, dest) ->
         @setNextTarget(source, dest)
 
     setTickSizeX: (t) ->
         @tickSizeX = t
-
+    
     getTickSizeX: () ->
         @tickSizeX
-
+    
     setTickSizeY: (t) ->
         @tickSizeY = t
-
+    
     getTickSizeY: () ->
         @tickSizeY
 
@@ -38,12 +38,14 @@ class GSignal
 class Drawer
     margin: 100
     size: 40
+    circleRadius: 8
     horIncrement: 0
     verIncrement: 0
     diffRows: 0
     signals: {}
     basePoint1: {}
     basePoint2: {}
+    fpsLabel: {}
 
     constructor: (@id, @stage, @minRow, @maxRow) ->
         @horIncrement = Math.ceil Math.sqrt(3)*@size/2
@@ -53,13 +55,14 @@ class Drawer
         @stage.enableMouseOver()
         @signals = new Container
 
-        Ticker.addListener this
-        Ticker.useRAF = true
-        Ticker.setFPS 60
+        @fpsLabel = new Text("-- fps","bold 18px Arial","#FFF");
+        @stage.addChild(@fpsLabel);
+        @fpsLabel.x = 10;
+        @fpsLabel.y = 20;
 
     setSize: (size) ->
         @size = size
-
+    
     setMargin: (margin) ->
         @margin = margin
 
@@ -118,7 +121,7 @@ class Drawer
             else
         g.drawPolyStar(point.x, point.y, @size, 6, 0, 90)
         @stage.addChild new Shape g
-
+    
     drawResource: (point, resource) ->
         g = new Graphics()
         switch resource
@@ -142,12 +145,18 @@ class Drawer
         g = new Graphics()
         g.setStrokeStyle(1)
             .beginStroke("#FFFF00")
-            .drawCircle(point.x, point.y, 8)
+            .drawCircle(0, 0, @circleRadius)
         dest = @getDestination(point, direction)
         shape = new Shape g
+        shape.x = point.x
+        shape.y = point.y
         signal = new GSignal(shape, point, dest)
         @signals.addChild signal
         @stage.addChild signal.shape
+        @stage.update()
+        shape.cache(-@circleRadius-1, -@circleRadius-1, (@circleRadius+1)*2, (@circleRadius+1)*2)
+        #@toogleCache(true)
+
 
     setBacklight: (point) ->
         g = new Graphics()
@@ -172,15 +181,28 @@ class Drawer
 
 #---------------Animation---------------#
 
+    getDistance: (x, y) ->
+        Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2))
+
+    toogleCache: (status) ->
+        l = @stage.getNumChildren() - 1
+        for i in [0..l]
+            shape = @stage.getChildAt i
+            if status
+                shape.cache(-@circleRadius, -@circleRadius, @circleRadius*2, @circleRadius*2)
+            else
+                shape.uncache()
+
     tick: () ->
         for signal in @signals.children
-            if (Math.abs(signal.shape.x) >= Math.abs(signal.closestDest.x) and
-            Math.abs(signal.shape.y) >= Math.abs(signal.closestDest.y))
-                signal.shape.visible = false
-            else
+            if signal.shape.isVisible()
+                if @getDistance(signal.shape.x - signal.source.x, signal.shape.y - signal.source.y) >= 2*@horIncrement
+                    signal.tickSizeX = -signal.tickSizeX
+                    signal.tickSizeY = -signal.tickSizeY
                 signal.shape.x += signal.tickSizeX
                 signal.shape.y += signal.tickSizeY
-            @stage.update()
+        @fpsLabel.text = Math.round(Ticker.getMeasuredFPS())+" fps";
+        @stage.update()
 
 #---------------Interface---------------#
 
@@ -190,7 +212,7 @@ class Drawer
         @drawPlatform(point, fieldState.platform.behaviour.platformType)
         @stage.update()
 
-    createChannel: (y, x, direction) ->
+    createChannel: (y, x, direction) -> 
         point = @getPoint(x, y)
         @drawOwnership(point, channelState.platform.state.owner)
         @drawChannel(point, direction)
@@ -242,7 +264,11 @@ class BackgroundDrawer
 
 #----------------------------------------#
 
-state = {
+player = ObjectFactory.build Types.Entities.Player
+manager = new GameManager [player], [[2,2]], 8, 15
+state = manager.map
+
+###state = {
   channels: [
     [
         [
@@ -395,14 +421,14 @@ state = {
   fields: [
     [
       {
-      platform:
+      platform: 
           {
             behaviour:
               platformType: {}
             state:
               owner: 1
           }
-      resource:
+      resource: 
           {
             behaviour:
               resourceType: 1
@@ -410,14 +436,14 @@ state = {
           }
       },
       {
-      platform:
+      platform: 
           {
             behaviour:
               platformType: {}
             state:
               owner: 2
           }
-      resource:
+      resource: 
           {
             behaviour:
               resourceType: 2
@@ -427,14 +453,14 @@ state = {
     ]
     [
      {
-      platform:
+      platform: 
           {
             behaviour:
               platformType: 1
             state:
               owner: 1
           }
-      resource:
+      resource: 
           {
             behaviour:
               resourceType: {}
@@ -442,14 +468,14 @@ state = {
           }
       },
       {
-      platform:
+      platform: 
           {
             behaviour:
               platformType: 1
             state:
               owner: 1
           }
-      resource:
+      resource: 
           {
             behaviour:
               resourceType: {}
@@ -457,14 +483,14 @@ state = {
           }
       },
       {
-      platform:
+      platform: 
           {
             behaviour:
               platformType: {}
             state:
               owner: 1
           }
-      resource:
+      resource: 
           {
             behaviour:
               resourceType: {}
@@ -474,14 +500,14 @@ state = {
     ],
     [
       {
-      platform:
+      platform: 
           {
             behaviour:
               platformType: {}
             state:
               owner: 2
           }
-      resource:
+      resource: 
           {
             behaviour:
               resourceType: 2
@@ -489,14 +515,14 @@ state = {
           }
       },
       {
-      platform:
+      platform: 
           {
             behaviour:
               platformType: 1
             state:
               owner: 2
           }
-      resource:
+      resource: 
           {
             behaviour:
               resourceType: 2
@@ -506,16 +532,12 @@ state = {
     ]
    ]
   }
-
+###
 $ ->
     canvasBoard = document.getElementById "board"
     canvasBackground = document.getElementById "background"
     canvasSignals = document.getElementById "signals"
     canvasChannels = document.getElementById "channels"
-    prerendered = document.getElementById "prerendered"
-    if prerendered?
-        context = new Stage prerendered
-        dr = new Drawer 0, context, 2, 3
     ###
     if canvasBackground?
         stageBackground = new Stage canvasBackground
@@ -525,20 +547,27 @@ $ ->
         stageBoard = new Stage canvasBoard
         boardDrawer = new Drawer 1, stageBoard, 2, 3
         boardDrawer.drawState(state)
+    ###
     if canvasChannels?
         stageChannels = new Stage canvasChannels
-        channelDrawer = new Drawer 2, stageChannels, 2, 3
+        channelDrawer = new Drawer 2, stageChannels, 2, 3   
+    ###
     if canvasSignals?
         stageSignals = new Stage canvasSignals
-        signalsDrawer = new Drawer 3, stageSignals, 2, 3
-        signalsDrawer.createSignal 0, 0, 2
+        signalsDrawer = new Drawer 3, stageSignals, 8, 15
+        Ticker.addListener signalsDrawer
+        Ticker.useRAF = true
+        Ticker.setFPS 60
+        for y in [0..15]
+            for x in [0..8]
+                signalsDrawer.createSignal y, x, 0
+                signalsDrawer.createSignal y, x, 1
+                signalsDrawer.createSignal y, x, 2
+
+
+        
+        
 
 
 
-###
-Plan for today
-    - signal animation on separate canvas
-    - rasterize as much as possible
-    - introduce events with mouse actions
-    - further optimialisations if there is enough time
-###
+
