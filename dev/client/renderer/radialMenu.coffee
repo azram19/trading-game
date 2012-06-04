@@ -8,130 +8,126 @@ class radialMenu
   expandedChildren: false
   visible: false
 
-  expandTime: 500
-  compactTime: 500
-  hideTime: 200
-  showTime: 200
-
-
   constructor: ( @engine, @canvas, @x, @y, @text, @desc ) ->
     if not @mousedownLister
       @canvas.addEventListener this
       @mousedownListener = true
 
+    ###
+    This is a title displayed next to the menu item. It is hidden by
+    default and shown only when menu item is in visibile state
+    ###
     @$title = $ "<div/>"
     @$title.text @text
     @$title.appendTo 'body'
+    @$title.css 'display', 'none'
     @$title.click =>
       @click()
 
+    ###
+    Get the context and stage we will be drawing to. Only for the root it will be the actuall context, for every other element it will get
+    overwritten by root's context and stage.
+    ###
     @context2d = @canvas.getContext '2d'
     @stage = new Stage @canvas
+
+    #Container where we store all our children
+    @container = new Container()
+
+    #My parent
     @parent = null
 
+    #Current coordinates
     @x ?= 0
     @y ?= 0
 
-    @x_origin = @x
-    @y_origin = @y
+    ###
+    Distances from the origin in different states.
+    ###
+    @length = 0
 
-    @length = 60
-    @length_base = 60
-    @expand_length = @length_base * 1
+    @length_base = 100
+    @expand_length = @length_base
     @compact_length = @length_base * 0.5
 
+    #Constants
+    @expandTime = 500
+    @compactTime = 500
+    @hideTime = 200
+    @showTime = 200
+
+    @priority = 100
+
+    #Alphas
+    @fadedInOpacity = 1
+    @fadedOutOpacity = 0.2
+    @opacity = 1
+
+    #Flags
+    @visible = false
+    @expanded = false
+    @expanding = false #visible -> expanded
+    @collapsing = false #expanded -> collapsed
+    @showing = false #hidden -> visible
+    @hiding = false #visible -> hidden
+    @drawn = false
+
+    #Radius of the button
     @radius = 10
-    @radius_base = 10
-    @expand_radius = @radius_base * 0.8
-    @compact_radius = @radius_base * 0.5
 
-    @alpha = Math.PI / 3
-    @beta = Math.PI * 2/2
+    #Angles
+    @alpha = Math.PI / 6
+    @beta = -Math.PI
 
+    #Children elements - class radialMenu
     @children = []
 
-
+    #Boundaries of the object, used for hit detection
     @boundaries =
       x: @x - @radius
       y: @y - @radius
       width: @radius * 2
       height: @radius * 2
 
-    @mId = Mouse.register @, @click, ['click']
-
-    Ticker.addListener @, false
-
   addChild: ( menu ) ->
-    menu.setXO @x
-    menu.setYO @y
+    menu.priority = @priority - 1
     menu.stage = @stage
     menu.parent = @
-    menu.setAngle( menu.getAngle() - @children.length * @alpha )
-    menu.computeP()
+    menu.beta = menu.beta - @children.length * @alpha
+    [x,y] = menu.computeP()
+    menu.x = x
+    menu.y = y
 
     @children.push menu
 
-  getX: () ->
-    @x
-  getY: () ->
-    @y
-
-  getXO: () ->
-    @x_origin
-  getYO: () ->
-    @y_origin
-  getAngle: () =>
-    @beta
-
-
-  setX: ( x ) ->
-    @x = x
-  setY: ( y ) ->
-    @y = y
-  setXO: ( x ) ->
-    @x_origin = x
-  setYO: ( y ) ->
-    @y_origin = y
-  setAngle: ( beta ) ->
-    @beta = beta
 
   computeP: ( length ) ->
     if not length?
       length = @length
 
-    @x = @x_origin + length * Math.sin( @beta )
-    @y = @y_origin + length * Math.cos( @beta )
+    x = length * Math.sin( @beta )
+    y = length * Math.cos( @beta )
+
+    [x,y]
+
+  drawIt: () =>
+    @draw()
+
+    c.drawIt() for c in @children
 
   draw: () =>
-    redraw = @line?
+    if @drawn
+      return false
 
-    if not redraw
-      @line = new Shape()
-
-    @line.graphics
-      .setStrokeStyle( 2 )
-      .beginStroke( "white" )
-      .moveTo( @x_origin, @y_origin )
-      .lineTo( @x, @y )
-
-    if not redraw
-      @stage.addChild @line
-
-    @drawAsRoot()
-
-  drawAsRoot: () =>
-    redraw = @button?
-
-    if not redraw
-      @button = new Shape()
+    @drawn = true
+    @button = new Shape()
 
     @button.graphics
       .beginStroke( "red" )
       .beginFill( "red" )
       .drawCircle( @x, @y, @radius )
 
-
-    P = @button.localToGlobal @x + 2 * @radius, @y - 10
+    P = @button.localToGlobal @x, @y
 
     @$title.css
       'position': 'absolute'
@@ -140,189 +136,269 @@ class radialMenu
       'opacity' : 1
       'cursor' : 'pointer'
 
-    @$title.show()
-
-
-    if not redraw
+    if not @parent?
       @stage.addChild @button
+      @stage.addChild @container
+    else
+      @parent.container.addChild @button
+      @parent.container.addChild @container
 
-    @button.visible = true
-
-    if @line?
-      @line.visible = true
+    @button.visible = false
 
     #update boundaries
     @boundaries =
-      x: @x - @radius
-      y: @y - @radius
+      x: P.x - @radius
+      y: P.y - @radius
       width: @radius * 2
       height: @radius * 2
 
-    @stage.update()
+    c.draw() for c in @children
+
+    @button.cache @x-@radius, @x-@radius, @radius * 2, @radius * 2
+
+    ###
+    Register us as a listener for the Mouse and the Ticker
+    ###
+    @mId = Mouse.register @, @click, ['click'], @priority
+    Ticker.addListener @, false
 
   restoreFlags: () =>
     @expanded = false
     @expandedChildren = false
     @visible = false
 
-  drawChildren: () =>
-    c.draw() for c in @children
-
-    null
-
-  expand: () ->
-    if (@expandSteps > 0 and @expandAnimate) or not @expanded
-      if not @expanded
-        @expanded = true
-        @expandSteps = @expandTime / Ticker.getInterval()
-        @expandLengthStep = (@expand_length - @length) / @expandSteps
-        @expandRadiusStep = (@expand_radius - @radius) / @expandSteps
-        @expandStepCounter = 1
-        @expandAnimate = true
-
-      #save original radius of the circle, to restore it later
-      radius = @radius
-
-      #compute new coordinates
-      @computeP @length + @expandLengthStep * @expandStepCounter
-
-      @button.graphics.clear()
-      @line.graphics.clear()
-
-      #compute new radius
-      @radius = @radius + @expandRadiusStep * @expandStepCounter
-
+  show: () =>
+    if not @drawn
       @draw()
 
-      #restore original radius of the item
-      @radius = radius
+    @showing = true
+    @hiding = false
 
-      @computeP()
+    [x,y] = @computeP @length_base
 
-      @expandSteps--
-      @expandStepCounter++
+    if @parent? and @x != x and @y != y
+      @steps = @showTime/Ticker.getInterval()
+      @stepX = (x-@x)/@steps
+      @stepY = (y-@y)/@steps
+      @stepOpacity = (1-@opacity)/@steps
     else
-      @expandAnimate = false
-      @length = @expand_length
-      @radius = @expand_radius
+      @steps = 0
+      @stepX = 0
+      @stepY = 0
+      @stepOpacity = 0
 
-  expandChild: ( child ) ->
-    (
-      if c != child
-        c.compact()
-    ) for c in @children
+    @$title.show()
+    @button.visible = true
 
-    child.expand()
+  hide: () =>
+    @showing = false
+    @hiding = true
 
-    @expandedChildren = true
+    x = 0
+    y = 0
 
-  compact: () =>
-    if (@expandSteps > 0 and @compactAnimate) or @expanded
-      #section executed only once at the beginning of an animation
-      if @expanded
-        #hide my children
-        @hideChildren()
-
-        #menu item is in compacted state
-        @expanded = false
-
-        #number of steps in which the menu should compact
-        @expandSteps = @compactTime / Ticker.getInterval()
-
-        #length and radius step change
-        @expandLengthStep = (@length - @compact_length) / @expandSteps
-        @expandRadiusStep = (@radius - @compact_radius) / @expandSteps
-
-        #number of steps executed so far + 1
-        @expandStepCounter = 1
-
-        #execture compact animation
-        @compactAnimate = true
-
-      console.log "Compact tick: " + @expandStepCounter
-
-      #save original radius of the circle, to restore it later
-      radius = @radius
-
-      #compute new coordinates
-      @computeP @length - @expandLengthStep * @expandStepCounter
-
-      #reset graphics of both elements
-      @button.graphics.clear()
-      @line.graphics.clear()
-
-      #compute new radius
-      @radius = @radius - @expandRadiusStep * @expandStepCounter
-
-      #draw the elements
-      @draw()
-
-      #change opacity of the title
-      @$title.css
-        'opacity' : 0.5
-
-      #restore original radius of the item
-      @radius = radius
-
-      #restore original coordinates of the element
-      @computeP()
-
-      #change counters
-      @expandSteps--
-      @expandStepCounter++
-
+    if @parent?  and @x != x and @y != y
+      @steps = @showTime/Ticker.getInterval()
+      @stepX = @x/@steps
+      @stepY = @y/@steps
+      @stepOpacity = (-@opacity)/@steps
     else
-      #end the animation
-      @compactAnimate = false
-      @length = @compact_length
-      @radius = @compact_radius
+      @steps = 0
+      @stepX = 0
+      @stepY = 0
+      @stepOpacity = 0
 
-  compactChildren: () ->
-    c.compact() for c in @children
-    @expandedChildren = false
-
-  hide: () ->
     @hideChildren()
 
-    @button.visible = false
-    @$title.hide()
+  expand: ( expandChildren ) =>
+    console.log "expand"
 
-    if @line?
-      @line.visible = false
-    #TODO
+    if not @visible
+      @show()
 
-  hideChildren: () ->
+    @expanding = true
+    @collapsing = false
+
+    [x,y] = @computeP @expand_length
+
+    if @parent?  and @x != x and @y != y
+      @steps = @showTime/Ticker.getInterval()
+      @stepX = (x-@x)/@steps
+      @stepY = (y-@y)/@steps
+      @stepOpacity = (@fadedInOpacity-@opacity)/@steps
+    else
+      @steps = 0
+      @stepX = 0
+      @stepY = 0
+      @stepOpacity = 0
+
+    if expandChildren
+      c.show() for c in @children
+      @expanded = true
+
+  collapseChildren: ( child ) =>
+    (
+      if c != child
+        c.collapse()
+    ) for c in @children
+
+  hideChildren: () =>
+    @expanded = false
     c.hide() for c in @children
-    null
+
+  collapse: () =>
+    @collapsing = true
+    @expanding = false
+
+    [x,y] = @computeP @compact_length
+
+    if @parent?  and @x != x and @y != y
+      @steps = @showTime/Ticker.getInterval()
+      @stepX = (@x-x)/@steps
+      @stepY = (@y-y)/@steps
+      @stepOpacity = (@fadedOutOpacity-@opacity)/@steps
+    else
+      @steps = 0
+      @stepX = 0
+      @stepY = 0
+      @stepOpacity = 0
+
+    @hideChildren()
+
+  showAnimate: () =>
+    if @steps <= 0
+      @showing = false
+      @visible = true
+      @$title.show()
+    else
+      @steps--
+      @x += @stepX
+      @y += @stepY
+      @opacity += @stepOpacity
+
+  hideAnimate: () =>
+    if @steps <= 0
+      @hiding = false
+      @visible = false
+      @$title.hide()
+    else
+      @steps--
+      @x -= @stepX
+      @y -= @stepY
+      @opacity += @stepOpacity
+
+
+  collapseAnimate: () =>
+    if @steps <= 0
+      @collapsing = false
+      @expanded = false
+    else
+      @x -= @stepX
+      @y -= @stepY
+      @opacity += @stepOpacity
+      @steps--
+
+  expandAnimate: () =>
+    if @steps <= 0
+      @expanding = false
+    else
+      @x += @stepX
+      @y += @stepY
+      @opacity += @stepOpacity
+      @steps--
 
   click: () =>
+    if not @expanded
+      @expand true #show my children
 
-    if @parent?
-      @parent.expandChild( @ ) #expand me and collapse my siblings
-
-    @drawChildren() #draw my children
-    @drawAsRoot() #draw me
+      if @parent?
+        @parent.collapseChildren @
+    else
+      @hideChildren()
 
   in: ( x, y ) =>
     @button.hitTest x, y
 
   tick: ( time ) =>
-    if @expandAnimate
-      @expand()
+    if not @drawn
+      return false
 
-    if @compactAnimate
-      @compact()
+    #perform animations
+    if @showing
+      @showAnimate()
+
+    if @hiding
+      @hideAnimate()
+
+    if @expanding
+      @expandAnimate()
+
+    if @collapsing
+      @collapseAnimate()
+
+    ###
+    Apply new coordinates computated by animating functions
+    ###
+    @button.x = @x
+    @button.y = @y
+
+    @button.alpha = @opacity
+    @$title.css 'opacity', @opacity
+
+    if @parent?
+      @container.x = @x
+      @container.y = @y
+    else
+      @container.x = 2*@x
+      @container.y = 2*@y
+
+    if not @parent
+      global = @button.localToGlobal @button.x, @button.y
+    else
+      global = @parent.container.localToGlobal @button.x, @button.y
+
+    rotation = - (@beta) * 180/Math.PI + 90
+
+    if @parent?
+      xTrans = 15 * Math.sin @beta
+      yTrans = -10 + 15 *Math.cos @beta
+
+      @$title.css
+        top: global.y + yTrans
+        left: global.x + xTrans
+        '-webkit-transform-origin': 'left center'
+        '-webkit-transform': 'rotate('+ (rotation) + 'deg)'
+    else
+      @$title.css
+        top: global.y - 10
+        left: global.x + 15
+
+    #update boundaries
+    @boundaries =
+      x: global.x - @radius
+      y: global.y - @radius
+      width: @radius * 2
+      height: @radius * 2
+
+    ###
+    We do not want to update the stage too many times so we call this
+    only from the root element of the menu
+    ###
+    if not @parent?
+      @stage.update()
 
 $ ->
   canvas = document.getElementById "radial"
   if canvas?
     window.Mouse = new MouseClass canvas
 
-    window.r = r = new radialMenu null, canvas, 100, 100, "piesek"
+    window.r = r = new radialMenu null, canvas, 150, 150, "piesek"
 
     r2 = new radialMenu null, canvas, 0, 0, "kotek"
     r3 = new radialMenu null, canvas, 0, 0, "malpka"
     r4 = new radialMenu null, canvas, 0, 0, "ptaszek"
+    r0 = new radialMenu null, canvas, 0, 0, "dziubek"
+
     r5 = new radialMenu null, canvas, 0, 0, "gawron"
     r6 = new radialMenu null, canvas, 0, 0, "slon"
     r7 = new radialMenu null, canvas, 0, 0, "dzwon"
@@ -332,12 +408,14 @@ $ ->
     r.addChild r2
     r.addChild r3
     r.addChild r4
+    r.addChild r0
+
     r4.addChild r5
     r4.addChild r6
     r4.addChild r7
     r4.addChild r8
     r4.addChild r9
 
-
-    r.drawAsRoot()
+    r.drawIt()
+    r.show()
 

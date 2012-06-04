@@ -1,7 +1,7 @@
 class GSignal
     tickSizeX: 0
     tickSizeY: 0
-    div: 24
+    div: 48
     closestDest: {}
     index: 0
 
@@ -576,4 +576,3 @@ $ ->
             for x in [0..4]
                 signalsDrawer.createSignal y, x, 0
                 signalsDrawer.createSignal y, x, 1
-                signalsDrawer.createSignal y, x, 2

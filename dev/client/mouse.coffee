@@ -54,7 +54,7 @@ class Mouse
         bs.x < x and bs.y < y and bs.x + bs.width > x and bs.y + bs.height > y
 
       #sorts elements by priority and then selects those with the highest priority
-      handlersObjs = _.chain( handlersObjs ).sortBy( ( o ) -> -o.p ).filter( (o, i, l) -> o.p == (_.first l).p ).filter( inBoundaries ).value()
+      handlersObjs = _.chain( handlersObjs ).filter( inBoundaries ).sortBy( ( o ) -> -o.p ).filter( (o, i, l) -> o.p == (_.first l).p ).value()
 
       #executes a callback
       (

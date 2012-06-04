@@ -17,7 +17,8 @@ Types =
             100
         ]
     Platforms:
-        Normal: 0
+        Normal: 8
+        HQ: 9
 
 
 if module? and module.exports
