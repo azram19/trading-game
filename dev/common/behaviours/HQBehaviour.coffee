@@ -8,7 +8,7 @@ else
 class HQBehaviour
 
     getType: ->
-        "hq"
+        Types.Platforms.HQ
 
     requestAccept: ( signal, state ) ->
         if signal.owner is state.owner

@@ -11,7 +11,7 @@ guard 'process', :name => 'signal renderer watcher', :command => 'make js-render
 end
 
 guard 'process', :name => 'signal templates watcher', :command => 'make js-templates', :stop_signal => "KILL"  do
-  watch(%r{dev/client/templates/.+\.coffee})
+  watch(%r{dev/client/templates/.+\.handlebars})
 end
 
 guard 'process', :name => 'signal views watcher', :command => 'make js-views', :stop_signal => "KILL"  do

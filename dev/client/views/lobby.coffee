@@ -43,12 +43,12 @@ class LobbyView extends Backbone.View
 
       #clean textarea value
       textarea.val ''
-      
+
       #create the message
       msg = new Message
         author: author
         message: message
-  
+
       #add message to the collection
       @collection.add msg
 
@@ -57,7 +57,7 @@ class LobbyView extends Backbone.View
 
   render: =>
     msgs =  @messagesTemplate messages: @collection.toJSON()
-    
+
     @$el.find( '.chat ul' ).html msgs
 
 window['LobbyView'] = LobbyView
