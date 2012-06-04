@@ -14,6 +14,7 @@ dir:
 
 js-renderer:
 	find dev/client/renderer -name *.coffee -exec node_modules/.bin/coffee -cj dev/build/renderer.js {} +
+	cp dev/build/renderer.js dev/webroot/js
 
 js-templates:
 	find dev/client/templates -name *.handlebars -print0 | xargs -I {} -0 sh -c 'f=`basename {}`; node_modules/.bin/handlebars {} -f dev/build/templates/`basename {}`.js'
@@ -22,20 +23,26 @@ js-templates:
 
 js-views:
 	find dev/client/views -name *.coffee -exec node_modules/.bin/coffee -cj dev/build/views.js {} +
+	cp dev/build/views.js dev/webroot/js
 
 js-models:
 	find dev/client/models -name *.coffee -exec node_modules/.bin/coffee -cj dev/build/models.js {} +
+	cp dev/build/models.js dev/webroot/js
 
 js-collections:
 	find dev/client/collections -name *.coffee -exec node_modules/.bin/coffee -cj dev/build/collections.js {} +
+	cp dev/build/collections.js dev/webroot/js
 
-js: js-templates js-views js-models js-collections js-renderer js-engine
+js-general:
 	find dev/client -maxdepth 1 -name *.coffee -exec node_modules/.bin/coffee -cj dev/build/signals.js {} +
+	cp dev/build/signals.js dev/webroot/js
 
 js-engine:
 	find dev/common -name *.coffee -exec node_modules/.bin/coffee -co dev/build/engine {} +
 	cd dev/build/engine; \
 	cat $(ENGINE) > ../../webroot/js/engine.js
+
+js: js-templates js-views js-models js-collections js-renderer js-engine js-general
 
 css:
 	node_modules/.bin/lessc -x dev/webroot/css/style.less > dev/webroot/css/style.css
