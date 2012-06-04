@@ -54,21 +54,25 @@ class Mouse
         bs.x < x and bs.y < y and bs.x + bs.width > x and bs.y + bs.height > y
 
       #sorts elements by priority and then selects those with the highest priority
-      handlersObjs = _.chain( handlersObjs ).filter( inBoundaries ).sortBy( ( o ) -> -o.p ).filter( (o, i, l) -> o.p == (_.first l).p ).value()
+      handlersObjs = _.chain( handlersObjs )
+        .filter( inBoundaries )
+        .filter( ( o ) -> e.type in o.es )
+        .sortBy( ( o ) -> -o.p )
+        .filter( (o, i, l) -> o.p == (_.first l).p )
+        .value()
 
       #executes a callback
       (
-        if e.type in o.es
-          o.f e, x, y
+        o.f e, x, y
       ) for o in handlersObjs
 
       null
 
     $canvas = $ @canvas
 
-    #$canvas.on 'mousedown', ev_handler
-    #$canvas.on 'mouseup', ev_handler
-    #$canvas.on 'mousemove', ev_handler
+    $canvas.on 'mousedown', ev_handler
+    $canvas.on 'mouseup', ev_handler
+    $canvas.on 'mousemove', ev_handler
     $canvas.on 'click', ev_handler
 
     Ticker.addListener @, true
