@@ -1,7 +1,7 @@
 class GSignal
     tickSizeX: 0
     tickSizeY: 0
-    div: 24
+    div: 48
     closestDest: {}
     index: 0
 
@@ -570,10 +570,4 @@ $ ->
 
 
 
-###
-Plan for today
-    - signal animation on separate canvas
-    - rasterize as much as possible
-    - introduce events with mouse actions
-    - further optimialisations if there is enough time
-###
+
