@@ -31,5 +31,5 @@ guard 'process', :name => 'signal general js watcher', :command => 'make js-gene
 end
 
 guard 'less', :all_on_start => true, :all_after_change => true do
-  watch(%r{^.+\.less$})
+  watch(%r{dev/webroot/css/.+\.less$})
 end

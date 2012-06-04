@@ -43,16 +43,15 @@ class Drawer
     verIncrement: 0
     diffRows: 0
     signals: {}
-    basePoint1: {}
-    basePoint2: {}
     fpsLabel: {}
+    players: []
 
     constructor: (@id, @stage, @minRow, @maxRow) ->
         @horIncrement = Math.ceil Math.sqrt(3)*@size/2
         @verIncrement = Math.ceil 3*@size/2
         @diffRows = @maxRow - @minRow
 
-        @stage.enableMouseOver()
+        @stage.enableMouseOver(10)
         @stage.snapToPixelEnabled = true
         @signals = new Container
 
@@ -93,24 +92,19 @@ class Drawer
         p
 
     drawHex: (point, fieldState) ->
-        @drawStroke(point)
-        console.log fieldState
         if fieldState.platform.type?
-            console.log "owner"
             @drawOwnership(point, fieldState.platform.state.owner)
-        if fieldState.platform.type?
-            console.log "platform"
-            @drawPlatform(point, fieldState.platform.type())
         if fieldState.resource.behaviour?
-            console.log "resource"
             @drawResource(point, fieldState.resource.type())
+        if fieldState.platform.type?
+            @drawPlatform(point, fieldState.platform.type())
         @setBacklight(point)
+        @drawStroke(point)
 
     drawPlatform: (point, type) ->
         g = new Graphics()
-        console.log platform
-        switch Types.Platforms[type]
-            when 1 then g.beginFill("#A6B4B0")
+        switch type
+            when Types.Platforms.HQ then g.beginFill("#A6B4B0")
         g.drawPolyStar(point.x, point.y, @size/2, 6, 0, 90)
         @stage.addChild new Shape g
 
@@ -123,45 +117,41 @@ class Drawer
 
     drawOwnership: (point, owner) ->
         g = new Graphics()
-        console.log owner
-        switch owner
-            when 0 then g.beginFill("#000000")
-            when 1 then g.beginFill("#274E7D")
-            when 2 then g.beginFill("#A60C00")
-            else
+        switch owner.id
+            when 0 then g.beginFill("#274E7D")
+            when 1 then g.beginFill("#A60C00")
+            else g.beginFill("#000000")
         g.drawPolyStar(point.x, point.y, @size, 6, 0, 90)
         @stage.addChild new Shape g
+        @drawStroke point
     
     drawResource: (point, resource) ->
         g = new Graphics()
-        console.log resource
-        switch Types.Resources[resource]
+        switch resource
             when Types.Resources.Metal then g.beginFill("#FFFFFF")
             when Types.Resources.Tritium then g.beginFill("#FFFF00")
             else
         g.drawCircle(point.x, point.y, 6)
         @stage.addChild new Shape g
 
-    drawChannel: (point, direction) ->
+    drawChannel: (point, destination) ->
         g = new Graphics()
-        point2 = @getDestination(point, direction)
         g.moveTo(point.x, point.y)
             .setStrokeStyle(3)
             .beginStroke("#FFFF00")
             .beginFill("#FFFF00")
-            .lineTo(point2.x, point2.y)
+            .lineTo(destination.x, destination.y)
         @stage.addChild new Shape g
 
-    drawSignal: (point, direction) ->
+    drawSignal: (point, destination) ->
         g = new Graphics()
         g.setStrokeStyle(1)
             .beginStroke("#FFFF00")
             .drawCircle(0, 0, @circleRadius)
-        dest = @getDestination(point, direction)
         shape = new Shape g
         shape.x = point.x
         shape.y = point.y
-        signal = new GSignal(shape, point, dest)
+        signal = new GSignal(shape, point, destination)
         @signals.addChild signal
         @stage.addChild signal.shape
         @stage.update()
@@ -175,19 +165,23 @@ class Drawer
         g.beginFill("#FFFF00")
             .drawPolyStar(point.x, point.y, @size, 6, 0, 90)
         overlay = new Shape g
-        overlay.alpha = 0.5
+        overlay.alpha = 0.3
         overlay.visible = false
+        @stage.addChild overlay
         overlay.onMouseOver = @mouseOverField
         overlay.onMouseOut = @mouseOutField
-        @stage.addChild overlay
+        console.log overlay
 
 #----------------Events-----------------#
 
     mouseOverField: (event) ->
+        console.log "gey"
         event.target.visible = true
+        @stage.update
 
     mouseOutField: (event) ->
         event.target.visible = false
+        @stage.update
 
     mouseOnClickRadial: (event) ->
 
@@ -221,23 +215,25 @@ class Drawer
     createPlatfrom: (y, x, fieldState) ->
         point = @getPoint(x, y)
         @drawOwnership(point, fieldState.platform.state.owner)
-        @drawPlatform(point, fieldState.platform.behaviour.platformType)
+        @drawPlatform(point, fieldState.platform.type())
         @stage.update()
 
-    createChannel: (y, x, direction) -> 
+    createChannel: (y, x, direction, channelState) -> 
         point = @getPoint(x, y)
-        @drawOwnership(point, channelState.platform.state.owner)
-        @drawChannel(point, direction)
+        destination = @getDestination(point, direction)
+        @drawOwnership(destination, channelState.platform.state.owner)
+        @drawChannel(point, destination)
         @stage.update()
 
     createResource: (y, x, fieldState) ->
         point = @getPoint(x, y)
-        @drawResource(point, fieldState.resource.behaviuor.resourceType)
+        @drawResource(point, fieldState.resource.type())
         @stage.update()
 
     createSignal: (y, x, direction) ->
         point = @getPoint(x, y)
-        @drawSignal(point, direction)
+        destination = @getDestination(point, direction)
+        @drawSignal(point, destination)
         @stage.update()
 
     drawState: (boardState) ->
@@ -546,6 +542,21 @@ state = {
    ]
   }
 ###
+
+channelStat =
+    state: {}
+    platform: {
+        behaviour:
+            platformType: {}
+        state:
+            owner:
+                id: 0
+        }
+
+myFunction = () ->
+    console.log "a"
+
+
 $ ->
     canvasBoard = document.getElementById "board"
     canvasBackground = document.getElementById "background"
@@ -560,18 +571,28 @@ $ ->
         stageBoard = new Stage canvasBoard
         boardDrawer = new Drawer 1, stageBoard, 8, 15
         boardDrawer.drawState(state)
+        boardDrawer.createChannel 2, 2, 3, channelStat
+        boardDrawer.createChannel 3, 3, 3, channelStat
+        boardDrawer.createChannel 4, 4, 5, channelStat
+        Touch.enable stageBoard
+        stageBoard.onPress = myFunction
+        console.log myFunction
+        console.log stageBoard.onPress
+
     ###
     if canvasChannels?
         stageChannels = new Stage canvasChannels
         channelDrawer = new Drawer 2, stageChannels, 2, 3   
     ###
-    ###
+    
     if canvasSignals?
         stageSignals = new Stage canvasSignals
         signalsDrawer = new Drawer 3, stageSignals, 8, 15
         Ticker.addListener signalsDrawer
         Ticker.useRAF = true
         Ticker.setFPS 60
+        signalsDrawer.createSignal 3, 3, 3
+    ### 
         for y in [0..8]
             for x in [0..4]
                 signalsDrawer.createSignal y, x, 0
