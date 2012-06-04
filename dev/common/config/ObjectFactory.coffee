@@ -70,14 +70,14 @@ class ObjectFactory
             name = 'Metal' + id
             state = _.extend new ObjectState(), _.clone(Properties.resource)
             state = _.extend state, {'name': name, 'id': id, 'owner': owner}
-            object = new GameObject new ResourceBehaviour(Types.Resources.Names[0]), state
+            object = new GameObject new ResourceBehaviour(Types.Resources.Metal), state
 
         @builders[Types.Resources.Tritium] = (id, args) =>
             owner = args[0]
             name = 'Tritium' + id
             state = _.extend new ObjectState(), _.clone(Properties.resource)
             state = _.extend state, {'name': name, 'id': id, 'owner': owner}
-            object = new GameObject new ResourceBehaviour(Types.Resources.Names[1]), state
+            object = new GameObject new ResourceBehaviour(Types.Resources.Tritium), state
 
         _.extend @builders, SignalFactory.builders
 

@@ -30,7 +30,7 @@ class ResourceBehaviour
                     clearInterval @PID
             else
                 #we have enough resources, mining...
-                newSignal = SignalFactory.build Types.Entities.Signal, state.extraction, Types.Resources[@resourceType], state.field.platform.state.owner
+                newSignal = SignalFactory.build Types.Entities.Signal, state.extraction, @resourceType, state.field.platform.state.owner
                 newSignal.path.push state.field.resource
 
                 #can the platform accept the signal
