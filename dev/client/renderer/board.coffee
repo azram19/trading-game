@@ -242,6 +242,13 @@ class BackgroundDrawer
 
 #----------------------------------------#
 
+player = ObjectFactory.build Types.Entities.Player
+console.log player
+manager = new GameManager [player], [[2,2]], 8, 15
+state = manager.map
+console.log state
+
+###
 state = {
   channels: [
     [
@@ -506,6 +513,7 @@ state = {
     ]
    ]
   }
+###
 
 $ ->
     canvasBoard = document.getElementById "board"

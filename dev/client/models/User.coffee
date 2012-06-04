@@ -1,3 +1,4 @@
+###
 class User extends Backbone.Model
     defaults:
         highscore: 0
@@ -24,3 +25,4 @@ class User extends Backbone.Model
         db.close()
 
 @User = User
+###

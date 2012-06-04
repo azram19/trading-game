@@ -3,7 +3,8 @@ if require?
     Types = require './Types'
     Signal = require '../objects/Signal'
 else
-    Signals = window.Signals
+    _ = window._
+    Signal = window.Signal
     Types = window.Types
 
 class SignalFactory

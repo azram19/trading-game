@@ -54,9 +54,9 @@ class ObjectFactory
             object = new GameObject new ChannelBehaviour(), state
 
         @builders[Types.Entities.Player] = (id, args) =>
-            user = _.extend new Player(), _.clone( Properties.player )
-            name = 'User' + id
-            _.extend user, {'name': name, 'id': id}
+            player = _.extend new Player(), _.clone( Properties.player )
+            name = 'Player_' + id
+            _.extend player, {'name': name, 'id': id}
 
         #@builders[Types.Entities.Signal] = (id, args) =>
             #strength = args[0]
