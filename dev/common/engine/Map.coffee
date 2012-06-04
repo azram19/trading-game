@@ -36,7 +36,7 @@ class Map
 
       if res < chance
         kind = ''
-        if res > 0.5
+        if res > chance / 2
             kind = Types.Resources.Metal
         else
             kind = Types.Resources.Tritium
