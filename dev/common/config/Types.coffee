@@ -4,7 +4,7 @@ Types =
         Platform: 2
         Channel: 3
         Signal: 4
-        User: 5
+        Player: 5
     Resources:
         Metal: 6
         Tritium: 7

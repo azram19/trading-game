@@ -59,11 +59,11 @@ Properties =
         capacity: 10
         life: 100
 
-    user:
+    player:
         resources: {}
 
 (
-    Properties.user.resources[Types.Resources.Names[i]] = Types.Resources.Amounts[i]
+    Properties.player.resources[Types.Resources.Names[i]] = Types.Resources.Amounts[i]
 ) for i in [0...Types.Resources.Names.length]
 
 defaultRoute =

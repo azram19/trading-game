@@ -22,7 +22,7 @@ class GameManager
       ObjectFactory.build Types.Entities.HQ, user
 
     HQs = (createHQ user for user in @users)
-    @nonUser = ObjectFactory.build Types.Entities.User
+    @nonUser = ObjectFactory.build Types.Entities.Player
     @map = new Map minWidth, maxWidth, @nonUser
 
     @initialMapState( @map, HQs, startPoints )
