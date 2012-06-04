@@ -8,8 +8,8 @@ class radialMenu
   expandedChildren: false
   visible: false
 
-  expandTime: 200
-  collapseTime: 200
+  expandTime: 500
+  compactTime: 500
   hideTime: 200
   showTime: 200
 
@@ -36,11 +36,14 @@ class radialMenu
     @y_origin = @y
 
     @length = 60
-    @expand_length = @length * 1
-    @compact_length = @length * 0.5
+    @length_base = 60
+    @expand_length = @length_base * 1
+    @compact_length = @length_base * 0.5
 
     @radius = 10
-    @compact_radius = @radius * 0.5
+    @radius_base = 10
+    @expand_radius = @radius_base * 0.8
+    @compact_radius = @radius_base * 0.5
 
     @alpha = Math.PI / 3
     @beta = Math.PI * 2/2
@@ -55,6 +58,8 @@ class radialMenu
       height: @radius * 2
 
     @mId = Mouse.register @, @click, ['click']
+
+    Ticker.addListener @, false
 
   addChild: ( menu ) ->
     menu.setXO @x
@@ -117,8 +122,6 @@ class radialMenu
   drawAsRoot: () =>
     redraw = @button?
 
-    console.log redraw
-
     if not redraw
       @button = new Shape()
 
@@ -155,9 +158,6 @@ class radialMenu
       width: @radius * 2
       height: @radius * 2
 
-    #force tree update
-    Mouse.stick()
-
     @stage.update()
 
   restoreFlags: () =>
@@ -171,15 +171,40 @@ class radialMenu
     null
 
   expand: () ->
-    @expanded = true
+    if (@expandSteps > 0 and @expandAnimate) or not @expanded
+      if not @expanded
+        @expanded = true
+        @expandSteps = @expandTime / Ticker.getInterval()
+        @expandLengthStep = (@expand_length - @length) / @expandSteps
+        @expandRadiusStep = (@expand_radius - @radius) / @expandSteps
+        @expandStepCounter = 1
+        @expandAnimate = true
 
-    @computeP( @expand_length )
+      #save original radius of the circle, to restore it later
+      radius = @radius
 
-    @button.graphics.clear()
-    @line.graphics.clear()
-    @draw()
+      #compute new coordinates
+      @computeP @length + @expandLengthStep * @expandStepCounter
 
-    @computeP()
+      @button.graphics.clear()
+      @line.graphics.clear()
+
+      #compute new radius
+      @radius = @radius + @expandRadiusStep * @expandStepCounter
+
+      @draw()
+
+      #restore original radius of the item
+      @radius = radius
+
+      @computeP()
+
+      @expandSteps--
+      @expandStepCounter++
+    else
+      @expandAnimate = false
+      @length = @expand_length
+      @radius = @expand_radius
 
   expandChild: ( child ) ->
     (
@@ -192,26 +217,65 @@ class radialMenu
     @expandedChildren = true
 
   compact: () =>
-    @hideChildren()
-    @expanded = false
+    if (@expandSteps > 0 and @compactAnimate) or @expanded
+      #section executed only once at the beginning of an animation
+      if @expanded
+        #hide my children
+        @hideChildren()
 
-    radius = @radius
+        #menu item is in compacted state
+        @expanded = false
 
-    @computeP( @compact_length )
+        #number of steps in which the menu should compact
+        @expandSteps = @compactTime / Ticker.getInterval()
 
-    @button.graphics.clear()
-    @line.graphics.clear()
+        #length and radius step change
+        @expandLengthStep = (@length - @compact_length) / @expandSteps
+        @expandRadiusStep = (@radius - @compact_radius) / @expandSteps
 
-    @radius = @compact_radius
-    @draw()
+        #number of steps executed so far + 1
+        @expandStepCounter = 1
 
-    @$title.css
-      'opacity' : 0.5
+        #execture compact animation
+        @compactAnimate = true
 
-    @radius = radius
-    @computeP()
+      console.log "Compact tick: " + @expandStepCounter
 
-    #TODO
+      #save original radius of the circle, to restore it later
+      radius = @radius
+
+      #compute new coordinates
+      @computeP @length - @expandLengthStep * @expandStepCounter
+
+      #reset graphics of both elements
+      @button.graphics.clear()
+      @line.graphics.clear()
+
+      #compute new radius
+      @radius = @radius - @expandRadiusStep * @expandStepCounter
+
+      #draw the elements
+      @draw()
+
+      #change opacity of the title
+      @$title.css
+        'opacity' : 0.5
+
+      #restore original radius of the item
+      @radius = radius
+
+      #restore original coordinates of the element
+      @computeP()
+
+      #change counters
+      @expandSteps--
+      @expandStepCounter++
+
+    else
+      #end the animation
+      @compactAnimate = false
+      @length = @compact_length
+      @radius = @compact_radius
 
   compactChildren: () ->
     c.compact() for c in @children
@@ -243,6 +307,11 @@ class radialMenu
     @button.hitTest x, y
 
   tick: ( time ) =>
+    if @expandAnimate
+      @expand()
+
+    if @compactAnimate
+      @compact()
 
 $ ->
   canvas = document.getElementById "radial"
