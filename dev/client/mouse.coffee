@@ -56,9 +56,6 @@ class Mouse
       #sorts elements by priority and then selects those with the highest priority
       handlersObjs = _.chain( handlersObjs ).sortBy( ( o ) -> -o.p ).filter( (o, i, l) -> o.p == (_.first l).p ).filter( inBoundaries ).value()
 
-      console.debug [x,y]
-      console.debug handlersObjs
-
       #executes a callback
       (
         if e.type in o.es
@@ -92,8 +89,6 @@ class Mouse
     id = _.uniqueId 'object_'
 
     p ?= 0
-
-    console.debug b
 
     o = {}
     o.b = b #reference
