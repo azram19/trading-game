@@ -576,3 +576,4 @@ $ ->
             for x in [0..4]
                 signalsDrawer.createSignal y, x, 0
                 signalsDrawer.createSignal y, x, 1
+    ###
