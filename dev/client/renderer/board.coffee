@@ -3,10 +3,10 @@ class GSignal
     tickSizeY: 0
     div: 48
     closestDest: {}
+    index: 0
 
     constructor: (@shape, source, dest) ->
-        @closestDest = new Point(dest.x - source.x, dest.y - source.y)
-        @setRouting()
+        @setNextTarget(source, dest)
 
     setTickSizeX: (t) ->
         @tickSizeX = t
@@ -20,28 +20,20 @@ class GSignal
     getTickSizeY: () ->
         @tickSizeY
 
+    hasNext: () ->
+        @index < @directions.length
+
+    getNext: () ->
+        @index++
+        @directions[@index]
+
+    setNextTarget: (source, dest) ->
+        @closestDest = new Point(dest.x - source.x, dest.y - source.y)
+        @setRouting()
+
     setRouting: () ->
         @setTickSizeX(@closestDest.x/@div)
         @setTickSizeY(@closestDest.y/@div)
-
-###
-class ChannelDrawer extends Drawer
-class SignalsDrawer extends Drawer
-class BoardDrawer extends Drawer
-    to dicuss
-    or an array of canvas as a property
-###
-
-class BackgroundDrawer
-    constructor: (@stage) ->
-        img = new Image
-        img.src = "address"
-        img.onload = @setBg
-
-    setBg: (event) =>
-        bg = new Bitmap event.target
-        @stage.addChild bg
-        @stage.update()
 
 class Drawer
     margin: 100
@@ -59,11 +51,11 @@ class Drawer
         @diffRows = @maxRow - @minRow
 
         @stage.enableMouseOver()
-
         @signals = new Container
 
-        Ticker.setFPS 50
         Ticker.addListener this
+        Ticker.useRAF = true
+        Ticker.setFPS 60
 
     setSize: (size) ->
         @size = size
@@ -180,18 +172,11 @@ class Drawer
 
 #---------------Animation---------------#
 
-    moveSignal: (i, j, channelState) ->
-        start = @getPoint(i, j)
-        dest = @getDestination(start, channelState.routing)
-        @drawSignal(point)
-
     tick: () ->
         for signal in @signals.children
             if (Math.abs(signal.shape.x) >= Math.abs(signal.closestDest.x) and 
             Math.abs(signal.shape.y) >= Math.abs(signal.closestDest.y))
                 signal.shape.visible = false
-                # dest = getDestination(new Point(signal.x, signal.y), channelState.routing)
-                # signal.setRouting(dest)
             else
                 signal.shape.x += signal.tickSizeX
                 signal.shape.y += signal.tickSizeY
@@ -232,6 +217,29 @@ class Drawer
                         @drawChannel(point, k)
         @stage.update()
 
+class ChannelDrawer
+    constructor: (@id, @stage, @minRow, @maxRow) ->
+        super @id, @stage, @minRow, @maxRow
+
+class SignalsDrawer
+    constructor: (@id, @stage, @minRow, @maxRow) ->
+        super @id, @stage, @minRow, @maxRow
+
+class BoardDrawer
+    constructor: (@id, @stage, @minRow, @maxRow) ->
+        super @id, @stage, @minRow, @maxRow
+
+class BackgroundDrawer
+    constructor: (@stage) ->
+        img = new Image
+        img.src = "address"
+        img.onload = @setBg
+
+    setBg: (event) =>
+        bg = new Bitmap event.target
+        @stage.addChild bg
+        @stage.update()
+
 #----------------------------------------#
 
 state = {
@@ -248,7 +256,7 @@ state = {
                 state: {}
             },
             {
-                state: {}
+                state: null
             },
             {
                 state: {}
@@ -271,69 +279,7 @@ state = {
                 state: {}
             },
             {
-                state: {}
-            },
-            {
-                state: {}
-            }
-        ]
-    ]
-    [
-        [
-            {
                 state: null
-            },
-            {
-                state: {}
-            },
-            {
-                state: {}
-            },
-            {
-                state: {}
-            },
-            {
-                state: null
-            },
-            {
-                state: null
-            }
-        ]
-        [
-            {
-                state: {}
-            },
-            {
-                state: {}
-            },
-            {
-                state: {}
-            },
-            {
-                state: {}
-            },
-            {
-                state: {}
-            },
-            {
-                state: {}
-            }
-        ]
-        [
-            {
-                state: {}
-            },
-            {
-                state: null
-            },
-            {
-                state: null
-            },
-            {
-                state: null
-            },
-            {
-                state: {}
             },
             {
                 state: {}
@@ -343,10 +289,72 @@ state = {
     [
         [
             {
-                state: {}
+                state: null
             },
             {
                 state: {}
+            },
+            {
+                state: null
+            },
+            {
+                state: {}
+            },
+            {
+                state: null
+            },
+            {
+                state: null
+            }
+        ]
+        [
+            {
+                state: null
+            },
+            {
+                state: null
+            },
+            {
+                state: null
+            },
+            {
+                state: null
+            },
+            {
+                state: null
+            },
+            {
+                state: null
+            }
+        ]
+        [
+            {
+                state: {}
+            },
+            {
+                state: null
+            },
+            {
+                state: null
+            },
+            {
+                state: null
+            },
+            {
+                state: {}
+            },
+            {
+                state: null
+            }
+        ]
+    ]
+    [
+        [
+            {
+                state: {}
+            },
+            {
+                state: null
             },
             {
                 state: {}
@@ -363,7 +371,7 @@ state = {
         ]
         [
             {
-                state: {}
+                state: null
             },
             {
                 state: {}
@@ -504,6 +512,10 @@ $ ->
     canvasBackground = document.getElementById "background"
     canvasSignals = document.getElementById "signals"
     canvasChannels = document.getElementById "channels"
+    prerendered = document.getElementById "prerendered"
+    if prerendered?
+        context = new Stage prerendered
+        dr = new Drawer 0, context, 2, 3
     ###
     if canvasBackground?
         stageBackground = new Stage canvasBackground
@@ -515,18 +527,12 @@ $ ->
         boardDrawer.drawState(state)
     if canvasChannels?
         stageChannels = new Stage canvasChannels
-        channelDrawer = new Drawer 2, stageChannels, 2, 3
-    
+        channelDrawer = new Drawer 2, stageChannels, 2, 3   
     if canvasSignals?
         stageSignals = new Stage canvasSignals
         signalsDrawer = new Drawer 3, stageSignals, 2, 3
-        signalsDrawer.createSignal 1, 1, 0
-        signalsDrawer.createSignal 1, 1, 1
-        signalsDrawer.createSignal 1, 1, 2
-        signalsDrawer.createSignal 1, 1, 3
-        signalsDrawer.createSignal 1, 1, 4
-        signalsDrawer.createSignal 1, 1, 5
-        console.log "Aaa"
+        signalsDrawer.createSignal 0, 0, 2
+
 
 
 ###
