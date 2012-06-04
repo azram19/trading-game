@@ -12,4 +12,3 @@ p{font-family:'Open Sans',sans-serif;}
 #canvasWrapper #board{z-index:2;background:transparent;}
 #canvasWrapper #channels{z-index:4;background:transparent;}
 #canvasWrapper #signals{z-index:6;background:transparent;}
-#canvasWrapper #prerendered{z-index:-1;background:transparent;}
