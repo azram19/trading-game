@@ -20,6 +20,7 @@ Types =
         Normal: 8
         HQ: 9
 
+
 if module? and module.exports
   exports = module.exports = Types
 else
