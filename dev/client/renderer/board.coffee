@@ -37,7 +37,7 @@ class GSignal
 
 class Drawer
     margin: 100
-    size: 40
+    size: 30
     circleRadius: 8
     horIncrement: 0
     verIncrement: 0
@@ -53,6 +53,7 @@ class Drawer
         @diffRows = @maxRow - @minRow
 
         @stage.enableMouseOver()
+        @stage.snapToPixelEnabled = true
         @signals = new Container
 
         @fpsLabel = new Text("-- fps","bold 18px Arial","#FFF");
@@ -93,14 +94,22 @@ class Drawer
 
     drawHex: (point, fieldState) ->
         @drawStroke(point)
-        @drawOwnership(point, fieldState.platform.state.owner)
-        @drawPlatform(point, fieldState.platform.behaviour.platformType)
-        @drawResource(point, fieldState.resource.behaviour.resourceType)
+        console.log fieldState
+        if fieldState.platform.type?
+            console.log "owner"
+            @drawOwnership(point, fieldState.platform.state.owner)
+        if fieldState.platform.type?
+            console.log "platform"
+            @drawPlatform(point, fieldState.platform.type())
+        if fieldState.resource.behaviour?
+            console.log "resource"
+            @drawResource(point, fieldState.resource.type())
         @setBacklight(point)
 
-    drawPlatform: (point, platform) ->
+    drawPlatform: (point, type) ->
         g = new Graphics()
-        switch platform
+        console.log platform
+        switch Types.Platforms[type]
             when 1 then g.beginFill("#A6B4B0")
         g.drawPolyStar(point.x, point.y, @size/2, 6, 0, 90)
         @stage.addChild new Shape g
@@ -114,6 +123,7 @@ class Drawer
 
     drawOwnership: (point, owner) ->
         g = new Graphics()
+        console.log owner
         switch owner
             when 0 then g.beginFill("#000000")
             when 1 then g.beginFill("#274E7D")
@@ -124,9 +134,10 @@ class Drawer
     
     drawResource: (point, resource) ->
         g = new Graphics()
-        switch resource
-            when 1 then g.beginFill("#FFFFFF")
-            when 2 then g.beginFill("#000000")
+        console.log resource
+        switch Types.Resources[resource]
+            when Types.Resources.Metal then g.beginFill("#FFFFFF")
+            when Types.Resources.Tritium then g.beginFill("#FFFF00")
             else
         g.drawCircle(point.x, point.y, 6)
         @stage.addChild new Shape g
@@ -154,16 +165,17 @@ class Drawer
         @signals.addChild signal
         @stage.addChild signal.shape
         @stage.update()
+        shape.snapToPixel = true
         shape.cache(-@circleRadius-1, -@circleRadius-1, (@circleRadius+1)*2, (@circleRadius+1)*2)
         #@toogleCache(true)
 
 
     setBacklight: (point) ->
         g = new Graphics()
-        g.beginStroke("#ED903E")
-            .setStrokeStyle(3)
+        g.beginFill("#FFFF00")
             .drawPolyStar(point.x, point.y, @size, 6, 0, 90)
         overlay = new Shape g
+        overlay.alpha = 0.5
         overlay.visible = false
         overlay.onMouseOver = @mouseOverField
         overlay.onMouseOut = @mouseOutField
@@ -235,7 +247,7 @@ class Drawer
                 point = @getPoint(i, j)
                 @drawHex(point, boardState.fields[j][i])
                 for k in [0 .. 5]
-                    if boardState.channels[j][i][k].state?
+                    if boardState.channels?[j]?[i]?[k]?.state?
                         @drawChannel(point, k)
         @stage.update()
 
@@ -267,8 +279,9 @@ class BackgroundDrawer
 player = ObjectFactory.build Types.Entities.Player
 manager = new GameManager [player], [[2,2]], 8, 15
 state = manager.map
-
-###state = {
+console.log state
+###
+state = {
   channels: [
     [
         [
@@ -545,12 +558,13 @@ $ ->
     ###
     if canvasBoard?
         stageBoard = new Stage canvasBoard
-        boardDrawer = new Drawer 1, stageBoard, 2, 3
+        boardDrawer = new Drawer 1, stageBoard, 8, 15
         boardDrawer.drawState(state)
     ###
     if canvasChannels?
         stageChannels = new Stage canvasChannels
         channelDrawer = new Drawer 2, stageChannels, 2, 3   
+    ###
     ###
     if canvasSignals?
         stageSignals = new Stage canvasSignals
@@ -558,22 +572,8 @@ $ ->
         Ticker.addListener signalsDrawer
         Ticker.useRAF = true
         Ticker.setFPS 60
-        for y in [0..15]
-            for x in [0..8]
+        for y in [0..8]
+            for x in [0..4]
                 signalsDrawer.createSignal y, x, 0
                 signalsDrawer.createSignal y, x, 1
                 signalsDrawer.createSignal y, x, 2
-
-
-        
-        
-
-
-
-###
-Plan for today
-    - signal animation on separate canvas
-    - rasterize as much as possible
-    - introduce events with mouse actions
-    - further optimialisations if there is enough time
-###

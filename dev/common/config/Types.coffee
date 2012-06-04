@@ -19,6 +19,7 @@ Types =
     Platforms:
         Normal: 0
 
+
 if module? and module.exports
   exports = module.exports = Types
 else
