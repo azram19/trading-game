@@ -92,18 +92,63 @@ p {
       position:absolute;
       bottom:0;
     }
-    
-    #chatScroll { width: 300px; clear: both; margin: 20px 10px 10px 0px; 
+
+    #chatScroll {
+      width: 310px;
+      clear: both;
+      margin: 20px 0 10px;
+
+    .viewport {
+      width: 280px;
+      height: 400px;
+      overflow: hidden;
+      position: relative;
     }
-#chatScroll .viewport { width: 280px; height: 400px; overflow: hidden; position: relative; }
-#chatScroll .overview { list-style: none; position: absolute; left: 0; top: 0; }
-#chatScroll .thumb .end,
-#chatScroll .thumb { background-color: #003d5d; }
-#chatScroll .scrollbar { position: relative; float: right; width: 15px; }
-#chatScroll .track { background-color: #d8eefd; height: 100%; width:13px; position: relative; padding: 0 1px; }
-#chatScroll .thumb { height: 20px; width: 13px; cursor: pointer; overflow: hidden; position: absolute; top: 0; }
-#chatScroll .thumb .end { overflow: hidden; height: 5px; width: 13px; }
-#chatScroll .disable{ display: none; }
+
+    .overview {
+      list-style: none;
+      position: absolute;
+      left: 0;
+      top: 0;
+    }
+
+    .thumb {
+      background-color: #003d5d;
+      height: 20px;
+      width: 13px;
+      cursor: pointer;
+      overflow: hidden;
+      position: absolute;
+      top: 0;
+
+        .end {
+          background-color: #003d5d;
+          overflow: hidden;
+          height: 5px;
+          width: 13px;
+        }
+    }
+
+    .scrollbar {
+      position: relative;
+      float: right;
+      width: 15px;
+    }
+
+    .track {
+      background-color: #d8eefd;
+      height: 100%;
+      width: 13px;
+      position: relative;
+      padding: 0 1px;
+    }
+
+    .disable {
+      display: none;
+    }
+
+    }
+
   }
 
 }
