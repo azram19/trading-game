@@ -13,34 +13,72 @@ module.exports = ( app, express ) ->
 
   app.mongoURL = 'mongodb://signal:signals11@ds033097.mongolab.com:33097/heroku_app4770943'
 
+  Schema = app.Mongoose.Schema
+  ObjectId = Schema.ObjectId
+  app.Mongoose.connect app.mongoURL
+  app.Mongoose.connection.on 'open', ->
+      console.log 'connected'
 
-  #abstraction of database connection
-  app.connectDb = ( fn ) =>
-    self = @
+  app.userSchema = new Schema
+        name: String
+        userName: String
+        id: String
+        highscore: Number
+        friends: [
+            type: Schema.ObjectId
+            ref: 'User'
+        ]
 
-    #connect
-    app.Mongo.Db.connect app.mongoURL, (err, db) ->
+  app.Mongoose.model 'User', app.userSchema
 
-      #check if there are no errors
-      app.Mongo.assert.equal null, err
+  app.historySchema = new Schema
+        players: [
+            type: Schema.ObjectId
+            ref: 'User'
+        ]
+        winners: [
+            type: Schema.ObjectId
+            ref: 'User'
+        ]
+        channel: String
 
-      #execute the opreation
-      fn.apply self, arguments
+  app.Mongoose.model 'History', app.historySchema
 
+  app.chatSchema = new Schema
+        sender:
+            type: Schema.ObjectId
+            ref: 'User'
+        time: Date
+        contet: String
+        channel: String
 
+  app.Mongoose.model 'Chat', app.chatSchema
+
+  
   #Everyauth - Facebook
   app.everyauth.facebook
     .appId( app.facebookAppId )
     .appSecret( app.facebookAppSecret )
     .scope( app.facebookScope )
     .findOrCreateUser( (session, accessToken, accessTokExtra, fbUserMetadata) ->
-      app.usersByFbId[fbUserMetadata.id] = fbUserMetadata
+        userModel = app.Mongoose.model 'User'
+        userModel.findOne id: fbUserMetadata.id, (err, doc) ->
+            console.log doc
+            if err?
+                throw err
+            if not doc?
+                newUser = new userModel()
+                newUser.name = fbUserMetadata.name
+                newUser.userName = fbUserMetadata.username
+                newUser.id = fbUserMetadata.id
+                newUser.save (err) ->
+                        if err?
+                            throw err
     )
     .redirectPath( '/lobby' )
 
   app.everyauth.everymodule.findUserById (userId, callback) ->
-    user = app.usersByFbId[userId]
-    callback null, user
+      app.Mongoose.model('User').findById userId, callback
 
   #generic config
   app.configure ->
