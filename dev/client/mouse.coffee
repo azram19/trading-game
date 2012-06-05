@@ -81,6 +81,9 @@ class Mouse
 
       #executes a callback
       (
+        if o.target?
+          e.target = o.target
+
         o.f e, x, y
       ) for o in handlersObjs
 
@@ -92,6 +95,7 @@ class Mouse
 
       e.type = 'mouseout'
 
+
       objs = _.chain( objs )
         .filter( ( o ) -> e.type in o.es )
         .sortBy( ( o ) -> -o.p )
@@ -100,6 +104,9 @@ class Mouse
 
       #executes a callback
       (
+        if o.target?
+          e.target = o.target
+
         o.f e, x, y
       ) for o in objs
 
@@ -136,6 +143,9 @@ class Mouse
     o.es = es
     o.p = p
     o.id = id
+
+    if b.target?
+      o.target = b.target
 
     _.extend o, b.boundaries #values
 
