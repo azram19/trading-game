@@ -64,14 +64,23 @@ class Mouse
       if e.type is 'mousemove'
         oldInIds = _.pluck @oldIn, 'id'
         curInIds = _.pluck handlersObjs, 'id'
+
         outIds = _.difference oldInIds, curInIds
+        inIds = _.difference curInIds, oldInIds
+
         outObjs = _.filter @oldIn, ( ob ) ->
           ob.id in outIds
+
+        inObjs = _.filter handlersObjs, ( ob ) ->
+          ob.id in inIds
 
         @oldIn = handlersObjs
 
         if outObjs.length > 0
           ev_handler_mouseout e, outObjs
+
+        if inObjs.length > 0
+          ev_handler_mouseout e, inObjs
 
       handlersObjs = _.chain( handlersObjs )
         .filter( ( o ) -> e.type in o.es )
@@ -110,6 +119,25 @@ class Mouse
         o.f e, x, y
       ) for o in objs
 
+    #handler for abstract event in
+    ev_handler_mouseout = ( e, objs ) =>
+      [x,y] = getXY e
+
+      e.type = 'mousein'
+
+      objs = _.chain( objs )
+        .filter( ( o ) -> e.type in o.es )
+        .sortBy( ( o ) -> -o.p )
+        .filter( (o, i, l) -> o.p == (_.first l).p )
+        .value()
+
+      #executes a callback
+      (
+        if o.target?
+          e.target = o.target
+
+        o.f e, x, y
+      ) for o in objs
 
     $canvas = $ @canvas
 
