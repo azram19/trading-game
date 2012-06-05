@@ -10,13 +10,13 @@ class GSignal
 
     setTickSizeX: (t) ->
         @tickSizeX = t
-    
+
     getTickSizeX: () ->
         @tickSizeX
-    
+
     setTickSizeY: (t) ->
         @tickSizeY = t
-    
+
     getTickSizeY: () ->
         @tickSizeY
 
@@ -49,7 +49,7 @@ class Drawer
 
     setSize: (size) ->
         @size = size
-    
+
     setMargin: (margin) ->
         @margin = margin
 
@@ -86,7 +86,7 @@ class Drawer
             else g.beginFill("#000000")
         g.drawPolyStar(point.x, point.y, @size, 6, 0, 90)
         @stage.addChild new Shape g
-        @drawStroke point 
+        @drawStroke point
 
     drawStroke: (point) ->
         g = new Graphics()
@@ -108,7 +108,7 @@ class ChannelDrawer extends Drawer
             .lineTo(destination.x, destination.y)
         @stage.addChild new Shape g
 
-    createChannel: (y, x, direction, channelState) -> 
+    createChannel: (y, x, direction, channelState) ->
         point = @getPoint(x, y)
         destination = @getDestination(point, direction)
         @drawOwnership(destination, channelState.platform.state.owner)
@@ -165,7 +165,7 @@ class SignalsDrawer extends Drawer
         point = @getPoint(x, y)
         destination = @getDestination(point, direction)
         @drawSignal(point, destination)
-        @stage.update() 
+        @stage.update()
 
     getDistance: (x, y) ->
         Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2))
@@ -194,7 +194,7 @@ class BoardDrawer extends Drawer
     constructor: (@stage, @minRow, @maxRow) ->
         super @stage, @minRow, @maxRow
 
-    drawHex: (point, fieldState) ->  
+    drawHex: (point, fieldState) ->
         if fieldState.platform.type?
             @drawOwnership(point, fieldState.platform.state.owner)
         if fieldState.resource.behaviour?
@@ -209,7 +209,7 @@ class BoardDrawer extends Drawer
             when Types.Platforms.HQ then g.beginFill("#A6B4B0")
         g.drawPolyStar(point.x, point.y, @size/2, 6, 0, 90)
         @stage.addChild new Shape g
-    
+
     drawResource: (point, resource) ->
         g = new Graphics()
         switch resource
@@ -323,7 +323,7 @@ class Renderer
         if canvasSignals?
             @signalsST = new Stage canvasSignals
             @signalsDR = new SignalsDrawer @signalsST, @minRow, @maxRow
-    
+
     setupBoard: (boardState) ->
         @boardDR.drawState(boardState)
         @channelDR.drawState(boardState)
@@ -366,11 +366,12 @@ channelStat =
         }
 
 $ ->
-    renderer = new Renderer 8, 15
-    renderer.setupBoard(state)
-    for y in [0..4]
-            for x in [0..4]
-                renderer.moveSignal y, x, 0
-    renderer.buildChannel 2, 2, 3, channelStat
-    renderer.buildChannel 3, 3, 3, channelStat
-    renderer.buildChannel 4, 4, 5, channelStat    
+    if $('#radial').length <= 0
+        renderer = new Renderer 8, 15
+        renderer.setupBoard(state)
+        for y in [0..4]
+                for x in [0..4]
+                    renderer.moveSignal y, x, 0
+        renderer.buildChannel 2, 2, 3, channelStat
+        renderer.buildChannel 3, 3, 3, channelStat
+        renderer.buildChannel 4, 4, 5, channelStat
