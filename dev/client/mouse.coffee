@@ -5,6 +5,9 @@ class Mouse
     #all items in the tree
     @items = []
 
+    #list of objects recently affected by 'in'
+    @oldIn = []
+
     #quad tree of the items
     @tree = new QuadTree
       x:0
@@ -56,6 +59,21 @@ class Mouse
       #sorts elements by priority and then selects those with the highest priority
       handlersObjs = _.chain( handlersObjs )
         .filter( inBoundaries )
+        .value()
+
+      if e.type is 'mousemove'
+        oldInIds = _.pluck @oldIn, 'id'
+        curInIds = _.pluck handlersObjs, 'id'
+        outIds = _.difference oldInIds, curInIds
+        outObjs = _.filter @oldIn, ( ob ) ->
+          ob.id in outIds
+
+        @oldIn = handlersObjs
+
+        if outObjs.length > 0
+          ev_handler_mouseout e, outObjs
+
+      handlersObjs = _.chain( handlersObjs )
         .filter( ( o ) -> e.type in o.es )
         .sortBy( ( o ) -> -o.p )
         .filter( (o, i, l) -> o.p == (_.first l).p )
@@ -67,6 +85,24 @@ class Mouse
       ) for o in handlersObjs
 
       null
+
+    #handler for abstract event out
+    ev_handler_mouseout = ( e, objs ) =>
+      [x,y] = getXY e
+
+      e.type = 'mouseout'
+
+      objs = _.chain( objs )
+        .filter( ( o ) -> e.type in o.es )
+        .sortBy( ( o ) -> -o.p )
+        .filter( (o, i, l) -> o.p == (_.first l).p )
+        .value()
+
+      #executes a callback
+      (
+        o.f e, x, y
+      ) for o in objs
+
 
     $canvas = $ @canvas
 
