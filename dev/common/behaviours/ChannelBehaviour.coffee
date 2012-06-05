@@ -31,7 +31,7 @@ class ChannelBehaviour
                 route? and route.object isnt signal.source
            destination = availableRoutes[0]
            if destination.requestAccept signal
-               destinatio.trigger 'accept', signal, (signal) ->
+               destination.trigger 'accept', signal, (signal) ->
                    state.signals = _.without state.signals, signal
 
 if module? and module.exports

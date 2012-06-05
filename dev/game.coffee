@@ -26,6 +26,9 @@ app.get '/board', ( req, res) ->
 app.get '/radialDemo', ( req, res) ->
    res.render 'radialDemo'
 
+app.get '/lobby2', ( req, res) ->
+   res.render 'lobby2'
+
 app.get '/', ( req, res ) ->
     if app.requireAuth and req.loggedIn
       res.redirect 'lobby'

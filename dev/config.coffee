@@ -8,7 +8,7 @@ module.exports = ( app, express ) ->
   app.sessionSecret = 'veryFuckingSecret'
   app.sessionKey = 'express.sid'
 
-  app.requireAuth = false
+  app.requireAuth = true
   app.usersByFbId = {}
 
   app.mongoURL = 'mongodb://signal:signals11@ds033097.mongolab.com:33097/heroku_app4770943'

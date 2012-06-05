@@ -8,12 +8,15 @@ class radialMenu
   expandedChildren: false
   visible: false
 
-  constructor: ( @engine, @canvas, @x, @y, @text, @desc ) ->
-    if not @mousedownLister
-      @canvas.addEventListener this
-      @mousedownListener = true
-
+  constructor: ( @engine, @stage, @text, @desc, @x, @y, @f ) ->
     @menuId = _.uniqueId()
+
+    @f = _.filter( [@x, @y, @text, @desc, @f], ( e ) -> _.isFunction e )
+
+    if @f.length > 0
+      @f = @f[0]
+    else
+      @f = () ->
 
     ###
     This is a title displayed next to the menu item. It is hidden by
@@ -23,14 +26,7 @@ class radialMenu
     @$title.text @text
     @$title.addClass 'radial-menu-title'
     @$title.appendTo 'body'
-    @$title.css
-      display: 'none'
-      position: 'absolute'
-      cursor : 'pointer'
-      'text-transform' : 'uppercase'
-      'font-size' : '10px'
-      'text-shadow' : '1px 1px #000'
-      'color' : '#aaa'
+
 
     @$title.click =>
       @click()
@@ -40,32 +36,6 @@ class radialMenu
     @$desc.addClass 'radial-menu-desc'
     @$desc.addClass 'hyphenate'
     @$desc.appendTo 'body'
-    @$desc.css
-      display: 'none'
-      position: 'absolute'
-      width: '200px'
-      color: '#bbb'
-      padding: '0 10px'
-      hyphens:'auto'
-      'text-align':'justify'
-      '-webkit-hyphens':'auto'
-      '-webkit-hyphenate-limit-after':1
-      '-webkit-hyphenate-limit-before':3
-      '-moz-hyphens':'auto'
-      'text-shadow' : '1px 1px #000'
-      'font-size' : '10px'
-      'border-left' : '1px rgba(0,0,0,0.1) solid'
-
-    @$desc.find('p').css
-      'font-size' : '10px'
-      'margin' : '0'
-
-    ###
-    Get the context and stage we will be drawing to. Only for the root it will be the actuall context, for every other element it will get
-    overwritten by root's context and stage.
-    ###
-    @context2d = @canvas.getContext '2d'
-    @stage = new Stage @canvas
 
     #Container where we store all our children
     @container = new Container()
@@ -96,7 +66,7 @@ class radialMenu
 
     #Alphas
     @fadedInOpacity = 1
-    @fadedOutOpacity = 0.1
+    @fadedOutOpacity = 0.2
     @opacity = 1
 
     #Flags
@@ -145,8 +115,11 @@ class radialMenu
     if not length?
       length = @length
 
-    x = length * Math.sin( @beta )
-    y = length * Math.cos( @beta )
+    if @parent?
+      x = length * Math.sin( @beta )
+      y = length * Math.cos( @beta )
+    else
+      x = y = 0
 
     [x,y]
 
@@ -154,6 +127,8 @@ class radialMenu
     @draw()
 
     c.drawIt() for c in @children
+
+    null
 
   draw: () =>
     if @drawn
@@ -163,21 +138,21 @@ class radialMenu
 
     @button = new Shape()
     @button.graphics
-      .beginRadialGradientFill(["#C21A01","#A7DBD8","#69D2E7", "#222"], [0,0,0.7,1], @x, @y, 0, @x, @y, @radius)
+      .beginRadialGradientFill(["#C21A01","#A7DBD8","#69D2E7", "#333"], [0,0,0.7,1], @x, @y, 0, @x, @y, @radius)
       .drawCircle( @x, @y, @radius )
 
     @circle = new Shape()
     @circle.visible = false
     @circle.graphics
       .setStrokeStyle(1)
-      .beginStroke( "rgba(0,0,0,0.1)" )
+      .beginStroke( "rgba(0,0,0,0.15)" )
       .drawCircle( @x, @y, @expand_length )
 
     @circleC = new Shape()
     @circleC.visible = false
     @circleC.graphics
       .setStrokeStyle(1)
-      .beginStroke( "rgba(0,0,0,0.1)" )
+      .beginStroke( "rgba(0,0,0,0.15)" )
       .drawCircle( @x, @y, @compact_length )
 
     P = @button.localToGlobal @x, @y
@@ -216,7 +191,11 @@ class radialMenu
     Register us as a listener for the Mouse and the Ticker
     ###
     @mId = Mouse.register @, @click, ['click'], @priority
+
     Ticker.addListener @, false
+
+    #@x = 0
+    #@y = 0
 
   restoreFlags: () =>
     @expanded = false
@@ -461,6 +440,8 @@ class radialMenu
           else
             console.log 'und'
             @parent.undisplayText @
+      @f()
+
     else
       if @children.length < 1
         if not @descDisplayed
@@ -553,12 +534,15 @@ class radialMenu
     if not @parent?
       @stage.update()
 
+window.radialMenu = radialMenu
+
 $ ->
   canvas = document.getElementById "radial"
   if canvas?
-    window.Mouse = new MouseClass canvas
+    stage = new Stage canvas
+    window.Mouse = new MouseClass stage, 1280, 800
 
-    window.r = r = new radialMenu null, canvas, 150, 150, "piesek"
+    window.r = r = new radialMenu null, stage, "piesek", "", 150, 150
 
 
 
@@ -570,16 +554,16 @@ $ ->
     rd8 = "<p>Her power of repulsion for the planet was so great that it had carried her far into space, where she can be seen today, by the aid of powerful telescopes, hurtling through the heavens ten thousand miles from Mars; a tiny satellite that will thus encircle Barsoom to the end of time.</p>"
     rd9 = "<p>Her power of repulsion for the planet was so great that it had carried her far into space, where she can be seen today, by the aid of powerful telescopes, hurtling through the heavens ten thousand miles from Mars; a tiny satellite that will thus encircle Barsoom to the end of time.</p>"
 
-    r2 = new radialMenu null, canvas, 0, 0, "kotek", rd5
-    r3 = new radialMenu null, canvas, 0, 0, "malpka", rd5
-    r4 = new radialMenu null, canvas, 0, 0, "ptaszek", rd5
-    r0 = new radialMenu null, canvas, 0, 0, "dziubek", rd5
+    r2 = new radialMenu null, stage, "kotek", rd5
+    r3 = new radialMenu null, stage, "malpka", rd5
+    r4 = new radialMenu null, stage, "ptaszek", rd5
+    r0 = new radialMenu null, stage, "dziubek", rd5
 
-    r5 = new radialMenu null, canvas, 0, 0, "gawron", rd5
-    r6 = new radialMenu null, canvas, 0, 0, "slon", rd6
-    r7 = new radialMenu null, canvas, 0, 0, "dzwon", rd7
-    r8 = new radialMenu null, canvas, 0, 0, "dzwon1", rd8
-    r9 = new radialMenu null, canvas, 0, 0, "dzwon2", rd9
+    r5 = new radialMenu null, stage, "gawron", rd5
+    r6 = new radialMenu null, stage, "slon", rd6
+    r7 = new radialMenu null, stage, "dzwon", rd7
+    r8 = new radialMenu null, stage, "dzwon1", rd8
+    r9 = new radialMenu null, stage, "dzwon2", rd9
 
     r.addChild r2
     r.addChild r3
