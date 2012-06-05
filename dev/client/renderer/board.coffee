@@ -283,6 +283,9 @@ class OverlayDrawer extends Drawer
     constructor: (@stage, @minRow, @maxRow) ->
         super @stage, @minRow, @maxRow
         @stage.enableMouseOver(20)
+        Ticker.addListener this
+        Ticker.useRAF = true
+        Ticker.setFPS 60
 
     drawOverlay: (point) ->
         g = new Graphics()
@@ -291,18 +294,18 @@ class OverlayDrawer extends Drawer
         overlay = new Shape g
         overlay.alpha = 0.01
         @stage.addChild overlay
-
+        ###
         boundaries = 
             x: point.x - @horIncrement
             y: point.y - @size
             width: 2*@horIncrement
             height: 2*@size
+        ###
+        #Mouse.register {target: overlay, boundaries: boundaries}, @mouseOutField, ['mouseout']
+        #Mouse.register {target: overlay, boundaries: boundaries}, @mouseOverField, ['mousein']
 
-        Mouse.register {target: overlay, boundaries: boundaries}, @mouseOutField, ['mouseout']
-        Mouse.register {target: overlay, boundaries: boundaries}, @mouseOverField, ['mousemove']
-
-        #overlay.onMouseOver = @mouseOverField
-        #overlay.onMouseOut = @mouseOutField
+        overlay.onMouseOver = @mouseOverField
+        overlay.onMouseOut = @mouseOutField
 
     createOverlay: (y, x) ->
         point = @getPoint(x, y)
@@ -317,19 +320,25 @@ class OverlayDrawer extends Drawer
                 @drawOverlay(point)
         @stage.update()
 
-    mouseOverField: (event, x, y) =>
-        console.log "gey"
-        if event.target.hitTest(x, y)
-            event.target.alpha = 0.2
-            @stage.update()
+    mouseOverField: (event) =>
+        #if event.target.hitTest(x, y)
+        event.target.alpha = 0.2
+        @update = true
 
-    mouseOutField: (event, x, y) =>
-        if not event.target.hitTest(x, y)
-            event.target.alpha = 0.01
+    mouseOutField: (event) =>
+        #if not event.target.hitTest(x, y)
+        event.target.alpha = 0.01
+        @update = true
+        ###
         else
             event.target.alpha = 0.2
         @stage.update()
+        ###
 
+    tick: () ->
+        if(@update)
+            @update = false
+            @stage.update()
 
 class BackgroundDrawer
     constructor: (@stage) ->
@@ -418,7 +427,7 @@ class Renderer
             @UIST = new Stage canvasUI
             @UIDR = new OverlayDrawer @UIST, @minRow, @maxRow
             @addSTDR(@UIST, @UIDR)
-            window.Mouse = new MouseClass canvasUI
+            window.Mouse = new MouseClass canvasUI, 1280, 800
         @diffRows = @maxRow - @minRow
 
 
