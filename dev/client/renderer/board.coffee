@@ -335,14 +335,18 @@ class Renderer
     moveSignal: (y, x, direction) ->
         @signalsDR.createSignal(y, x, direction)
 
-    buildChannel: (y, x, direction, fieldState) ->
-        @channelDR.createChannel(y, x, direction, fieldState)
+    buildChannel: (y, x, direction, channelState) ->
+        @channelDR.createChannel(y, x, direction, channelState)
 
     buildPlatform: (y, x, fieldState) ->
         @boardDR.createPlatfrom(y, x, fieldState)
 
     buildResource: (y, x, fieldState) ->
         @boardDR.createResource(y, x, fieldState)
+
+    captureChannel: (y, x, direction, channelState) ->
+
+    capturePlatform: (y, x, fieldState) ->
 
 #----------------------------------------#
 
