@@ -104,7 +104,6 @@ class Mouse
 
       e.type = 'mouseout'
 
-
       objs = _.chain( objs )
         .filter( ( o ) -> e.type in o.es )
         .sortBy( ( o ) -> -o.p )
