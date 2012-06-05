@@ -111,7 +111,7 @@ class SignalsDrawer extends Drawer
     fpsLabel: {}
     signals: {}
     signalRadius: 8
-
+    
     constructor: (@stage, @minRow, @maxRow) ->
         super @stage, @minRow, @maxRow
 
@@ -121,11 +121,13 @@ class SignalsDrawer extends Drawer
         Ticker.addListener this
         Ticker.useRAF = true
         Ticker.setFPS 60
+        @setupFPS()  
 
-        @fpsLabel = new Text("-- fps","bold 18px Arial","#FFF");
-        @stage.addChild(@fpsLabel);
-        @fpsLabel.x = 10;
-        @fpsLabel.y = 20;
+    setupFPS: () ->
+        @fpsLabel = new Text "-- fps", "bold 18px Arial", "#FFF"
+        @stage.addChild @fpsLabel
+        @fpsLabel.x = 10
+        @fpsLabel.y = 20  
 
     drawSignal: (point, destination) ->
         g = new Graphics()
@@ -169,7 +171,7 @@ class SignalsDrawer extends Drawer
                     signal.tickSizeY = -signal.tickSizeY
                 signal.shape.x += signal.tickSizeX
                 signal.shape.y += signal.tickSizeY
-        @fpsLabel.text = Math.round(Ticker.getMeasuredFPS())+" fps";
+        @fpsLabel.text = Math.round(Ticker.getMeasuredFPS())+" fps"
         @stage.update()
 
 class ResourcesDrawer extends Drawer
@@ -398,10 +400,11 @@ class Renderer
         ###
         if canvasUI?
             @UIST = new Stage canvasUI
-            @UIDR = new UIDrawer @UIST, @minRow, @maxRow
+            @UIDR = new OverlayDrawer @UIST, @minRow, @maxRow
             @addSTDR(@UIST, @UIDR)
         ###
         @diffRows = @maxRow - @minRow
+
 
     addSTDR: (stage, drawer) ->
         @stages.push stage
@@ -446,6 +449,7 @@ class Renderer
 
     setupBoard: (boardState) ->
         @clearAll()
+        @signalsDR.setupFPS()
         for j in [0 ... (2*@diffRows + 1)]
             for i in [0 ... @maxRow - Math.abs(@diffRows - j)]
                 point = @ownershipDR.getPoint(i, j)
@@ -482,3 +486,4 @@ $ ->
         renderer.buildChannel 2, 2, 3, channelStat
         renderer.buildChannel 3, 3, 3, channelStat
         renderer.buildChannel 4, 4, 5, channelStat
+
