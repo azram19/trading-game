@@ -51,7 +51,7 @@ class Drawer
         @verIncrement = Math.ceil 3*@size/2
         @diffRows = @maxRow - @minRow
 
-        @stage.enableMouseOver(10)
+        @stage.enableMouseOver(20)
         @stage.snapToPixelEnabled = true
         @signals = new Container
 
@@ -91,14 +91,14 @@ class Drawer
             when 5 then p.x -= 2*@horIncrement
         p
 
-    drawHex: (point, fieldState) ->
+    drawHex: (point, fieldState) ->  
         if fieldState.platform.type?
             @drawOwnership(point, fieldState.platform.state.owner)
         if fieldState.resource.behaviour?
             @drawResource(point, fieldState.resource.type())
         if fieldState.platform.type?
             @drawPlatform(point, fieldState.platform.type())
-        @setBacklight(point)
+        #@drawOverlay(point)
         @drawStroke(point)
 
     drawPlatform: (point, type) ->
@@ -160,30 +160,28 @@ class Drawer
         #@toogleCache(true)
 
 
-    setBacklight: (point) ->
+    drawOverlay: (point) ->
         g = new Graphics()
         g.beginFill("#FFFF00")
             .drawPolyStar(point.x, point.y, @size, 6, 0, 90)
         overlay = new Shape g
-        overlay.alpha = 0.3
-        overlay.visible = false
+        overlay.alpha = 0.01
         @stage.addChild overlay
         overlay.onMouseOver = @mouseOverField
         overlay.onMouseOut = @mouseOutField
-        console.log overlay
 
 #----------------Events-----------------#
 
-    mouseOverField: (event) ->
+    mouseOverField: (event) =>
         console.log "gey"
-        event.target.visible = true
-        @stage.update
+        event.target.alpha = 0.2
+        @stage.update()
 
-    mouseOutField: (event) ->
-        event.target.visible = false
-        @stage.update
+    mouseOutField: (event) =>
+        event.target.alpha = 0.01
+        @stage.update()
 
-    mouseOnClickRadial: (event) ->
+    mouseOnClickRadial: (event) =>
 
 #---------------Animation---------------#
 
@@ -247,6 +245,14 @@ class Drawer
                         @drawChannel(point, k)
         @stage.update()
 
+    setBacklight: () ->
+        @stage.removeAllChildren()
+        for j in [0 ... (2*@diffRows + 1)]
+            for i in [0 ... @maxRow - Math.abs(@diffRows - j)]
+                point = @getPoint(i, j)
+                @drawOverlay(point)
+        @stage.update()
+
 class ChannelDrawer
     constructor: (@id, @stage, @minRow, @maxRow) ->
         super @id, @stage, @minRow, @maxRow
@@ -276,272 +282,6 @@ player = ObjectFactory.build Types.Entities.Player
 manager = new GameManager [player], [[2,2]], 8, 15
 state = manager.map
 console.log state
-###
-state = {
-  channels: [
-    [
-        [
-            {
-                state: null
-            },
-            {
-                state: null
-            },
-            {
-                state: {}
-            },
-            {
-                state: null
-            },
-            {
-                state: {}
-            },
-            {
-                state: null
-            }
-        ]
-        [
-            {
-                state: null
-            },
-            {
-                state: null
-            },
-            {
-                state: null
-            },
-            {
-                state: {}
-            },
-            {
-                state: null
-            },
-            {
-                state: {}
-            }
-        ]
-    ]
-    [
-        [
-            {
-                state: null
-            },
-            {
-                state: {}
-            },
-            {
-                state: null
-            },
-            {
-                state: {}
-            },
-            {
-                state: null
-            },
-            {
-                state: null
-            }
-        ]
-        [
-            {
-                state: null
-            },
-            {
-                state: null
-            },
-            {
-                state: null
-            },
-            {
-                state: null
-            },
-            {
-                state: null
-            },
-            {
-                state: null
-            }
-        ]
-        [
-            {
-                state: {}
-            },
-            {
-                state: null
-            },
-            {
-                state: null
-            },
-            {
-                state: null
-            },
-            {
-                state: {}
-            },
-            {
-                state: null
-            }
-        ]
-    ]
-    [
-        [
-            {
-                state: {}
-            },
-            {
-                state: null
-            },
-            {
-                state: {}
-            },
-            {
-                state: null
-            },
-            {
-                state: null
-            },
-            {
-                state: null
-            }
-        ]
-        [
-            {
-                state: null
-            },
-            {
-                state: {}
-            },
-            {
-                state: null
-            },
-            {
-                state: null
-            },
-            {
-                state: null
-            },
-            {
-                state: {}
-            }
-        ]
-    ]
-   ]
-
-  fields: [
-    [
-      {
-      platform: 
-          {
-            behaviour:
-              platformType: {}
-            state:
-              owner: 1
-          }
-      resource: 
-          {
-            behaviour:
-              resourceType: 1
-            state: {}
-          }
-      },
-      {
-      platform: 
-          {
-            behaviour:
-              platformType: {}
-            state:
-              owner: 2
-          }
-      resource: 
-          {
-            behaviour:
-              resourceType: 2
-            state: {}
-          }
-      }
-    ]
-    [
-     {
-      platform: 
-          {
-            behaviour:
-              platformType: 1
-            state:
-              owner: 1
-          }
-      resource: 
-          {
-            behaviour:
-              resourceType: {}
-            state: {}
-          }
-      },
-      {
-      platform: 
-          {
-            behaviour:
-              platformType: 1
-            state:
-              owner: 1
-          }
-      resource: 
-          {
-            behaviour:
-              resourceType: {}
-            state: {}
-          }
-      },
-      {
-      platform: 
-          {
-            behaviour:
-              platformType: {}
-            state:
-              owner: 1
-          }
-      resource: 
-          {
-            behaviour:
-              resourceType: {}
-            state: {}
-          }
-      }
-    ],
-    [
-      {
-      platform: 
-          {
-            behaviour:
-              platformType: {}
-            state:
-              owner: 2
-          }
-      resource: 
-          {
-            behaviour:
-              resourceType: 2
-            state: {}
-          }
-      },
-      {
-      platform: 
-          {
-            behaviour:
-              platformType: 1
-            state:
-              owner: 2
-          }
-      resource: 
-          {
-            behaviour:
-              resourceType: 2
-            state: {}
-          }
-      },
-    ]
-   ]
-  }
-###
 
 channelStat =
     state: {}
@@ -553,15 +293,11 @@ channelStat =
                 id: 0
         }
 
-myFunction = () ->
-    console.log "a"
-
-
 $ ->
-    canvasBoard = document.getElementById "board"
     canvasBackground = document.getElementById "background"
-    canvasSignals = document.getElementById "signals"
+    canvasBoard = document.getElementById "board"
     canvasChannels = document.getElementById "channels"
+    canvasSignals = document.getElementById "signals"
     ###
     if canvasBackground?
         stageBackground = new Stage canvasBackground
@@ -570,21 +306,14 @@ $ ->
     if canvasBoard?
         stageBoard = new Stage canvasBoard
         boardDrawer = new Drawer 1, stageBoard, 8, 15
-        boardDrawer.drawState(state)
+        boardDrawer.drawState(state)        
         boardDrawer.createChannel 2, 2, 3, channelStat
         boardDrawer.createChannel 3, 3, 3, channelStat
         boardDrawer.createChannel 4, 4, 5, channelStat
-        Touch.enable stageBoard
-        stageBoard.onPress = myFunction
-        console.log myFunction
-        console.log stageBoard.onPress
-
-    ###
     if canvasChannels?
         stageChannels = new Stage canvasChannels
-        channelDrawer = new Drawer 2, stageChannels, 2, 3   
-    ###
-    
+        channelDrawer = new Drawer 2, stageChannels, 8, 15 
+        channelDrawer.setBacklight() 
     if canvasSignals?
         stageSignals = new Stage canvasSignals
         signalsDrawer = new Drawer 3, stageSignals, 8, 15
@@ -592,9 +321,10 @@ $ ->
         Ticker.useRAF = true
         Ticker.setFPS 60
         signalsDrawer.createSignal 3, 3, 3
-    ### 
-        for y in [0..8]
+        for y in [0..4]
             for x in [0..4]
                 signalsDrawer.createSignal y, x, 0
-                signalsDrawer.createSignal y, x, 1
-    ###
+
+        
+
+    
