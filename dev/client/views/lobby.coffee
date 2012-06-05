@@ -16,8 +16,7 @@ class LobbyView extends Backbone.View
     #Listen to the server
     @communicator.on 'message:new', @handleServerMessage
 
-    KeyboardJS.bind.key 'enter', @newMessage, () ->
-      console.debug @$el.find( 'textarea:focus' )
+    KeyboardJS.bind.key 'enter', @newMessage, =>
       @$el.find( 'textarea:focus' ).val ''
 
   #Add new message to the chat
@@ -26,6 +25,7 @@ class LobbyView extends Backbone.View
 
     msg = @messageTemplate message: model.toJSON()
     @$el.find( '.chat ul' ).append msg
+    @$el.find( '#chatScroll' ).tinyscrollbar_update()
 
   handleServerMessage: ( data ) =>
     console.log "Lobby: Server message"

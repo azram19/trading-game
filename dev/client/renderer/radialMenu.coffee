@@ -21,23 +21,44 @@ class radialMenu
     ###
     @$title = $ "<div/>"
     @$title.text @text
+    @$title.addClass 'radial-menu-title'
     @$title.appendTo 'body'
-    @$title.css 'display', 'none'
+    @$title.css
+      display: 'none'
+      position: 'absolute'
+      cursor : 'pointer'
+      'text-transform' : 'uppercase'
+      'font-size' : '10px'
+      'text-shadow' : '1px 1px #000'
+      'color' : '#aaa'
+
     @$title.click =>
       @click()
 
     @$desc = $ "<div/>"
     @$desc.html @desc
+    @$desc.addClass 'radial-menu-desc'
+    @$desc.addClass 'hyphenate'
     @$desc.appendTo 'body'
     @$desc.css
       display: 'none'
       position: 'absolute'
       width: '200px'
-      color: '#fff'
-      padding: '10px'
-      border: '1px rgba(0,0,0,0.6) solid'
-      background: 'rgba(255,255,255,0.1)'
+      color: '#bbb'
+      padding: '0 10px'
+      hyphens:'auto'
+      'text-align':'justify'
+      '-webkit-hyphens':'auto'
+      '-webkit-hyphenate-limit-after':1
+      '-webkit-hyphenate-limit-before':3
+      '-moz-hyphens':'auto'
+      'text-shadow' : '1px 1px #000'
+      'font-size' : '10px'
+      'border-left' : '1px rgba(0,0,0,0.1) solid'
 
+    @$desc.find('p').css
+      'font-size' : '10px'
+      'margin' : '0'
 
     ###
     Get the context and stage we will be drawing to. Only for the root it will be the actuall context, for every other element it will get
@@ -75,7 +96,7 @@ class radialMenu
 
     #Alphas
     @fadedInOpacity = 1
-    @fadedOutOpacity = 0.2
+    @fadedOutOpacity = 0.1
     @opacity = 1
 
     #Flags
@@ -139,26 +160,42 @@ class radialMenu
       return false
 
     @drawn = true
-    @button = new Shape()
 
+    @button = new Shape()
     @button.graphics
-      .beginStroke( "red" )
-      .beginFill( "red" )
+      .beginRadialGradientFill(["#C21A01","#A7DBD8","#69D2E7", "#222"], [0,0,0.7,1], @x, @y, 0, @x, @y, @radius)
       .drawCircle( @x, @y, @radius )
+
+    @circle = new Shape()
+    @circle.visible = false
+    @circle.graphics
+      .setStrokeStyle(1)
+      .beginStroke( "rgba(0,0,0,0.1)" )
+      .drawCircle( @x, @y, @expand_length )
+
+    @circleC = new Shape()
+    @circleC.visible = false
+    @circleC.graphics
+      .setStrokeStyle(1)
+      .beginStroke( "rgba(0,0,0,0.1)" )
+      .drawCircle( @x, @y, @compact_length )
 
     P = @button.localToGlobal @x, @y
 
     @$title.css
-      'position': 'absolute'
       'left': P.x
       'top': P.y
       'opacity' : 1
-      'cursor' : 'pointer'
+
 
     if not @parent?
+      @stage.addChild @circleC
+      @stage.addChild @circle
       @stage.addChild @button
       @stage.addChild @container
     else
+      @parent.container.addChild @circleC
+      @parent.container.addChild @circle
       @parent.container.addChild @button
       @parent.container.addChild @container
 
@@ -173,7 +210,7 @@ class radialMenu
 
     c.draw() for c in @children
 
-    @button.cache @x-@radius, @x-@radius, @radius * 2, @radius * 2
+    @button.cache @x-@radius, @y-@radius, (@radius) * 2, (@radius) * 2
 
     ###
     Register us as a listener for the Mouse and the Ticker
@@ -228,12 +265,17 @@ class radialMenu
       @stepOpacity = 0
 
     @hideChildren()
+    @circle.visible = false
+    @circleC.visible = false
 
   expand: ( expandChildren ) =>
     console.log "expand"
 
     if not @visible
       @show()
+
+    if @children.length > 0
+      @circle.visible = true
 
     @expanding = true
     @collapsing = false
@@ -264,10 +306,16 @@ class radialMenu
 
     ) for c in @children
 
+    @circle.visible = true
+    @circleC.visible = true
+
   hideChildren: () =>
     @expanded = false
     @undisplayText c for c in @children
     c.hide() for c in @children
+
+    @circle.visible = false
+    @circleC.visible = false
 
   collapse: () =>
     @collapsing = true
@@ -287,6 +335,9 @@ class radialMenu
       @stepOpacity = 0
 
     @hideChildren()
+    @circle.visible = false
+    @circleC.visible = false
+
 
   showAnimate: () =>
     if @steps <= 0
@@ -359,27 +410,22 @@ class radialMenu
     if not child.descDisplayed
       return
 
-    console.log 'undisplay'
-
     angle = (-(Math.PI*7/6) - (child.childIndex) * @alpha)
 
     child.beta = angle
     child.hideText()
 
   showText: () =>
-    console.log "show"
     global = @parent.container.localToGlobal @x, @y
 
     @$desc.css
       top: global.y - 10
       left: global.x + @$title.width() + 25
 
-    @$desc.slideDown()
+    @$desc.slideDown 200
     @descDisplayed = true
 
   hideText: () =>
-    console.log "hide"
-    console.debug @$desc
     @$desc.hide()
     @descDisplayed = false
 
@@ -453,6 +499,12 @@ class radialMenu
     ###
     Apply new coordinates computated by animating functions
     ###
+    @circle.x = @x
+    @circle.y = @y
+
+    @circleC.x = @x
+    @circleC.y = @y
+
     @button.x = @x
     @button.y = @y
 

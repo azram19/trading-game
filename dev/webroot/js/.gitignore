@@ -1,1 +1,7 @@
-*.js
+collections.js
+engine.js
+models.js
+renderer.js
+signals.js
+templates.js
+views.js
