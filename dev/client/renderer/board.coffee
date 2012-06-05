@@ -291,8 +291,18 @@ class OverlayDrawer extends Drawer
         overlay = new Shape g
         overlay.alpha = 0.01
         @stage.addChild overlay
-        overlay.onMouseOver = @mouseOverField
-        overlay.onMouseOut = @mouseOutField
+
+        boundaries = 
+            x: point.x - @horIncrement
+            y: point.y - @size
+            width: 2*@horIncrement
+            height: 2*@size
+
+        Mouse.register {target: overlay, boundaries: boundaries}, @mouseOutField, ['mouseout']
+        Mouse.register {target: overlay, boundaries: boundaries}, @mouseOverField, ['mousemove']
+
+        #overlay.onMouseOver = @mouseOverField
+        #overlay.onMouseOut = @mouseOutField
 
     createOverlay: (y, x) ->
         point = @getPoint(x, y)
@@ -307,14 +317,19 @@ class OverlayDrawer extends Drawer
                 @drawOverlay(point)
         @stage.update()
 
-    mouseOverField: (event) =>
+    mouseOverField: (event, x, y) =>
         console.log "gey"
-        event.target.alpha = 0.2
+        if event.target.hitTest(x, y)
+            event.target.alpha = 0.2
+            @stage.update()
+
+    mouseOutField: (event, x, y) =>
+        if not event.target.hitTest(x, y)
+            event.target.alpha = 0.01
+        else
+            event.target.alpha = 0.2
         @stage.update()
 
-    mouseOutField: (event) =>
-        event.target.alpha = 0.01
-        @stage.update()
 
 class BackgroundDrawer
     constructor: (@stage) ->
@@ -389,20 +404,21 @@ class Renderer
             @channelsST = new Stage canvasChannels
             @channelsDR = new ChannelsDrawer @channelsST, @minRow, @maxRow
             @addSTDR(@channelsST, @channelsDR)
+        ###
         if canvasOverlay?
             @overlayST = new Stage canvasOverlay
             @overlayDR = new OverlayDrawer @overlayST, @minRow, @maxRow
             @addSTDR(@overlayST, @overlayDR)
+        ###
         if canvasSignals?
             @signalsST = new Stage canvasSignals
             @signalsDR = new SignalsDrawer @signalsST, @minRow, @maxRow
             @addSTDR(@signalsST, @signalsDR)
-        ###
         if canvasUI?
             @UIST = new Stage canvasUI
             @UIDR = new OverlayDrawer @UIST, @minRow, @maxRow
             @addSTDR(@UIST, @UIDR)
-        ###
+            window.Mouse = new MouseClass canvasUI
         @diffRows = @maxRow - @minRow
 
 
@@ -437,7 +453,7 @@ class Renderer
         if fieldState.platform.type?
             @platformsDR.drawPlatform(point, fieldState.platform.type())
         @gridDR.drawStroke(point)
-        @overlayDR.drawOverlay(point)
+        @UIDR.drawOverlay(point)
 
     clearAll: () ->
         for stage in @stages
