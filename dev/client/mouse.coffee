@@ -80,7 +80,7 @@ class Mouse
           ev_handler_mouseout e, outObjs
 
         if inObjs.length > 0
-          ev_handler_mouseout e, inObjs
+          ev_handler_mousein e, inObjs
 
       handlersObjs = _.chain( handlersObjs )
         .filter( ( o ) -> e.type in o.es )
@@ -104,7 +104,6 @@ class Mouse
 
       e.type = 'mouseout'
 
-
       objs = _.chain( objs )
         .filter( ( o ) -> e.type in o.es )
         .sortBy( ( o ) -> -o.p )
@@ -120,7 +119,7 @@ class Mouse
       ) for o in objs
 
     #handler for abstract event in
-    ev_handler_mouseout = ( e, objs ) =>
+    ev_handler_mousein = ( e, objs ) =>
       [x,y] = getXY e
 
       e.type = 'mousein'
