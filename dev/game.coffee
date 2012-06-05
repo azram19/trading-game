@@ -8,12 +8,11 @@ app.everyauth = require 'everyauth'
 MemoryStore = express.session.MemoryStore
 Communicator = require('./server/communicator').Communicator
 
-app.Mongo = require 'mongodb'
+app.Mongoose = require 'mongoose'
 
 app.sessionStore = new MemoryStore()
 
 app.everyauth.helpExpress app
-
 
 #config the app
 config = require('./config.coffee')(app, express)
@@ -32,14 +31,15 @@ app.get '/', ( req, res ) ->
     res.render 'index',
       title: 'Signals early chat tests'
 
-app.get '/lobby', ( req, res ) ->
+app.get '/lobby', ( req, res ) =>
   if app.requireAuth and not req.loggedIn
     res.redirect '/'
   else
-    usersArray = _.toArray app.usersByFbId
-    res.render 'lobby'
-      users: usersArray
-      numberOfUsers: usersArray.length
+    app.Mongoose.model('User').find {}, (err, docs) ->
+        console.log docs
+        res.render 'lobby'
+            users: _.toArray docs
+            numberOfUsers: docs.length
 
 port =  process.env.PORT || process.env['PORT_WWW']  || 3000
 
