@@ -79,16 +79,14 @@ class Communicator
 
   clientLeaveChannel: ( client ) ->
       channel = client.getChannel()
-      
+
       if channel?
         client.getSocket().leave channel
         client.leaveChannel()
-      
 
   clientJoinChannel: ( client, channel ) ->
       client.joinChannel channel
       client.getSocket().join channel
-  
 
   configHandlers: =>
 
@@ -141,9 +139,7 @@ class Communicator
   start: =>
     self = @
 
-
   getClientById: ( id ) =>
     #TODO
-
 
 module.exports = exports = Communicator
