@@ -1,6 +1,9 @@
 {{#each messages}}
-  <li class='message'>
-    <span>{{this.author}}</span>
+  <li>
     <p>{{this.message}}</p>
+    <div>
+      <span class='name'>{{this.author}}</span>
+      <span class='time'>{{this.time}}</span>
+    </div>
   </li>
 {{/each}}

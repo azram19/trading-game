@@ -17,15 +17,15 @@ class LobbyView extends Backbone.View
     @communicator.on 'message:new', @handleServerMessage
 
     KeyboardJS.bind.key 'enter', @newMessage, =>
-      @$el.find( 'textarea:focus' ).val ''
+      $( '#chat textarea:focus' ).val ''
 
   #Add new message to the chat
   addMessage: ( model ) =>
     console.log "Lobby: New message"
 
     msg = @messageTemplate message: model.toJSON()
-    @$el.find( '.chat ul' ).append msg
-    @$el.find( '#chatScroll' ).tinyscrollbar_update()
+    $( '#chat ul' ).append msg
+    $( "#chat .nano" ).nanoScroller scroll: 'bottom'
 
   handleServerMessage: ( data ) =>
     console.log "Lobby: Server message"
@@ -34,7 +34,7 @@ class LobbyView extends Backbone.View
 
   newMessage: =>
     #Get the textarea and check if we are focused on it
-    textarea = @$el.find 'textarea:focus'
+    textarea = $ '#chat textarea:focus'
     if textarea.length > 0
 
       #set message attributes
@@ -58,6 +58,7 @@ class LobbyView extends Backbone.View
   render: =>
     msgs =  @messagesTemplate messages: @collection.toJSON()
 
-    @$el.find( '.chat ul' ).html msgs
+    $( '#chat ul' ).html msgs
+    $( "#chat .nano" ).nanoScroller();
 
 window['LobbyView'] = LobbyView
