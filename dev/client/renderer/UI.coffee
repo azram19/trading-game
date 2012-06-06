@@ -6,7 +6,7 @@ class UI extends Drawer
 
     @on "fieldClick", @handleClickOnField
 
-    @menus = []
+    @curMenu = null
 
     @engine =
       getMenu:() ->
@@ -14,6 +14,8 @@ class UI extends Drawer
           'pies:kot:leszek',
           'pies:malpa:swinka',
         ]
+      getField: () ->
+        {}
 
     window.Types.Events =
         pies:
@@ -31,10 +33,6 @@ class UI extends Drawer
               desc: 'very interesting creature'
 
   initializeMenus: () ->
-    for j in [0 ... (2*@diffRows + 1)]
-      @menus[j] = {}
-      for i in [0 ... @maxRow - Math.abs(@diffRows - j)]
-        @menus[j][i] = {}
 
     null
 
@@ -43,7 +41,8 @@ class UI extends Drawer
 
     menuStructure = @engine.getMenu i, j
 
-    menu = new S.radialMenu null, @stage.canvas, p.x, p.y, "", "", true
+    obj = @engine.getField i, j
+    menu = new S.radialMenu null, @stage.canvas, p.x, p.y, "", "", true, obj
 
     eventsStructure = window.Types.Events
     submenuNames = @getPrefixes menuStructure
@@ -56,7 +55,7 @@ class UI extends Drawer
       menu.addChild subMenu
     ) for submenuName in submenuNames
 
-    @menus[j][i] = menu
+    menu
 
   #name of the event element, eventsStructure - Types.Events sub object
   #eventsStructure [a:b:c] ...
@@ -119,10 +118,12 @@ class UI extends Drawer
   handleClickOnField: ( i, j ) =>
     (menu?.hide() for menu in menuI) for menuI in @menus
 
-    @menus[j][i].click()
+    @curMenu = createMenu i, j
+    @curMenu.click()
+
 
   render: (i,j) ->
-    menu = @menus[j][i]
+    menu = createMenu i, j
     menu.drawIt()
     menu.show()
 
@@ -134,6 +135,7 @@ $ ->
   canvas = document.getElementById "UI"
   if canvas?
     stage = new Stage canvas
+    stage.autoclear = false
     window.UI = UI = new S.UIClass stage, 8, 15
     UI.initializeMenus()
     window.M = m = UI.createMenu 6,6
