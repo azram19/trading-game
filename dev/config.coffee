@@ -24,10 +24,6 @@ module.exports = ( app, express ) ->
         userName: String
         id: String
         highscore: Number
-        friends: [
-            type: Schema.ObjectId
-            ref: 'User'
-        ]
 
   app.Mongoose.model 'User', app.userSchema
 
@@ -63,7 +59,6 @@ module.exports = ( app, express ) ->
     .findOrCreateUser( (session, accessToken, accessTokExtra, fbUserMetadata) ->
         userModel = app.Mongoose.model 'User'
         userModel.findOne id: fbUserMetadata.id, (err, doc) ->
-            console.log doc
             if err?
                 throw err
             if not doc?
