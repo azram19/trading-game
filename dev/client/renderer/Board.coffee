@@ -93,8 +93,8 @@ class OffSignals
 
     getSignal: () ->
         shape = @stage.getChildAt @out
-        @stage.removeChildAt @out
-        @out = (@out + 1) % @signalCount
+        #@stage.removeChildAt @out
+        @out += 1
         shape
 
     returnSignal: (signal) ->
@@ -158,9 +158,10 @@ class SignalsDrawer extends Drawer
     drawSignal: (point, dir) ->
         signal = @getSignal()
         if signal is null
+            console.log "from OFF"
             signal = @offSignals.getSignal()
             @stage.addChild signal
-        signal.source = new Point(point.x, point.y)
+        console.log signal
         signal.x = point.x
         signal.y = point.y
         signal.tickSizeX = @ticksX[dir]
@@ -170,8 +171,9 @@ class SignalsDrawer extends Drawer
         @stage.update()
 
     getSignal: () ->
+        console.log @stage.children
         for sig in @stage.children
-            if sig.isSignal and not sig.isVisible
+            if sig.isSignal and not sig.visible
                 return sig
         null
 
@@ -454,14 +456,12 @@ class Renderer
         if canvasChannels?
             @channelsST = new Stage canvasChannels
             @channelsDR = new ChannelsDrawer @channelsST, @minRow, @maxRow
-            @addSTDR(@channelsST, @channelsDR)
-        
+            @addSTDR(@channelsST, @channelsDR)      
         if canvasOverlay?
             @overlayST = new Stage canvasOverlay
             @overlayDR = new OverlayDrawer @overlayST, @minRow, @maxRow
             @addSTDR(@overlayST, @overlayDR)
-            window.Mouse = new MouseClass canvasOverlay, 1280, 800
-        
+            window.Mouse = new MouseClass canvasOverlay, 1280, 800   
         if canvasSignals?
             @signalsST = new Stage canvasSignals
             @offStage = new Stage canvasOff
@@ -566,4 +566,13 @@ $ ->
         renderer.buildChannel 2, 2, 3, channelStat
         renderer.buildChannel 3, 3, 3, channelStat
         renderer.buildChannel 4, 4, 5, channelStat
+        renderer.buildChannel 4, 4, 3, channelStat
+        renderer.buildChannel 5, 5, 2, channelStat
+        renderer.buildChannel 5, 6, 3, channelStat
+        renderer.buildChannel 6, 7, 4, channelStat
+        renderer.buildChannel 7, 7, 5, channelStat
+        renderer.buildChannel 7, 6, 0, channelStat
+        renderer.buildChannel 6, 5, 1, channelStat
+        window.renderer = renderer
+
 
