@@ -1,5 +1,5 @@
 Session = require( 'connect' ).middleware.session.Session
-ComClient = require( './communicationClient' ).ComClient
+ComClient = require './communicationClient'
 _ = require( 'underscore' )._
 Backbone = require( 'backbone' )
 parseCookie = require('connect').utils.parseCookie
@@ -146,4 +146,4 @@ class Communicator
     #TODO
 
 
-exports.Communicator = Communicator
+module.exports = exports = Communicator

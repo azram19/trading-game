@@ -18,4 +18,4 @@ class ComClient
   leaveChannel: ( channel ) =>
     @channel = null
 
-exports.ComClient = ComClient
+module.exports = exports = ComClient

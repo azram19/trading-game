@@ -5,6 +5,10 @@ module.exports = ( app, express ) ->
   app.facebookAppSecret = '1cb71dd07064e3d110f0d76695961664'
   app.facebookScope = 'email'
 
+  app.googleAppId = '1045311658397.apps.googleusercontent.com'
+  app.googleAppSecret = 'Wy21_PuUibbG-tIgaLXTOX8E'
+  app.googleScope = 'https://www.googleapis.com/auth/plus.me https://www.googleapis.com/auth/userinfo.profile'
+
   app.sessionSecret = 'veryFuckingSecret'
   app.sessionKey = 'express.sid'
 
@@ -12,6 +16,8 @@ module.exports = ( app, express ) ->
   app.usersByFbId = {}
 
   app.mongoURL = 'mongodb://signal:signals11@ds033097.mongolab.com:33097/heroku_app4770943'
+
+  _ = require('underscore')._
 
   Schema = app.Mongoose.Schema
   ObjectId = Schema.ObjectId
@@ -22,7 +28,11 @@ module.exports = ( app, express ) ->
   app.userSchema = new Schema
         name: String
         userName: String
-        id: String
+        id:
+          type: String
+          index:
+            unique: true
+        type: String
         highscore: Number
 
   app.Mongoose.model 'User', app.userSchema
@@ -50,30 +60,62 @@ module.exports = ( app, express ) ->
 
   app.Mongoose.model 'Chat', app.chatSchema
 
-  
+  app.fetchUserWithPromise = (userData, promise) ->
+    userModel = app.Mongoose.model 'User'
+    userModel.findOne id: userData.id, (err, doc) ->
+      if err?
+        console.error 'Cannot fetch user data from DB'
+        console.log err
+        promise.fail err
+
+      if doc?
+        promise.fulfill doc
+      else
+        newUser = new userModel()
+        newUser = _.extend newUser, userData
+        newUser.save (err) ->
+          if err?
+            console.error 'Cannot add user'
+            console.log err
+            promise.fail err
+          else
+            promise.fulfill doc
+
   #Everyauth - Facebook
   app.everyauth.facebook
     .appId( app.facebookAppId )
     .appSecret( app.facebookAppSecret )
     .scope( app.facebookScope )
     .findOrCreateUser( (session, accessToken, accessTokExtra, fbUserMetadata) ->
-        userModel = app.Mongoose.model 'User'
-        userModel.findOne id: fbUserMetadata.id, (err, doc) ->
-            if err?
-                throw err
-            if not doc?
-                newUser = new userModel()
-                newUser.name = fbUserMetadata.name
-                newUser.userName = fbUserMetadata.username
-                newUser.id = fbUserMetadata.id
-                newUser.save (err) ->
-                        if err?
-                            throw err
+      userPromise = this.Promise()
+      userData =
+        name: fbUserMetadata.name
+        userName: fbUserMetadata.username
+        id: fbUserMetadata.id
+        type: 'facebook'
+      app.fetchUserWithPromise userData, userPromise
+      userPromise
     )
-    .redirectPath( '/lobby' )
+    .redirectPath( '/lobby2' )
+
+  app.everyauth.google
+    .appId( app.googleAppId )
+    .appSecret( app.googleAppSecret )
+    .scope( app.googleScope )
+    .findOrCreateUser( (session, accessToken, extra, googleUser) ->
+      userPromise = this.Promise()
+      userData =
+        name: googleUser.name
+        userName: googleUser.id
+        id: googleUser.id
+        type: 'google+'
+      app.fetchUserWithPromise userData, userPromise
+      userPromise
+    )
+    .redirectPath( '/lobby2' )
 
   app.everyauth.everymodule.findUserById (userId, callback) ->
-      app.Mongoose.model('User').findById userId, callback
+    app.Mongoose.model('User').findOne id: userId, callback
 
   #generic config
   app.configure ->
