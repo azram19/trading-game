@@ -1,51 +1,29 @@
-class GSignal
-    tickSizeX: 0
-    tickSizeY: 0
-    div: 48
-    closestDest: {}
-    index: 0
-
-    constructor: (@shape, @source, dest) ->
-        @setNextTarget(source, dest)
-
-    setTickSizeX: (t) ->
-        @tickSizeX = t
-
-    getTickSizeX: () ->
-        @tickSizeX
-
-    setTickSizeY: (t) ->
-        @tickSizeY = t
-
-    getTickSizeY: () ->
-        @tickSizeY
-
-    hasNext: () ->
-        @index < @directions.length
-
-    getNext: () ->
-        @index++
-        @directions[@index]
-
-    setNextTarget: (source, dest) ->
-        @closestDest = new Point(dest.x - source.x, dest.y - source.y)
-        @setRouting()
-
-    setRouting: () ->
-        @setTickSizeX(@closestDest.x/@div)
-        @setTickSizeY(@closestDest.y/@div)
-
 class Drawer
     margin: 100
     size: 30
+    diffRows: 0
     horIncrement: 0
     verIncrement: 0
-    diffRows: 0
+    div: 48
+    offsetX: []
+    offsetY: []
+    ticksX: []
+    ticksY: []
 
     constructor: (@stage, @minRow, @maxRow) ->
         @horIncrement = Math.ceil Math.sqrt(3)*@size/2
         @verIncrement = Math.ceil 3*@size/2
         @diffRows = @maxRow - @minRow
+        @setupOffsets()
+        @setupTicks()
+
+    setupOffsets: () ->
+        @offsetX = [-@horIncrement, @horIncrement, 2*@horIncrement, @horIncrement, -@horIncrement, -2*@horIncrement]
+        @offsetY = [-@verIncrement, -@verIncrement, 0, @verIncrement, @verIncrement, 0]
+
+    setupTicks: () ->
+        @ticksX = [-@horIncrement / @div, @horIncrement / @div, 2*@horIncrement / @div, @horIncrement / @div, -@horIncrement / @div, -2*@horIncrement / @div]
+        @ticksY = [-@verIncrement / @div, -@verIncrement / @div, 0, @verIncrement / @div, @verIncrement / @div, 0]
 
     setSize: (size) ->
         @size = size
@@ -60,23 +38,16 @@ class Drawer
         new Point(x, y)
 
     getDestination: (point, dir) ->
-        p = new Point(point.x, point.y)
-        switch dir
-            when 0 then (
-                p.x -= @horIncrement
-                p.y -= @verIncrement)
-            when 1 then (
-                p.x += @horIncrement
-                p.y -= @verIncrement)
-            when 2 then p.x += 2*@horIncrement
-            when 3 then (
-                p.x += @horIncrement
-                p.y += @verIncrement)
-            when 4 then (
-                p.x -= @horIncrement
-                p.y += @verIncrement)
-            when 5 then p.x -= 2*@horIncrement
-        p
+        p = new Point(point.x + @offsetX[dir], point.y + @offsetY[dir])
+
+    getTicks: (dir) ->
+        p = new Point(@ticksX[dir], @ticksY[dir])
+
+    getCoords: (x, y) ->
+        offset = @margin + Math.abs(@diffRows-j)*@horIncrement
+        i = (x - offset) / 2*@horIncrement
+        j = (y - @margin) / @verIncrement
+        new Point(i,j)
 
 window.Drawer = Drawer
 
@@ -98,6 +69,7 @@ class ChannelsDrawer extends Drawer
         destination = @getDestination(point, direction)
         @drawChannel(point, destination)
         @stage.update()
+        destination
 
     drawState: (boardState) ->
         @stage.removeAllChildren()
@@ -109,16 +81,67 @@ class ChannelsDrawer extends Drawer
                         @drawChannel(point, k)
         @stage.update()
 
+class OffSignals
+    signalRadius: 8
+    signalCount: 50
+    incoming: 0
+    out: 0
+
+    constructor: (@stage, @distance, @div) ->
+        @stage.snapToPixelEnabled = true
+        @setupSignalTable()
+
+    getSignal: () ->
+        shape = @stage.getChildAt @out
+        @stage.removeChildAt @out
+        @out = (@out + 1) % @signalCount
+        shape
+
+    returnSignal: (signal) ->
+        @stage.addChildAt signal, @incoming
+        @incoming = (@incoming + 1) % @signalCount
+
+    setupSignalTable: () ->
+        for i in [0..@signalCount]
+            @drawSignal()
+        @toogleCache(true)
+        @stage.update()
+
+    doubleSignalTable: () ->
+        @signalCount = 2*@signalCount
+        @setupSignalTable()
+
+    drawSignal: () ->
+        g = new Graphics()
+        g.setStrokeStyle(1)
+            .beginStroke("#FFFF00")
+            .drawCircle(0, 0, @signalRadius)
+        shape = new Shape g
+        shape.snapToPixel = true
+        shape.visible = false
+        shape.isSignal = true
+        #shape.cache(-@signalRadius-1, -@signalRadius-1, (@signalRadius+1)*2, (@signalRadius+1)*2)
+        @stage.addChild shape
+        
+    toogleCache: (status) ->
+        length = @stage.getNumChildren() - 1
+        for i in [0..length]
+            shape = @stage.getChildAt i
+            if status
+                shape.cache(-@signalRadius-1, -@signalRadius-1, (@signalRadius+1)*2, (@signalRadius+1)*2)
+            else
+                shape.uncache()
+
 class SignalsDrawer extends Drawer
     fpsLabel: {}
-    signals: {}
+    offSignals: {}
     signalRadius: 8
+    signalCount: 50
 
-    constructor: (@stage, @minRow, @maxRow) ->
+    constructor: (@stage, @minRow, @maxRow, @offStage) ->
         super @stage, @minRow, @maxRow
-
-        @stage.snapToPixelEnabled = true
-        @signals = new Container
+        @distance = 2*@horIncrement
+        @offSignals = new OffSignals @offStage
 
         Ticker.addListener this
         Ticker.useRAF = true
@@ -130,27 +153,31 @@ class SignalsDrawer extends Drawer
         @stage.addChild @fpsLabel
         @fpsLabel.x = 10
         @fpsLabel.y = 20
+        @fpsLabel.isSignal = false
 
-    drawSignal: (point, destination) ->
-        g = new Graphics()
-        g.setStrokeStyle(1)
-            .beginStroke("#FFFF00")
-            .drawCircle(0, 0, @signalRadius)
-        shape = new Shape g
-        shape.x = point.x
-        shape.y = point.y
-        signal = new GSignal(shape, point, destination)
-        @signals.addChild signal
-        @stage.addChild signal.shape
+    drawSignal: (point, dir) ->
+        signal = @getSignal()
+        if signal is null
+            signal = @offSignals.getSignal()
+            @stage.addChild signal
+        signal.source = new Point(point.x, point.y)
+        signal.x = point.x
+        signal.y = point.y
+        signal.tickSizeX = @ticksX[dir]
+        signal.tickSizeY = @ticksY[dir]
+        signal.visible = true
+        signal.k = 0
         @stage.update()
-        shape.snapToPixel = true
-        shape.cache(-@signalRadius-1, -@signalRadius-1, (@signalRadius+1)*2, (@signalRadius+1)*2)
-        #@toogleCache(true)
+
+    getSignal: () ->
+        for sig in @stage.children
+            if sig.isSignal and not sig.isVisible
+                return sig
+        null
 
     createSignal: (y, x, direction) ->
         point = @getPoint(x, y)
-        destination = @getDestination(point, direction)
-        @drawSignal(point, destination)
+        @drawSignal(point, direction)
         @stage.update()
 
     getDistance: (x, y) ->
@@ -166,16 +193,25 @@ class SignalsDrawer extends Drawer
                 shape.uncache()
 
     tick: () ->
-        for signal in @signals.children
-            if signal.shape.isVisible()
-                if @getDistance(signal.shape.x - signal.source.x, signal.shape.y - signal.source.y) >= 2*@horIncrement
-                    signal.tickSizeX = -signal.tickSizeX
-                    signal.tickSizeY = -signal.tickSizeY
-                signal.shape.x += signal.tickSizeX
-                signal.shape.y += signal.tickSizeY
+        for signal in @stage.children
+            if signal.isSignal and signal.isVisible
+                if @getDistance(signal.k * signal.tickSizeX, signal.k * signal.tickSizeY) >= 2*@horIncrement
+                    signal.visible = false
+                else   
+                    signal.x += signal.tickSizeX
+                    signal.y += signal.tickSizeY
+                    signal.k += 1
         @fpsLabel.text = Math.round(Ticker.getMeasuredFPS())+" fps"
+        #@stage.children = _.reject @stage.children, @filterSignals
         @stage.update()
 
+    filterSignals: (signal) => 
+            if signal.mark
+                @offSignals.returnSignal signal
+                true
+            else 
+                false
+        
 class ResourcesDrawer extends Drawer
     constructor: (@stage, @minRow, @maxRow) ->
         super @stage, @minRow, @maxRow
@@ -337,6 +373,9 @@ class OverlayDrawer extends Drawer
         @stage.update()
         ###
 
+    fieldClick: (event) =>
+        coords = getCoords(event.stageX, event.stageY)
+
     tick: () ->
         if(@update)
             @update = false
@@ -390,6 +429,7 @@ class Renderer
         canvasOverlay = document.getElementById "overlay"
         canvasSignals = document.getElementById "signals"
         canvasUI = document.getElementById "UI"
+        canvasOff = document.getElementById "off"
 
         if canvasBackground?
             @backgroundST = new Stage canvasBackground
@@ -415,21 +455,24 @@ class Renderer
             @channelsST = new Stage canvasChannels
             @channelsDR = new ChannelsDrawer @channelsST, @minRow, @maxRow
             @addSTDR(@channelsST, @channelsDR)
-        ###
+        
         if canvasOverlay?
             @overlayST = new Stage canvasOverlay
             @overlayDR = new OverlayDrawer @overlayST, @minRow, @maxRow
             @addSTDR(@overlayST, @overlayDR)
-        ###
+            window.Mouse = new MouseClass canvasOverlay, 1280, 800
+        
         if canvasSignals?
             @signalsST = new Stage canvasSignals
-            @signalsDR = new SignalsDrawer @signalsST, @minRow, @maxRow
+            @offStage = new Stage canvasOff
+            @signalsDR = new SignalsDrawer @signalsST, @minRow, @maxRow, @offStage
             @addSTDR(@signalsST, @signalsDR)
+        ###
         if canvasUI?
             @UIST = new Stage canvasUI
             @UIDR = new OverlayDrawer @UIST, @minRow, @maxRow
-            @addSTDR(@UIST, @UIDR)
-            window.Mouse = new MouseClass canvasUI, 1280, 800
+            @addSTDR(@UIST, @UIDR)            
+        ###
         @diffRows = @maxRow - @minRow
 
 
@@ -444,7 +487,9 @@ class Renderer
         @signalsDR.createSignal(y, x, direction)
 
     buildChannel: (y, x, direction, channelState) ->
-        @channelsDR.createChannel(y, x, direction, channelState)
+        dest = @channelsDR.createChannel(y, x, direction, channelState) 
+        @ownershipDR.drawOwnership(dest, channelState.state.owner)
+        @ownershipST.update()
 
     buildPlatform: (y, x, fieldState) ->
         @boardDR.createPlatfrom(y, x, fieldState)
@@ -453,8 +498,13 @@ class Renderer
         @boardDR.createResource(y, x, fieldState)
 
     captureChannel: (y, x, direction, channelState) ->
+        point = @ownershipDR.getPoint(x, y)
+        dest = @ownershipDR.getDestination(point, direction)
+        @ownershipDR.drawOwnership(dest, channelState.state.owner)
 
     capturePlatform: (y, x, fieldState) ->
+        @point = @ownershipDR.getPoint(x, y)
+        @ownershipDR.drawOwnership(dest, channelState.state.owner)
 
     drawHex: (point, fieldState) ->
         if fieldState.platform.type?
@@ -464,7 +514,7 @@ class Renderer
         if fieldState.platform.type?
             @platformsDR.drawPlatform(point, fieldState.platform.type())
         @gridDR.drawStroke(point)
-        @UIDR.drawOverlay(point)
+        @overlayDR.drawOverlay(point)
 
     clearAll: () ->
         for stage in @stages
@@ -494,7 +544,10 @@ state = manager.map
 console.log state
 
 channelStat =
-    state: {}
+    state: {
+        owner:
+            id: 0
+    }
     platform: {
         behaviour:
             platformType: {}
@@ -509,7 +562,7 @@ $ ->
         renderer.setupBoard(state)
         for y in [0..4]
                 for x in [0..4]
-                    renderer.moveSignal y, x, 0
+                    renderer.moveSignal y, x, 2
         renderer.buildChannel 2, 2, 3, channelStat
         renderer.buildChannel 3, 3, 3, channelStat
         renderer.buildChannel 4, 4, 5, channelStat

@@ -2,7 +2,7 @@ class Communicator
   constructor: ( @host ) ->
     self = @
     @com = {}
-    
+
     _.extend @com, Backbone.Events
 
     @id = null
