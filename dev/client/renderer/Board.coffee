@@ -111,7 +111,7 @@ class SignalsDrawer extends Drawer
     fpsLabel: {}
     signals: {}
     signalRadius: 8
-    
+
     constructor: (@stage, @minRow, @maxRow) ->
         super @stage, @minRow, @maxRow
 
@@ -121,13 +121,13 @@ class SignalsDrawer extends Drawer
         Ticker.addListener this
         Ticker.useRAF = true
         Ticker.setFPS 60
-        @setupFPS()  
+        @setupFPS()
 
     setupFPS: () ->
         @fpsLabel = new Text "-- fps", "bold 18px Arial", "#FFF"
         @stage.addChild @fpsLabel
         @fpsLabel.x = 10
-        @fpsLabel.y = 20  
+        @fpsLabel.y = 20
 
     drawSignal: (point, destination) ->
         g = new Graphics()
@@ -295,7 +295,7 @@ class OverlayDrawer extends Drawer
         overlay.alpha = 0.01
         @stage.addChild overlay
         ###
-        boundaries = 
+        boundaries =
             x: point.x - @horIncrement
             y: point.y - @size
             width: 2*@horIncrement

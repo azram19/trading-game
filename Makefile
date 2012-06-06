@@ -1,5 +1,6 @@
 # Order is EXTREMELY important here
 ENGINE = GameObject.js ObjectState.js Field.js Signal.js Player.js Types.js Properties.js SignalFactory.js HQBehaviour.js ChannelBehaviour.js PlatformBehaviour.js ResourceBehaviour.js ObjectFactory.js Map.js GameManager.js
+RENDERER =  Board.js RadialMenu.js UI.js
 
 all: dir | js css
 	cp dev/build/*.js dev/webroot/js
@@ -11,10 +12,12 @@ clean:
 dir:
 	mkdir -p dev/build/templates
 	mkdir -p dev/build/engine
+	mkdir -p dev/build/renderer
 
 js-renderer:
-	find dev/client/renderer -name *.coffee -exec node_modules/.bin/coffee -cj dev/build/renderer.js {} +
-	cp dev/build/renderer.js dev/webroot/js
+	find dev/client/renderer -name *.coffee -exec node_modules/.bin/coffee -co dev/build/renderer {} +
+	cd dev/build/renderer; \
+	cat $(RENDERER) > ../../webroot/js/renderer.js
 
 js-templates:
 	find dev/client/templates -name *.handlebars -print0 | xargs -I {} -0 sh -c 'f=`basename {}`; node_modules/.bin/handlebars {} -f dev/build/templates/`basename {}`.js'

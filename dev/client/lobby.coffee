@@ -1,15 +1,14 @@
 $ ->
+  console.log "lobby"
   w = window
   w.communicator = communicator = new Communicator()
   w.messages = messages = new Messages([{'author':'pies','message':'asdasd'}])
   w.lobby = lobby = new LobbyView
     communicator: communicator
     collection: messages
-    el : $('#main')[0]
+    el : $('#main.lobby2')[0]
 
   lobby.render()
-
-  $('#chatScroll').tinyscrollbar {autohide: true}
 
   w.newMessage = new Message
     author: 'kot'

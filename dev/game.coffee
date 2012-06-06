@@ -30,18 +30,19 @@ app.get '/lobby2', ( req, res) ->
 
 app.get '/', ( req, res ) ->
     if app.requireAuth and req.loggedIn
-      res.redirect 'lobby'
+      res.redirect 'lobby2'
     res.render 'index',
       title: 'Signals early chat tests'
 
 app.get '/lobby', ( req, res ) =>
-	if app.requireAuth and not req.loggedIn
-		res.redirect '/'
-	else
-		app.Mongoose.model('User').find {}, (err, docs) ->
-			res.render 'lobby'
-				users: _.toArray docs
-				numberOfUsers: docs.length
+  if app.requireAuth and not req.loggedIn
+    res.redirect '/'
+  else
+    app.Mongoose.model('User').find {}, (err, docs) ->
+        console.log docs
+        res.render 'lobby2'
+            users: _.toArray docs
+            numberOfUsers: docs.length
 
 port =  process.env.PORT || process.env['PORT_WWW']  || 3000
 
