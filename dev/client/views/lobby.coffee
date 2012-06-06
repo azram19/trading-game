@@ -59,6 +59,6 @@ class LobbyView extends Backbone.View
     msgs =  @messagesTemplate messages: @collection.toJSON()
 
     $( '#chat ul' ).html msgs
-    $( "#chat .nano" ).nanoScroller();
+    $( "#chat .nano" ).nanoScroller()
 
 window['LobbyView'] = LobbyView

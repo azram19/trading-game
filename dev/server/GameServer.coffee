@@ -1,8 +1,7 @@
 class GameServer
-    
+
     constructor: ->
         @games = {}
-        
 
     newGame: ( name, type ) ->
 
