@@ -1,4 +1,4 @@
-.radial-menu-title{
+.radial-menu-title, .radial-menu-action-title{
   display: none;
   position: absolute;
   cursor : pointer;
