@@ -139,3 +139,4 @@ $ ->
     window.M = m = UI.createMenu 6,6
     m.drawIt()
     m.show()
+

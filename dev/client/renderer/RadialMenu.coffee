@@ -650,3 +650,5 @@ $ ->
     r.drawIt()
     r.show()
 
+window.radialMenu = radialMenu
+
