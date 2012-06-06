@@ -59,5 +59,9 @@ $ ->
     stage = new Stage canvas
     window.UI = UI = new UIClass stage, 8, 15
     UI.initializeMenus()
+    UI.render 0, 0
+    UI.render 0, 1
+    UI.render 1, 0
     UI.render 1, 1
+    UI.render 2, 1
 
