@@ -78,6 +78,8 @@ class Drawer
             when 5 then p.x -= 2*@horIncrement
         p
 
+window.Drawer = Drawer
+
 class ChannelsDrawer extends Drawer
     constructor: (@stage, @minRow, @maxRow) ->
         super @stage, @minRow, @maxRow
