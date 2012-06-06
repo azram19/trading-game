@@ -8,7 +8,7 @@ class radialMenu
   expandedChildren: false
   visible: false
 
-  constructor: ( @engine, @canvas, @x, @y, @text, @desc, @root ) ->
+  constructor: ( @engine, @canvas, @x, @y, @text, @desc, @root, @obj ) ->
 
     @menuId = _.uniqueId()
 
@@ -66,7 +66,7 @@ class radialMenu
     ###
     @length = 0
 
-    @length_base = 100
+    @length_base = 60
     @expand_length = @length_base
     @compact_length = @length_base * 0.5
 
@@ -118,12 +118,13 @@ class radialMenu
     menu.parent = @
     menu.beta = menu.beta - @children.length * @alpha
     menu.childIndex = @children.length
+    menu.obj = @obj
 
     @children.push menu
 
   action: () =>
     console.log "trigger " + @event
-    @engine.trigger @event
+    @engine.trigger @event, @obj
 
   setEvent: ( ev ) ->
     console.debug ev
@@ -207,22 +208,11 @@ class radialMenu
     @button.visible = false
     @actionButton.visible = false
 
-    #update boundaries
-    @boundaries =
-      x: P.x - @radius
-      y: P.y - @radius
-      width: @radius * 2
-      height: @radius * 2
-
     c.draw() for c in @children
 
     @button.cache @x_o-@radius, @y_o-@radius, (@radius) * 2, (@radius) * 2
-    #@actionButton.cache @x_o-@radius, @y_o-@radius+40, (@radius) * 2, (@radius) * 2
+    @actionButton.cache @x_o-@radius, @y_o-@radius, (@radius) * 2, (@radius) * 2
 
-    ###
-    Register us as a listener for the Mouse and the Ticker
-    ###
-    @mId = Mouse.register @, @click, ['click'], @priority
     Ticker.addListener @, false
 
   drawButtonOrange: ( button ) ->
@@ -522,7 +512,7 @@ class radialMenu
                   @expanding or
                   @collapsing
 
-    if not @drawn or not @animating
+    if ( not @drawn or not @animating ) and @parent?
       return false
 
     #perform animations
