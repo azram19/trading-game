@@ -6,7 +6,8 @@ app.io = require( 'socket.io' ).listen( app )
 app.everyauth = require 'everyauth'
 
 MemoryStore = express.session.MemoryStore
-Communicator = require('./server/communicator').Communicator
+Communicator = require './server/communicator'
+GameServer = require './server/GameServer'
 
 app.Mongoose = require 'mongoose'
 
@@ -17,7 +18,11 @@ app.everyauth.helpExpress app
 #config the app
 config = require('./config.coffee')(app, express)
 
+
 app.communicator = new Communicator app
+app.gameServer = new GameServer
+
+console.log app.gameServer
 
 app.get '/board', ( req, res) ->
    res.render 'board'
