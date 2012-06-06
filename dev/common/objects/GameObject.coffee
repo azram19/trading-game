@@ -30,4 +30,5 @@ class GameObject
 if module? and module.exports
     exports = module.exports = GameObject
 else
+    window.S = {}
     window['GameObject'] = GameObject

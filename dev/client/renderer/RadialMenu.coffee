@@ -8,12 +8,13 @@ class radialMenu
   expandedChildren: false
   visible: false
 
-  constructor: ( @engine, @canvas, @x, @y, @text, @desc ) ->
-    if not @mousedownLister
-      @canvas.addEventListener this
-      @mousedownListener = true
+  constructor: ( @engine, @canvas, @x, @y, @text, @desc, @root ) ->
 
     @menuId = _.uniqueId()
+
+    @positive_action = 'Yes'
+    @negative_action = 'No'
+    @event = 'yes'
 
     ###
     This is a title displayed next to the menu item. It is hidden by
@@ -23,48 +24,28 @@ class radialMenu
     @$title.text @text
     @$title.addClass 'radial-menu-title'
     @$title.appendTo 'body'
-    @$title.css
-      display: 'none'
-      position: 'absolute'
-      cursor : 'pointer'
-      'text-transform' : 'uppercase'
-      'font-size' : '10px'
-      'text-shadow' : '1px 1px #000'
-      'color' : '#aaa'
+
+    @$actionTitle = $ "<div/>"
+    @$actionTitle.text @positive_action
+    @$actionTitle.addClass 'radial-menu-action-title'
+    @$actionTitle.appendTo 'body'
 
     @$title.click =>
       @click()
+
+    @$actionTitle.click =>
+      @action()
 
     @$desc = $ "<div/>"
     @$desc.html @desc
     @$desc.addClass 'radial-menu-desc'
     @$desc.addClass 'hyphenate'
     @$desc.appendTo 'body'
-    @$desc.css
-      display: 'none'
-      position: 'absolute'
-      width: '200px'
-      color: '#bbb'
-      padding: '0 10px'
-      hyphens:'auto'
-      'text-align':'justify'
-      '-webkit-hyphens':'auto'
-      '-webkit-hyphenate-limit-after':1
-      '-webkit-hyphenate-limit-before':3
-      '-moz-hyphens':'auto'
-      'text-shadow' : '1px 1px #000'
-      'font-size' : '10px'
-      'border-left' : '1px rgba(0,0,0,0.1) solid'
-
-    @$desc.find('p').css
-      'font-size' : '10px'
-      'margin' : '0'
 
     ###
     Get the context and stage we will be drawing to. Only for the root it will be the actuall context, for every other element it will get
     overwritten by root's context and stage.
     ###
-    @context2d = @canvas.getContext '2d'
     @stage = new Stage @canvas
 
     #Container where we store all our children
@@ -74,8 +55,11 @@ class radialMenu
     @parent = null
 
     #Current coordinates
-    @x ?= 0
-    @y ?= 0
+    @x_o = 0
+    @y_o = 0
+
+    @x ?= @x_o
+    @y ?= @y_o
 
     ###
     Distances from the origin in different states.
@@ -133,20 +117,27 @@ class radialMenu
     menu.stage = @stage
     menu.parent = @
     menu.beta = menu.beta - @children.length * @alpha
-    [x,y] = menu.computeP()
-    menu.x = x
-    menu.y = y
     menu.childIndex = @children.length
 
     @children.push menu
 
+  action: () =>
+    console.log "trigger " + @event
+    @engine.trigger @event
 
-  computeP: ( length ) ->
-    if not length?
-      length = @length
+  setEvent: ( ev ) ->
+    console.debug ev
+    @event = ev
 
-    x = length * Math.sin( @beta )
-    y = length * Math.cos( @beta )
+  setPositiveAction: ( @positive_action ) ->
+  setNegativeAction: ( @negative_action ) ->
+
+  computeP: ( length, beta ) ->
+    length ?= @length
+    beta ?= @beta
+
+    x = length * Math.sin( beta )
+    y = length * Math.cos( beta )
 
     [x,y]
 
@@ -162,31 +153,44 @@ class radialMenu
     @drawn = true
 
     @button = new Shape()
-    @button.graphics
-      .beginRadialGradientFill(["#C21A01","#A7DBD8","#69D2E7", "#222"], [0,0,0.7,1], @x, @y, 0, @x, @y, @radius)
-      .drawCircle( @x, @y, @radius )
+
+    @button =
+      if @children.length < 1
+        @drawButtonBlue @button
+      else
+        @drawButtonOrange @button
 
     @circle = new Shape()
     @circle.visible = false
     @circle.graphics
       .setStrokeStyle(1)
       .beginStroke( "rgba(0,0,0,0.1)" )
-      .drawCircle( @x, @y, @expand_length )
+      .drawCircle( @x_o, @y_o, @expand_length )
 
     @circleC = new Shape()
     @circleC.visible = false
     @circleC.graphics
       .setStrokeStyle(1)
       .beginStroke( "rgba(0,0,0,0.1)" )
-      .drawCircle( @x, @y, @compact_length )
+      .drawCircle( @x_o, @y_o, @compact_length )
 
-    P = @button.localToGlobal @x, @y
+    @actionButton = new Shape()
+
+    if @children.length < 1
+      @actionButton =  @drawButtonOrange @actionButton
+      @actionButton.y += 40
+
+    P = @button.localToGlobal @x_o, @y_o
 
     @$title.css
       'left': P.x
       'top': P.y
       'opacity' : 1
 
+    @$actionTitle.css
+      'left': P.x
+      'top': P.y + 40
+      'opacity' : 1
 
     if not @parent?
       @stage.addChild @circleC
@@ -197,9 +201,11 @@ class radialMenu
       @parent.container.addChild @circleC
       @parent.container.addChild @circle
       @parent.container.addChild @button
+      @parent.container.addChild @actionButton
       @parent.container.addChild @container
 
     @button.visible = false
+    @actionButton.visible = false
 
     #update boundaries
     @boundaries =
@@ -210,13 +216,28 @@ class radialMenu
 
     c.draw() for c in @children
 
-    @button.cache @x-@radius, @y-@radius, (@radius) * 2, (@radius) * 2
+    @button.cache @x_o-@radius, @y_o-@radius, (@radius) * 2, (@radius) * 2
+    #@actionButton.cache @x_o-@radius, @y_o-@radius+40, (@radius) * 2, (@radius) * 2
 
     ###
     Register us as a listener for the Mouse and the Ticker
     ###
     @mId = Mouse.register @, @click, ['click'], @priority
     Ticker.addListener @, false
+
+  drawButtonOrange: ( button ) ->
+    button.graphics
+      .beginRadialGradientFill(["#F38630","#FA6900", "#222"], [0,0.7,1], @x_o, @y_o, 0, @x_o, @y_o, @radius)
+      .drawCircle( @x_o, @y_o, @radius )
+
+    button
+
+  drawButtonBlue: ( button ) ->
+    button.graphics
+      .beginRadialGradientFill(["#A7DBD8","#69D2E7", "#222"], [0,0.7,1], @x_o, @y_o, 0, @x_o, @y_o, @radius)
+      .drawCircle( @x_o, @y_o, @radius )
+
+    button
 
   restoreFlags: () =>
     @expanded = false
@@ -237,6 +258,7 @@ class radialMenu
       @stepX = (x-@x)/@steps
       @stepY = (y-@y)/@steps
       @stepOpacity = (1-@opacity)/@steps
+      @length = @length_base
     else
       @steps = 0
       @stepX = 0
@@ -269,8 +291,6 @@ class radialMenu
     @circleC.visible = false
 
   expand: ( expandChildren ) =>
-    console.log "expand"
-
     if not @visible
       @show()
 
@@ -287,6 +307,7 @@ class radialMenu
       @stepX = (x-@x)/@steps
       @stepY = (y-@y)/@steps
       @stepOpacity = (@fadedInOpacity-@opacity)/@steps
+      @length = @expand_length
     else
       @steps = 0
       @stepX = 0
@@ -328,6 +349,7 @@ class radialMenu
       @stepX = (@x-x)/@steps
       @stepY = (@y-y)/@steps
       @stepOpacity = (@fadedOutOpacity-@opacity)/@steps
+      @length = @compact_length
     else
       @steps = 0
       @stepX = 0
@@ -337,7 +359,6 @@ class radialMenu
     @hideChildren()
     @circle.visible = false
     @circleC.visible = false
-
 
   showAnimate: () =>
     if @steps <= 0
@@ -424,12 +445,16 @@ class radialMenu
 
     @$desc.slideDown 200
     @descDisplayed = true
+    @actionButton.visible = true
+    @$actionTitle.show()
 
   hideText: () =>
     @$desc.hide()
     @descDisplayed = false
+    @actionButton.visible = false
+    @$actionTitle.hide()
 
-  rotate: ( angle, fn ) =>
+  rotate: ( angle, fn, full ) =>
     if not fn?
       fn = () ->
 
@@ -437,14 +462,28 @@ class radialMenu
 
     @rotateSteps = @showTime/Ticker.getInterval()
     @rotateStep = angle / @rotateSteps
+    @rotateStepXY = full
+
+    if full
+      (child.rotate angle, null, true) for child in @children
+
     @rotating = true
 
   rotateAnimate: () =>
     if @rotateSteps <= 0
+      @rotateStepXY = 0
       @rotationFn()
       @rotationFn = () ->
     else
       @beta += @rotateStep
+
+      if @rotateStepXY
+
+        [x,y] = @computeP @length
+
+        @x = x
+        @y = y
+
       @rotateSteps--
 
   click: () =>
@@ -477,7 +516,13 @@ class radialMenu
     @button.hitTest x, y
 
   tick: ( time ) =>
-    if not @drawn
+    @animating = @rotating or
+                  @showing or
+                  @hiding or
+                  @expanding or
+                  @collapsing
+
+    if not @drawn or not @animating
       return false
 
     #perform animations
@@ -507,6 +552,8 @@ class radialMenu
 
     @button.x = @x
     @button.y = @y
+    @actionButton.x = @x
+    @actionButton.y = @y + 40
 
     @button.alpha = @opacity
     @$title.css 'opacity', @opacity
@@ -515,8 +562,8 @@ class radialMenu
       @container.x = @x
       @container.y = @y
     else
-      @container.x = 2*@x
-      @container.y = 2*@y
+      @container.x = @x
+      @container.y = @y
 
     if not @parent
       global = @button.localToGlobal @button.x, @button.y
@@ -528,6 +575,10 @@ class radialMenu
     if @parent?
       xTrans = 15 * Math.sin @beta
       yTrans = -10 + 15 *Math.cos @beta
+
+      @$actionTitle.css
+        top: global.y + yTrans + 40
+        left: global.x + xTrans
 
       @$title.css
         top: global.y + yTrans
@@ -552,6 +603,8 @@ class radialMenu
     ###
     if not @parent?
       @stage.update()
+
+window.S.radialMenu = radialMenu
 
 $ ->
   canvas = document.getElementById "radial"

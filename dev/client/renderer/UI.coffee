@@ -1,5 +1,5 @@
 class UI extends Drawer
-  constructor: ( @stage, @minRow, @maxRow ) ->
+  constructor: ( @stage, @minRow, @maxRow, @engine ) ->
     super @stage, @minRow, @maxRow
 
     _.extend @, Backbone.Events
@@ -8,36 +8,113 @@ class UI extends Drawer
 
     @menus = []
 
+    @engine =
+      getMenu:() ->
+        [
+          'pies:kot:leszek',
+          'pies:malpa:swinka',
+        ]
+
+    window.Types.Events =
+        pies:
+          title: 'seip'
+          kot:
+            title: 'tok'
+            leszek:
+              title: 'keszel'
+              desc: 'fucking mock object'
+          malpa:
+            title: 'aplam'
+            swinka:
+              title: 'akniws'
+              positive: 'Buy'
+              desc: 'very interesting creature'
+
   initializeMenus: () ->
     for j in [0 ... (2*@diffRows + 1)]
       @menus[j] = {}
       for i in [0 ... @maxRow - Math.abs(@diffRows - j)]
         @menus[j][i] = {}
 
-    for j in [0 ... (2*@diffRows + 1)]
-      @menus[j] = {}
-      for i in [0 ... @maxRow - Math.abs(@diffRows - j)]
-        @menus[j][i] = @createMenu i, j
-
     null
 
   createMenu: (i, j) ->
     p = @getPoint i, j
 
-    rd5 = '<p>"No more, Queequeg," said I, shuddering; "that will do;" for I knew the inferences without his further hinting them. I had seen a sailor who had visited that very island, and he told me that it was the custom, when a great battle had been gained there, to barbecue all the slain in the yard or garden of the victor; and then, one by one, they were placed in great wooden trenchers, and garnished round like a pilau, with breadfruit and cocoanuts; and with some parsley in their mouths, were sent round with the victors compliments to all his friends, just as though these presents were so many Christmas turkeys.</p>'
+    menuStructure = @engine.getMenu i, j
 
-    console.debug [i,j,p.x,p.y]
+    menu = new S.radialMenu null, @stage.canvas, p.x, p.y, "", "", true
 
-    menu = new radialMenu null, @stage, "", "", p.x, p.y, () ->
-      console.log 'Click hehe'
+    eventsStructure = window.Types.Events
+    submenuNames = @getPrefixes menuStructure
 
-    r2 = new radialMenu null, @stage, "kotek", rd5
-    r3 = new radialMenu null, @stage, "malpka", rd5
+    ( subMenu = @buildMenu submenuName,
+        eventsStructure,
+        @getWithoutPrefix( submenuName, menuStructure ),
+        submenuName
 
-    menu.addChild r2
-    menu.addChild r3
+      menu.addChild subMenu
+    ) for submenuName in submenuNames
 
-    menu
+    @menus[j][i] = menu
+
+  #name of the event element, eventsStructure - Types.Events sub object
+  #eventsStructure [a:b:c] ...
+  buildMenu: ( name, eventsStructure, menuStructure, fullname ) =>
+
+    title = eventsStructure[name].title
+    desc = eventsStructure[name].desc
+
+    title ?= ""
+    desc ?= ""
+
+    if desc.length > 0
+      m = new S.radialMenu null, @stage.canvas, 0, 0, title, desc
+      m.setEvent fullname
+
+      m
+    else
+      m = new S.radialMenu null, @stage.canvas, 0, 0, title, desc
+
+      eventsStructure = eventsStructure[name]
+      submenuNames = @getPrefixes menuStructure
+
+      (
+        subMenu = @buildMenu submenuName,
+          eventsStructure,
+          @getWithoutPrefix( submenuName, menuStructure ),
+          fullname + ':' + submenuName
+
+        m.addChild subMenu
+      ) for submenuName in submenuNames
+
+      m
+
+  #Returns uniq prefixes from a list of strings
+  getPrefixes: ( list ) ->
+    prefixes = _.chain( list )
+                .map(
+                  ( el ) ->
+                    el.split( ':' )[0]
+                ).uniq()
+                .filter(
+                  ( el ) ->
+                    el.length > 0
+                ).value()
+
+  #Gets elements from the list with the prefix, and returns thme without it
+  getWithoutPrefix: ( prefix, list ) ->
+    listWithout = _.chain( list )
+                  .filter(
+                    ( el ) ->
+                      el.split( ':' )[0] is prefix
+                  ).map(
+                    ( el ) ->
+                      els = ( el.split( ':' )[1..] ).join ':'
+                  ).filter(
+                    ( el ) ->
+                      el.length > 0
+                  ).value()
 
   handleClickOnField: ( i, j ) =>
     (menu?.hide() for menu in menuI) for menuI in @menus
@@ -51,17 +128,14 @@ class UI extends Drawer
 
     console.log "Rendering finished"
 
-window.UIClass = UI
+window.S.UIClass = UI
 
 $ ->
   canvas = document.getElementById "UI"
   if canvas?
     stage = new Stage canvas
-    window.UI = UI = new UIClass stage, 8, 15
+    window.UI = UI = new S.UIClass stage, 8, 15
     UI.initializeMenus()
-    UI.render 0, 0
-    UI.render 0, 1
-    UI.render 1, 0
-    UI.render 1, 1
-    UI.render 2, 1
-
+    window.M = m = UI.createMenu 6,6
+    m.drawIt()
+    m.show()
