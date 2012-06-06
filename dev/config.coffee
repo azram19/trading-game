@@ -114,6 +114,7 @@ module.exports = ( app, express ) ->
     )
     .redirectPath( '/lobby2' )
 
+  app.everyauth.everymodule.moduleTimeout -1
   app.everyauth.everymodule.findUserById (userId, callback) ->
     app.Mongoose.model('User').findOne id: userId, callback
 
