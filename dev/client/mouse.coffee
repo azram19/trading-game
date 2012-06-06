@@ -140,10 +140,10 @@ class Mouse
 
     $canvas = $ @canvas
 
-    $canvas.on 'mousedown', ev_handler
-    $canvas.on 'mouseup', ev_handler
-    $canvas.on 'mousemove', ev_handler
-    $canvas.on 'click', ev_handler
+    $canvas.on 'mousedown', _.throttle(ev_handler, 100)
+    $canvas.on 'mouseup', _.throttle(ev_handler, 100)
+    $canvas.on 'mousemove', _.throttle(ev_handler, 5)
+    $canvas.on 'click', _.throttle(ev_handler, 100)
 
     Ticker.addListener @, true
 

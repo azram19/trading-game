@@ -129,6 +129,7 @@ class SignalsDrawer extends Drawer
     fpsLabel: {}
     signals: {}
     signalRadius: 8
+
     signalCount: 50
     div: 24
 
@@ -320,7 +321,7 @@ class OverlayDrawer extends Drawer
         overlay.alpha = 0.01
         @stage.addChild overlay
         ###
-        boundaries = 
+        boundaries =
             x: point.x - @horIncrement
             y: point.y - @size
             width: 2*@horIncrement

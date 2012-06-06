@@ -592,6 +592,8 @@ $ ->
     r4.addChild r8
     r4.addChild r9
 
+    Ticker.setFPS 60
+
     r.drawIt()
     r.show()
 
