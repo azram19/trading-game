@@ -7,6 +7,9 @@ body {
   margin: 0;
   color:#bbb;
   background: #333 url('http://cdn.humblebundle.com/hib3/bg.png');
+
+  color: #111;
+  text-shadow: 1px 1px rgba(255, 255, 255, 0.1);
 }
 
 a{
@@ -194,6 +197,172 @@ p {
       & > div{
         height:100%;
         border-right:2px rgba(0, 0, 0, 0.15) solid;
+        position:relative;
+
+
+        @distance: 61.11;
+        @base: 25 - @distance;
+
+        @step1colour: #FA6900;
+        @step2colour: #E97419;
+        @step3colour: #D98033;
+        @step4colour: #C98C4D;
+        @step5colour: #B99766;
+        @step6colour: #A9A380;
+        @step7colour: #99AF9A;
+        @step8colour: #89BAB3;
+        @step9colour: #79C6CD;
+        @step10colour: #69D2E7;
+
+        .step(@n, @m){
+          top:(@base + @distance * @n - @m)px;
+        }
+
+        .tickers{
+          list-style:none;
+          position:absolute;
+
+          li{
+            position: absolute;
+            display: block;
+            width: 10px;
+            border-bottom: 2px rgba(0, 0, 0, 0.15) solid;
+            left: 109px;
+
+
+            &:nth-child(1){
+              .step(1, 0);
+              border-color:@step1colour;
+              background-color:@step1colour;
+              color:@step1colour;
+            }
+            &:nth-child(2){
+              .step(2, 0);
+              border-color:@step2colour;
+              background-color:@step2colour;
+              color:@step2colour;
+            }
+            &:nth-child(3){
+              .step(3, 0);
+              border-color:@step3colour;
+              background-color:@step3colour;
+              color:@step3colour;
+            }
+            &:nth-child(4){
+              .step(4, 0);
+              border-color:@step4colour;
+              background-color:@step4colour;
+              color:@step4colour;
+            }
+            &:nth-child(5){
+              .step(5, 0);
+              border-color:@step5colour;
+              background-color:@step5colour;
+              color:@step5colour;
+            }
+            &:nth-child(6){
+              .step(6, 0);
+              border-color:@step6colour;
+              background-color:@step6colour;
+              color:@step6colour;
+            }
+            &:nth-child(7){
+              .step(7, 0);
+              border-color:@step7colour;
+              background-color:@step7colour;
+              color:@step7colour;
+            }
+            &:nth-child(8){
+              .step(8, 0);
+              border-color:@step8colour;
+              background-color:@step8colour;
+              color:@step8colour;
+            }
+            &:nth-child(9){
+              .step(9, 0);
+              border-color:@step9colour;
+              background-color:@step9colour;
+              color:@step9colour;
+            }
+            &:nth-child(10){
+              .step(10, 0);
+              border-color:@step10colour;
+              background-color:@step10colour;
+              color:@step10colour;
+            }
+          }
+        }
+
+        .ranking{
+          & > ul{
+
+            & > li{
+              position:absolute;
+              text-align:center;
+            }
+
+            .plus(@n){
+              @b: 44;
+              (~"+ .pos@{n}"){
+                left: @b px;
+              }
+              (~"+ .pos@{n} + .pos@{n}"){
+                left: @b*2 px;
+              }
+              (~"+ .pos@{n}  + .pos@{n}  + .pos@{n}"){
+                display:none;
+              }
+              (~"+ .pos@{n}  + .pos@{n}  + .pos@{n}  + .pos@{n}"){
+                display:none;
+              }
+              (~"+ .pos@{n}  + .pos@{n}  + .pos@{n}  + .pos@{n}  + .pos@{n}"){
+                display:none;
+              }
+            }
+
+            .pos1{
+              .step(0, 0);
+              .plus(1);
+            }
+            .pos2{
+              .step(1, 0);
+              .plus(2);
+            }
+            .pos3{
+              .step(2, 0);
+              .plus(3);
+            }
+            .pos4{
+              .step(3, 0);
+              .plus(4);
+            }
+            .pos5{
+              .step(4, 0);
+              .plus(5);
+            }
+            .pos6{
+              .step(5, 0);
+              .plus(6);
+            }
+            .pos7{
+              .step(6, 0);
+              .plus(7);
+            }
+            .pos8{
+              .step(7, 0);
+              .plus(8);
+            }
+            .pos9{
+              .step(8, 0);
+              .plus(9);
+            }
+            .pos10{
+              .step(9, 0);
+              .plus(10);
+            }
+
+          }
+        }
       }
     }
   }
@@ -219,7 +388,7 @@ p {
       h1{
         display:inline-block;
         line-height:48px;
-        color:#111;
+        color:#222;
       }
     }
 
@@ -268,8 +437,8 @@ p {
     padding-right: 16px;
     width: inherit;
     font-weight: bold;
-    color: #69D2E7;
-    text-shadow:0 0 2px #69D2E7;
+    color: #FA6900;
+    text-shadow:0 0 2px #FA6900;
   }
   .userScoreZero{
     position:absolute;
@@ -280,8 +449,8 @@ p {
     font-size: 30px;
     line-height: 48px;
     font-weight: bold;
-    color: #FA6900;
-    text-shadow:0 0 2px #FA6900;
+    color: #69D2E7;
+    text-shadow:0 0 2px #69D2E7;
   }
 
   .options{
@@ -337,6 +506,12 @@ p {
 
   .ranking{
     position:relative;
+    -webkit-transition: color 0.4s ease-out,  text-shadow 0.4s ease-out;
+
+    &:hover{
+      color:#bbb;
+      text-shadow:1px 1px #000;
+    }
 
     & > ul{
       list-style:none;
@@ -361,7 +536,6 @@ p {
         }
 
         span{
-          text-shadow:1px 1px #000;
           font-size:10px;
           text-transform:uppercase;
         }
@@ -370,6 +544,13 @@ p {
   }
 
   #chat{
+    -webkit-transition: color 0.4s ease-out,  text-shadow 0.4s ease-out;
+
+    &:hover{
+      color:#bbb;
+      text-shadow:1px 1px #000;
+    }
+
     position:relative;
     height:600px;
     border-left: 2px rgba(0, 0, 0, 0.15) solid;
@@ -388,7 +569,7 @@ p {
         margin:0;
 
         & > li{
-          text-shadow:1px 1px #000;
+
           padding-bottom: 16px;
           margin-top: 16px;
           border-bottom: 1px rgba(0, 0, 0, 0.15) solid;
@@ -405,7 +586,7 @@ p {
             font-size:12px;
             line-height:15px;
             margin-bottom:8px;
-            text-shadow:1px 1px #000;
+
           }
 
           .time{
