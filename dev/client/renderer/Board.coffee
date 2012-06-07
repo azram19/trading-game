@@ -146,6 +146,9 @@ class BoardDrawer
         @drawStroke point
         @uiHandler.drawOverlay point
 
+    setUI: ( @UI ) ->
+        @UIHandler.setUI @UI
+
     setupBoard: (boardState) ->
         for j in [0 ... (2*@helper.diffRows + 1)]
             for i in [0 ... @helper.maxRow - Math.abs(@helper.diffRows - j)]
@@ -170,6 +173,7 @@ class UIHandler
         @stage.addChild overlay
         overlay.onMouseOver = @mouseOverField
         overlay.onMouseOut = @mouseOutField
+        overlay.onClick = @fieldClick
 
     mouseOverField: (event) =>
         event.target.alpha = 0.2
@@ -179,8 +183,13 @@ class UIHandler
         event.target.alpha = 0.01
         @update = true
 
+    setUI: ( @UI ) ->
+
     fieldClick: (event) =>
         coords = getCoords(event.stageX, event.stageY)
+
+        if @UI?
+            @UI.trigger 'fieldClick', coords.x, coords.y
 
     tick: () ->
         if(@update)
@@ -393,7 +402,7 @@ class Renderer
     # Resets all the canvases, using the current boardState
     # It clears all the stages and. To be discussed whether to clear Signals
     # stage
-    setupBoard: (boardState) ->
+    setupBoard: (boardState, UI) ->
         @clearAll()
         @signalsDR.setupFPS()
         @signalsDR.setupOffSignals()
