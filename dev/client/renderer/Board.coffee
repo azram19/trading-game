@@ -151,9 +151,9 @@ class BoardDrawer
         for j in [0 ... (2*@helper.diffRows + 1)]
             for i in [0 ... @helper.maxRow - Math.abs(@helper.diffRows - j)]
                 point = @helper.getPoint(i, j)
-                @drawHex(point, boardState.getField(j, i))
+                @drawHex(point, boardState.getField(i, j))
                 for k in [0 .. 5]
-                    if boardState.getChannel(j, i, k)?.state?
+                    if boardState.getChannel(i, j, k)?.state?
                         @drawChannel(point, k)
         true
 

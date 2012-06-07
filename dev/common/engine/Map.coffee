@@ -26,16 +26,16 @@ class Map
     #initialize an empty map
     for y in [0 ... (2*@diffRows + 1)]
         for x in [0 ... @maxWidth - Math.abs(@diffRows - y)]
-            @addField {}, y, x
+            @addField {}, x, y
 
     #generate fields
-    initializeField = ( o, y, x ) ->
+    initializeField = ( o, x, y ) ->
       field = new Field(x, y)
       #console.log x + " " + y + ":field"
       field
 
     #generate resources
-    initializeResource = ( o, y, x ) =>
+    initializeResource = ( o, x, y ) =>
       chance = 0.42
       res = Math.random()
 
@@ -55,17 +55,17 @@ class Map
     @iterateFields initializeField
     @iterateFields initializeResource
 
-  addField: ( field, y, x ) ->
+  addField: ( field, x, y ) ->
     @fields[y] ?= {}
     @fields[y][x] = field
 
-  addPlatform: ( platform, y, x ) ->
+  addPlatform: ( platform, x, y ) ->
     platform.state.field = @fields[y][x]
     #console.log x + " " + y + " add pl"
     @fields[y][x].platform = platform
 
   #k - direction [0..6] clockwise from the top
-  addChannel: ( channel, y, x, k ) ->
+  addChannel: ( channel, x, y, k ) ->
     @fields[y] ?= {}
     @fields[y][x].channels ?= {}
     channel.state.field = @fields[y][x]
@@ -80,7 +80,7 @@ class Map
 
 
   dump: ->
-    print = ( o, y, x ) ->
+    print = ( o, x, y ) ->
       if o.resource.type?
         console.log x + " " + y + " res"
       if o.platform.type?
@@ -89,14 +89,14 @@ class Map
 
     @iterateFields print
 
-  getChannel: (y, x, k) ->
+  getChannel: (x, y, k) ->
     field = @getField y, x
     if field?
       return field.channels[k]
     else
       null
 
-  getField: ( y, x ) ->
+  getField: ( x, y ) ->
     if @fields[y]?
       return @fields[y][x]
 
@@ -105,7 +105,7 @@ class Map
   iterateFields: ( f ) =>
     for y in [0 ... (2*@diffRows + 1)]
         for x in [0 ... @maxWidth - Math.abs(@diffRows - y)]
-            @fields[y][x] = f( @fields[y][x], y, x )
+            @fields[y][x] = f( @fields[y][x], x, y )
 
 if module? and module.exports
   exports = module.exports = Map
