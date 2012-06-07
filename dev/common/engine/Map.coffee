@@ -74,11 +74,9 @@ class Map
     [mX, mY] = @directionModificators[k]
     nY = y + mY
     nX = x + mX
-    if 0 <= nY < 2*@diffRows+1
-      @fields[nY] ?= {}
-      if 0 <= nX < @maxWidth
-        @fields[nY][nX].channels ?= {}
-        @fieldsp[nY][nX].channels[(k+3)%6] = channel
+    @fields[nY] ?= {}
+    @fields[nY][nX].channels ?= {}
+    @fields[nY][nX].channels[(k+3)%6] = channel
 
 
   dump: ->
