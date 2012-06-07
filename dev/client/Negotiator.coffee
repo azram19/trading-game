@@ -49,15 +49,16 @@ class Negotiator
 
   getMenu: ( x, y ) ->
     field = @getField x, y
-    if field.platform.actionMenu?
-      field.platform.actionMenu()
-    else
-      if _.isEmpty field.channels
-        null
-      else if field.channels.length is 2
-        ['build:platform']
+    if field?
+      if field.platform.actionMenu?
+        field.platform.actionMenu()
       else
-        ['build:platform', 'build:channel']
+        if _.isEmpty field.channels
+          null
+        else if field.channels.length is 2
+          ['build:platform']
+        else
+          ['build:platform', 'build:channel']
 
   getField: ( x, y ) ->
     @game.map.getField x, y

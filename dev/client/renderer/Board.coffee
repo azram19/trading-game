@@ -425,7 +425,7 @@ class Renderer
 #window.state = state
 window.S.Drawer = Drawer
 window.S.Renderer = Renderer
-
+###
 render = ((global) ->
   docStyle = document.documentElement.style
   engine = undefined
@@ -465,6 +465,7 @@ $ ->
     cellWidth = 100
     cellHeight = 100
     content = document.getElementById("grid")
+    stage = new Stage content
     context = content.getContext("2d")
     tiling = new Tiling
 
@@ -472,8 +473,9 @@ $ ->
       content.width = clientWidth
       content.height = clientHeight
       context.clearRect 0, 0, clientWidth, clientHeight
-      tiling.setup clientWidth, clientHeight, contentWidth, contentHeight, cellWidth, cellHeight
-      tiling.render left, top, zoom, paint
+      #tiling.setup clientWidth, clientHeight, contentWidth, contentHeight, cellWidth, cellHeight
+      #tiling.render left, top, zoom, paint
+      negotiate.renderer.gridST.update()
 
     paint = (row, col, left, top, width, height, zoom) ->
       context.fillStyle = (if row % 2 + col % 2 > 0 then "#ddd" else "#fff")
@@ -554,3 +556,4 @@ $ ->
         #renderer.buildChannel 2, 2, 3, channelStat
         #renderer.buildChannel 3, 3, 3, channelStat
         #renderer.buildChannel 4, 4, 5, channelStat
+###
