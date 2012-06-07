@@ -289,7 +289,7 @@ class radialMenu
     @circle.visible = false
     @circleC.visible = false
 
-  hitTest: ( x, y ) =>
+  hitTest: ( x, y, recursive ) =>
     sq = ( a ) ->
       a * a
 
@@ -302,12 +302,10 @@ class radialMenu
 
     global = @button.parent.localToGlobal @x, @y
 
-    console.log [x,y,rsq,Math.sqrt( sq( x - global.x) + sq(y - global.y) )]
-
     if rsq > 0
       if rsq > Math.sqrt( sq( x - global.x) + sq(y - global.y) )
         return true
-      else
+      else if recursive
         return _.any( child.hitTest x, y for child in @children )
 
     false

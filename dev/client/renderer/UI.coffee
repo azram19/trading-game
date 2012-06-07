@@ -117,7 +117,7 @@ class UI extends S.Drawer
   handleClick: ( event ) =>
     [x, y] = @getXY event
 
-    if @curMenu? and @curMenu.hitTest x, y
+    if @curMenu? and @curMenu.hitTest x, y, true
       return
     else
       p = @getCoords (new Point x, y)
