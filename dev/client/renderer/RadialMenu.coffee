@@ -290,18 +290,25 @@ class radialMenu
     @circleC.visible = false
 
   hitTest: ( x, y ) =>
-    rsq = @length * @length
-
-    global = @button.parent.localToGlobal @x, @y
-
     sq = ( a ) ->
       a * a
 
+    if @circle.visible
+      l = @expand_length
+    else if @circleC.visible
+      l = @compact_length
+
+    rsq = l + 10
+
+    global = @button.parent.localToGlobal @x, @y
+
+    console.log [x,y,rsq,Math.sqrt( sq( x - global.x) + sq(y - global.y) )]
+
     if rsq > 0
       if rsq > Math.sqrt( sq( x - global.x) + sq(y - global.y) )
-        true
+        return true
       else
-        _.any( child.hitTest x, y for child in @children )
+        return _.any( child.hitTest x, y for child in @children )
 
     false
 

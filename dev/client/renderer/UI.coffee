@@ -10,22 +10,6 @@ class UI extends S.Drawer
 
     @curMenu = null
 
-
-    window.Types.Events =
-        pies:
-          title: 'seip'
-          kot:
-            title: 'tok'
-            leszek:
-              title: 'keszel'
-              desc: 'fucking mock object'
-          malpa:
-            title: 'aplam'
-            swinka:
-              title: 'akniws'
-              positive: 'Buy'
-              desc: 'very interesting creature'
-
   initializeMenus: () ->
 
     null
@@ -109,15 +93,39 @@ class UI extends S.Drawer
                       el.length > 0
                   ).value()
 
-  handleClick: ( event ) =>
-    if @curMenu? and @curMenu.hitTest event.x, event.y
+  getXY: ( ev ) ->
+      totalOffsetX = 0
+      totalOffsetY = 0
+      canvasX = 0
+      canvasY = 0
+      currentElement = @stage.canvas
 
+      totalOffsetX += currentElement.offsetLeft
+      totalOffsetY += currentElement.offsetTop
+
+      (
+          totalOffsetX += currentElement.offsetLeft
+          totalOffsetY += currentElement.offsetTop
+      ) while currentElement = currentElement.offsetParent
+
+      canvasX = ev.pageX - totalOffsetX
+      canvasY = ev.pageY - totalOffsetY
+
+      [canvasX, canvasY]
+
+
+  handleClick: ( event ) =>
+    [x, y] = @getXY event
+
+    if @curMenu? and @curMenu.hitTest x, y
+      return
     else
-      p = @getCoords (new Point event.x, event.y)
+      p = @getCoords (new Point x, y)
 
       @handleClickOnField p.x, p.y
 
   handleClickOnField: ( i, j ) =>
+    console.log [i,j]
     @destroyMenu @curMenu
     @curMenu = @createMenu i, j
     @curMenu.show()
