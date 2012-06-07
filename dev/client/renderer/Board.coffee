@@ -1,7 +1,7 @@
 class Drawer
     margin: 100
     size: 30
-    div: 48
+    div: 60
 
     # horIncrement is a horizontal distance between centers of two hexes divided by two
     # verIncrement is a vertical distance between centers of two hexes
@@ -253,6 +253,7 @@ class SignalsDrawer
     drawSignal: (point, dir) ->
         signal = @getSignal()
         if signal is null
+            #console.log "new"
             signal = @offSignals.getSignal()
             @stage.addChild signal
         signal.x = point.x
@@ -266,6 +267,7 @@ class SignalsDrawer
     getSignal: () ->
         for sig in @stage.children
             if sig.isSignal and not sig.visible
+                #console.log "used"
                 return sig
         null
 
@@ -431,8 +433,8 @@ $ ->
         renderer = new Renderer 8, 15
         renderer.setupBoard(state)
         window.renderer = renderer
-        for y in [0..4]
-                for x in [0..4]
+        for y in [0..7]
+                for x in [0..7]
                     renderer.moveSignal y, x, 2
         renderer.buildChannel 2, 2, 3, channelStat
         renderer.buildChannel 3, 3, 3, channelStat
