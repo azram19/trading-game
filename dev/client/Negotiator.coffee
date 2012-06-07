@@ -34,7 +34,10 @@ class Negotiator
 
   getMenu: ( x, y ) ->
     field = @getField x, y
-    field.platform.actionMenu()
+    if field.platform.actionMenu?
+      field.platform.actionMenu()
+    else
+      null
 
   getField: ( x, y ) ->
     @game.map.getField x, y

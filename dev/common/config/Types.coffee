@@ -19,6 +19,16 @@ Types =
     Platforms:
         Normal: 8
         HQ: 9
+    Events:
+      Routing:
+        title: 'set routing'
+      Build:
+        title: 'build'
+        Channel:
+          title: 'channel'
+        Platform:
+          title: 'platform'
+          desc: 'build some platfrom'
     Games:
       FFA: 0
       Team:

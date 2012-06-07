@@ -12,7 +12,14 @@ class HQBehaviour
     getType: ->
         Types.Platforms.HQ
 
-    menu: ->
+    actionMenu: ( state ) ->
+      menu = []
+      (
+        if sth.object?
+          menu.push 'routing:' + route
+        else
+          menu.push 'build:channel:' + route
+      ) for route, sth of state.routing
 
     requestAccept: ( signal, state ) ->
         if signal.owner is state.owner
