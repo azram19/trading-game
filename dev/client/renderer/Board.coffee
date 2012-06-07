@@ -426,39 +426,6 @@ class Renderer
 window.S.Drawer = Drawer
 window.S.Renderer = Renderer
 ###
-render = ((global) ->
-  docStyle = document.documentElement.style
-  engine = undefined
-  if global.opera and Object::toString.call(opera) is "[object Opera]"
-    engine = "presto"
-  else if "MozAppearance" of docStyle
-    engine = "gecko"
-  else if "WebkitAppearance" of docStyle
-    engine = "webkit"
-  else engine = "trident"  if typeof navigator.cpuClass is "string"
-  vendorPrefix =
-    trident: "ms"
-    gecko: "Moz"
-    webkit: "Webkit"
-    presto: "O"
-  [{engine}]
-  helperElem = document.createElement("div")
-  undef = undefined
-  perspectiveProperty = vendorPrefix + "Perspective"
-  transformProperty = vendorPrefix + "Transform"
-  if helperElem.style[perspectiveProperty] isnt undef
-    (left, top, zoom) ->
-      content.style[transformProperty] = "translate3d(" + (-left) + "px," + (-top) + "px,0) scale(" + zoom + ")"
-  else if helperElem.style[transformProperty] isnt undef
-    (left, top, zoom) ->
-      content.style[transformProperty] = "translate(" + (-left) + "px," + (-top) + "px) scale(" + zoom + ")"
-  else
-    (left, top, zoom) ->
-      content.style.marginLeft = (if left then (-left / zoom) + "px" else "")
-      content.style.marginTop = (if top then (-top / zoom) + "px" else "")
-      content.style.zoom = zoom or ""
-)(this)
-
 $ ->
     contentWidth = 2000
     contentHeight = 2000
