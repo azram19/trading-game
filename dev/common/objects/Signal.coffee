@@ -19,8 +19,8 @@ class Signal
     # Player who generated the channel
     owner: {}
 
-    constructor: ( @strength, @type, @source ) ->
-        @owner = @source.owner
+    constructor: ( @events, @strength, @type, @source ) ->
+        @owner = @source.state.owner
         @path = []
 
 if module? and module.exports

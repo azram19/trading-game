@@ -15,6 +15,9 @@ class ResourceBehaviour
     getType: ->
         @resourceType
 
+    menu: ->
+      []
+
     requestAccept: ( signal, state ) ->
 
     accept: ( signal, callback ) ->
@@ -30,7 +33,7 @@ class ResourceBehaviour
                     clearInterval @PID
             else
                 #we have enough resources, mining...
-                newSignal = SignalFactory.build Types.Entities.Signal, state.extraction, @resourceType, state.field.platform.state.owner
+                newSignal = SignalFactory.build Types.Entities.Signal, @eventBus, state.extraction, @resourceType, state.field.platform
                 newSignal.path.push state.field.xy
                 @eventBus.trigger 'resource:produce', state.field.xy, state.extraction, @resourceType
 

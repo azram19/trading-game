@@ -1,5 +1,5 @@
 class UI extends S.Drawer
-  constructor: ( @minRow, @maxRow, @engine ) ->
+  constructor: ( @events, @minRow, @maxRow ) ->
     canvas = document.getElementById "UI"
     @stage = new Stage canvas
     @stage.autoclear = false
@@ -9,15 +9,6 @@ class UI extends S.Drawer
 
 
     @curMenu = null
-
-    @engine =
-      getMenu:() ->
-        [
-          'pies:kot:leszek',
-          'pies:malpa:swinka',
-        ]
-      getField: () ->
-        {}
 
     window.Types.Events =
         pies:
@@ -41,10 +32,10 @@ class UI extends S.Drawer
   createMenu: (i, j) ->
     p = @getPoint i, j
 
-    menuStructure = @engine.getMenu i, j
+    menuStructure = @events.getMenu i, j
 
-    obj = @engine.getField i, j
-    menu = new S.radialMenu null, @stage.canvas, p.x, p.y, "", "", true, obj
+    obj = @events.getField i, j
+    menu = new S.radialMenu @events, @stage.canvas, p.x, p.y, "", "", true, obj
 
     eventsStructure = window.Types.Events
     submenuNames = @getPrefixes menuStructure
@@ -117,7 +108,8 @@ class UI extends S.Drawer
                       el.length > 0
                   ).value()
 
-  hanldeClick: ( event ) ->
+  handleClick: ( event ) ->
+    console.log event
     p = @getCoords event.stageX, eventStageY
 
     @handleClickOnField p.x, p.y

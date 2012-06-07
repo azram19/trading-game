@@ -77,8 +77,8 @@ class BoardDrawer
         @platformsST.update()
 
     capturePlatform: (x, y, owner) ->
-        point = @helper.getPoint(x, y)
-        @drawOwnership(point, owner)
+        point = @helper.getPoint x, y
+        @drawOwnership point, owner
         @ownershipST.update()
 
     buildChannel: (x, y, direction, owner) ->
@@ -97,6 +97,7 @@ class BoardDrawer
 
     drawOwnership: (point, owner) ->
         g = new Graphics()
+        # FIXME Ids can be very, very random
         switch owner.id
             when 0 then g.beginFill("#274E7D")
             when 1 then g.beginFill("#900020")
@@ -146,9 +147,6 @@ class BoardDrawer
         @drawStroke point
         @uiHandler.drawOverlay point
 
-    setUI: ( @UI ) ->
-      @uiHandler.setUI @UI
-
     setupBoard: (boardState) ->
         for j in [0 ... (2*@helper.diffRows + 1)]
             for i in [0 ... @helper.maxRow - Math.abs(@helper.diffRows - j)]
@@ -173,7 +171,6 @@ class UIHandler
         @stage.addChild overlay
         overlay.onMouseOver = @mouseOverField
         overlay.onMouseOut = @mouseOutField
-        overlay.onClick = @fieldClick
 
     mouseOverField: (event) =>
         event.target.alpha = 0.2
@@ -182,15 +179,6 @@ class UIHandler
     mouseOutField: (event) =>
         event.target.alpha = 0.01
         @update = true
-
-    setUI: ( @UI ) ->
-
-    fieldClick: (event) =>
-        console.log 'click'
-        coords = getCoords(event.stageX, event.stageY)
-        if @UI?
-            console.log 'click'
-            @UI.trigger 'fieldClick', coords.x, coords.y
 
     tick: () ->
         if(@update)
@@ -382,27 +370,23 @@ class Renderer
         @signalsDR.createSignal(x, y, direction)
 
     # builds a channel at field (x,y) in given direction
-    buildChannel: (x, y, direction, channel) ->
-        @boardDR.buildChannel(x, y, direction, channel.state.owner)
+    buildChannel: (x, y, direction, state) ->
+        @boardDR.buildChannel(x, y, direction, state.owner)
 
     # builds a platform at field (x,y) given a field object, which helps
     # to indicate type of a platform
-    buildPlatform: (x, y, field) ->
-        @boardDR.buildPlatform(x, y, field.platform.type())
+    buildPlatform: (x, y, platform) ->
+        @boardDR.buildPlatform(x, y, platform.type())
 
     # captures a channel, (x,y) are the coordinates of the player's field
     # channel is the object at (x,y), helps to find the ownership
     # direction indicates the field which will be captured with the channel
-    captureChannel: (x, y, direction, channel) ->
-        @boardDR.captureChannel(x, y, direction, channel.state.owner)
+    captureChannel: (x, y, direction, state) ->
+        @boardDR.captureChannel(x, y, direction, state.owner)
 
     # captures a platform at (x,y), field is a field object at (x,y)
-    capturePlatform: (x, y, field) ->
-        @boardDR.capturePlatform(x, y, field.platform.state.owner)
-
-    # injects UI element into board
-    setUI: ( UI ) ->
-      @boardDR.setUI UI
+    capturePlatform: (x, y, state) ->
+        @boardDR.capturePlatform(x, y, state.owner)
 
     # Resets all the canvases, using the current boardState
     # It clears all the stages and. To be discussed whether to clear Signals
