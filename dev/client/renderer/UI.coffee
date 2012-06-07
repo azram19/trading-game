@@ -3,12 +3,10 @@ class UI extends S.Drawer
     canvas = document.getElementById "UI"
     @stage = new Stage canvas
     @stage.autoclear = false
+    @stage.onClick = @handleClick
 
     super @stage, @minRow, @maxRow
 
-    _.extend @, Backbone.Events
-
-    @on "fieldClick", @handleClickOnField
 
     @curMenu = null
 
@@ -118,6 +116,11 @@ class UI extends S.Drawer
                     ( el ) ->
                       el.length > 0
                   ).value()
+
+  hanldeClick: ( event ) ->
+    p = @getCoords event.stageX, eventStageY
+
+    @handleClickOnField p.x, p.y
 
   handleClickOnField: ( i, j ) =>
     (menu?.hide() for menu in menuI) for menuI in @menus
