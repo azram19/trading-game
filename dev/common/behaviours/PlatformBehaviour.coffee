@@ -6,13 +6,7 @@ class PlatformBehaviour
         @platformType
 
     actionMenu: ( state ) ->
-      menu = []
-      (
-        if sth.object?
-          menu.push 'routing:' + route
-        else
-          menu.push 'build:channel:' + route
-      ) for route, sth of state.routing
+      menu = ['build:channel', 'routing']
 
     requestAccept: ( signal, state ) ->
         if signal.owner.id is state.owner.id

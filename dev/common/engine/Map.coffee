@@ -61,10 +61,17 @@ class Map
 
   addPlatform: ( platform, x, y ) ->
     platform.state.field = @fields[y][x]
-    #console.log x + " " + y + " add pl"
     @fields[y][x].platform = platform
+    #console.log x + " " + y + " add pl"
+    (
+      console.log channel
+      nDir = (+dir + 3) % 6
+      console.log dir, nDir
+      platform.state.routing[dir].object = channel
+      channel.state.routing[nDir].object = platform
+    ) for dir, channel of @fields[y][x].channels
 
-  #k - direction [0..6] clockwise from the top
+  #k - direction [0..5] clockwise from the top
   addChannel: ( channel, x, y, k ) ->
     @fields[y] ?= {}
     @fields[y][x].channels ?= {}
@@ -74,10 +81,22 @@ class Map
     [mX, mY] = @directionModificators[k]
     nY = y + mY
     nX = x + mX
-    @fields[nY] ?= {}
-    @fields[nY][nX].channels ?= {}
-    @fields[nY][nX].channels[(k+3)%6] = channel
+    nK = (k + 3) % 6
+    @addReverseChannel channel, nX, nY, nK
+    # Bind channel to routing table
+    routingAddChannel = (x, y, k) =>
+      if @fields[y][x].platform.type?
+        nK = (k + 3) % 6
+        @fields[y][x].platform.state.routing[k].object = channel
+        channel.state.routing[nK].object = @fields[y][k].platform
 
+    routingAddChannel x, y, k
+    routingAddChannel nX, nY, nK
+
+  addReverseChannel: ( channel, x, y, k ) ->
+    @fields[y] ?= {}
+    @fields[y][x].channels ?= {}
+    @fields[y][x].channels[k] = channel
 
   dump: ->
     print = ( o, x, y ) ->
