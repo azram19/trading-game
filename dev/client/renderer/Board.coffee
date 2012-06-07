@@ -401,58 +401,59 @@ class Renderer
 
 #----------------------------------------#
 #--------For test purposes only---------#
-
-#player = ObjectFactory.build Types.Entities.Player
-#manager = new GameManager [player], [[2,2]], 8, 15
-#state = manager.map
-#console.log state
-
-#channelStat =
-    #state: {
-        #owner:
-            #id: 1
-    #}
-    #platform: {
-        #type: () -> 8
-        #behaviour:
-            #platformType: {}
-        #state:
-            #owner:
-                #id: 1
-        #}
-
-#window.channelStat = channelStat
-#window.state = state
 window.S.Drawer = Drawer
 window.S.Renderer = Renderer
 ###
+player = ObjectFactory.build Types.Entities.Player
+manager = new GameManager Backbone.Events, [player], [[2,2]], 8, 15
+state = manager.map
+console.log state
+
+channelStat =
+    state: {
+        owner:
+            id: 1
+    }
+    platform: {
+        type: () -> 8
+        behaviour:
+            platformType: {}
+        state:
+            owner:
+                id: 1
+        }
+
+window.channelStat = channelStat
+window.state = state
+
+
 $ ->
+
+    if $('#radial').length <= 0   
+        renderer = new Renderer 8, 15
+        renderer.setupBoard(state)
+        window.renderer = renderer
+        for y in [0..4]
+                for x in [0..4]
+                    renderer.moveSignal y, x, 2
+        renderer.buildChannel 2, 2, 3, channelStat
+        renderer.buildChannel 3, 3, 3, channelStat
+        renderer.buildChannel 4, 4, 5, channelStat
+
     contentWidth = 2000
     contentHeight = 2000
     cellWidth = 100
     cellHeight = 100
+    container = document.getElementById("canvasWrapper")
     content = document.getElementById("grid")
-    stage = new Stage content
-    context = content.getContext("2d")
-    tiling = new Tiling
+    context = renderer.gridST.canvas.getContext("2d")
 
     render = (left, top, zoom) ->
       content.width = clientWidth
       content.height = clientHeight
       context.clearRect 0, 0, clientWidth, clientHeight
-      #tiling.setup clientWidth, clientHeight, contentWidth, contentHeight, cellWidth, cellHeight
-      #tiling.render left, top, zoom, paint
-      negotiate.renderer.gridST.update()
+      renderer.gridST.update()
 
-    paint = (row, col, left, top, width, height, zoom) ->
-      context.fillStyle = (if row % 2 + col % 2 > 0 then "#ddd" else "#fff")
-      context.fillRect left, top, width, height
-      context.fillStyle = "black"
-      context.font = (14 * zoom).toFixed(2) + "px \"Helvetica Neue\", Helvetica, Arial, sans-serif"
-      context.fillText row + "," + col, left + (6 * zoom), top + (18 * zoom)
-
-    container = document.getElementById("canvasWrapper")
-    content = document.getElementById("background")
     clientWidth = 0
     clientHeight = 0
     scroller = new Scroller(render,
@@ -487,6 +488,7 @@ $ ->
     else
         mousedown = false
         container.addEventListener "mousedown", ((e) ->
+            console.log 'poprostu kurwa no nie'
             return  if e.target.tagName.match(/input|textarea|select/i)
             scroller.doTouchStart [
                 pageX: e.pageX
@@ -495,6 +497,7 @@ $ ->
             mousedown = true
         ), false
         document.addEventListener "mousemove", ((e) ->
+            console.log 'boże czy Ty to widzisz?'
             return  unless mousedown
             scroller.doTouchMove [
                 pageX: e.pageX
@@ -503,6 +506,7 @@ $ ->
             mousedown = true
         ), false
         document.addEventListener "mouseup", ((e) ->
+            console.log "widzę"
             return  unless mousedown
             scroller.doTouchEnd e.timeStamp
             mousedown = false
@@ -523,4 +527,5 @@ $ ->
         #renderer.buildChannel 2, 2, 3, channelStat
         #renderer.buildChannel 3, 3, 3, channelStat
         #renderer.buildChannel 4, 4, 5, channelStat
+
 ###
