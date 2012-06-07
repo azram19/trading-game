@@ -3,10 +3,10 @@ class UI extends S.Drawer
     canvas = document.getElementById "UI"
     @stage = new Stage canvas
     @stage.autoclear = false
-    @stage.onClick = @handleClick
+
+    canvas.onclick = @handleClick
 
     super @stage, @minRow, @maxRow
-
 
     @curMenu = null
 
@@ -117,20 +117,26 @@ class UI extends S.Drawer
                       el.length > 0
                   ).value()
 
-  handleClick: ( event ) ->
-    p = @getCoords event.stageX, eventStageY
+  handleClick: ( event ) =>
+    if @curMenu? and @curMenu.hitTest event.x, event.y
 
-    @handleClickOnField p.x, p.y
+    else
+      p = @getCoords (new Point event.x, event.y)
+
+      @handleClickOnField p.x, p.y
 
   handleClickOnField: ( i, j ) =>
-    (menu?.hide() for menu in menuI) for menuI in @menus
-
-    @curMenu = createMenu i, j
+    @destroyMenu @curMenu
+    @curMenu = @createMenu i, j
+    @curMenu.show()
     @curMenu.click()
 
+  destroyMenu: ( menu ) ->
+    if menu?
+      menu.destroy()
 
   render: (i,j) ->
-    menu = createMenu i, j
+    menu = @createMenu i, j
     menu.drawIt()
     menu.show()
 

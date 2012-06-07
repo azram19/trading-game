@@ -21,7 +21,6 @@ class radialMenu
     overwritten by root's context and stage.
     ###
     @stage = new Stage @canvas
-    @stage.autoClear = true
 
     #Container where we store all our children
     @container = new Container()
@@ -126,7 +125,7 @@ class radialMenu
     @engine.trigger @event, @obj
 
   setEvent: ( ev ) ->
-    console.debug ev
+    console.log "set" + ev
     @event = ev
 
   setPositiveAction: ( @positive_action ) ->
@@ -220,6 +219,11 @@ class radialMenu
 
     Ticker.addListener @, false
 
+  destroy: () ->
+    Ticker.removeListener @
+
+    child.destroy() for child in @children
+
   drawButtonOrange: ( button ) ->
     button.graphics
       .beginRadialGradientFill(["#F38630","#FA6900", "#222"], [0,0.7,1], @x_o, @y_o, 0, @x_o, @y_o, @radius)
@@ -284,6 +288,23 @@ class radialMenu
     @hideChildren()
     @circle.visible = false
     @circleC.visible = false
+
+  hitTest: ( x, y ) =>
+    rsq = @length * @length
+
+    global = @button.parent.localToGlobal @x, @y
+
+    sq = ( a ) ->
+      a * a
+
+    if rsq > 0
+      if rsq > Math.sqrt( sq( x - global.x) + sq(y - global.y) )
+        true
+      else
+        _.any( child.hitTest x, y for child in @children )
+
+    false
+
 
   expand: ( expandChildren ) =>
     if not @visible
