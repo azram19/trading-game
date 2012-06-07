@@ -12,11 +12,12 @@ class SignalFactory
     constructor: ->
         @builders = {}
         @builders[Types.Entities.Signal] = (id, args) =>
-            strength = args[0]
-            type = args[1]
-            source = args[2]
+            events = args[0]
+            strength = args[1]
+            type = args[2]
+            source = args[3]
             name = 'Signal' + id
-            signal = _.extend new Signal(strength, type, source), {'name': name, 'id': id}
+            signal = _.extend new Signal(events, strength, type, source), {'name': name, 'id': id}
 
     build: ( kind, args... ) ->
         if not kind

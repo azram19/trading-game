@@ -147,7 +147,7 @@ class BoardDrawer
         @uiHandler.drawOverlay point
 
     setUI: ( @UI ) ->
-        @UIHandler.setUI @UI
+      @uiHandler.setUI @UI
 
     setupBoard: (boardState) ->
         for j in [0 ... (2*@helper.diffRows + 1)]
@@ -186,9 +186,10 @@ class UIHandler
     setUI: ( @UI ) ->
 
     fieldClick: (event) =>
+        console.log 'click'
         coords = getCoords(event.stageX, event.stageY)
-
         if @UI?
+            console.log 'click'
             @UI.trigger 'fieldClick', coords.x, coords.y
 
     tick: () ->
@@ -399,10 +400,14 @@ class Renderer
     capturePlatform: (x, y, field) ->
         @boardDR.capturePlatform(x, y, field.platform.state.owner)
 
+    # injects UI element into board
+    setUI: ( UI ) ->
+      @boardDR.setUI UI
+
     # Resets all the canvases, using the current boardState
     # It clears all the stages and. To be discussed whether to clear Signals
     # stage
-    setupBoard: (boardState, UI) ->
+    setupBoard: (boardState) ->
         @clearAll()
         @signalsDR.setupFPS()
         @signalsDR.setupOffSignals()
@@ -414,39 +419,38 @@ class Renderer
 #----------------------------------------#
 #--------For test purposes only---------#
 
-player = ObjectFactory.build Types.Entities.Player
-manager = new GameManager [player], [[2,2]], 8, 15
-state = manager.map
-console.log state
+#player = ObjectFactory.build Types.Entities.Player
+#manager = new GameManager [player], [[2,2]], 8, 15
+#state = manager.map
+#console.log state
 
-channelStat =
-    state: {
-        owner:
-            id: 1
-    }
-    platform: {
-        type: () -> 8
-        behaviour:
-            platformType: {}
-        state:
-            owner:
-                id: 1
-        }
+#channelStat =
+    #state: {
+        #owner:
+            #id: 1
+    #}
+    #platform: {
+        #type: () -> 8
+        #behaviour:
+            #platformType: {}
+        #state:
+            #owner:
+                #id: 1
+        #}
 
-window.channelStat = channelStat
-window.state = state
-window.S.Drawer = window.Drawer = Drawer
+#window.channelStat = channelStat
+#window.state = state
+window.S.Drawer = Drawer
+window.S.Renderer = Renderer
 
-$ ->
-    if $('#radial').length <= 0
-        renderer = new Renderer 8, 15
-        renderer.setupBoard(state)
-        window.renderer = renderer
-        for y in [0..4]
-                for x in [0..4]
-                    renderer.moveSignal y, x, 2
-        renderer.buildChannel 2, 2, 3, channelStat
-        renderer.buildChannel 3, 3, 3, channelStat
-        renderer.buildChannel 4, 4, 5, channelStat
-
-
+#$ ->
+    #if $('#radial').length <= 0
+        #renderer = new Renderer 8, 15
+        #renderer.setupBoard(state)
+        #window.renderer = renderer
+        #for y in [0..4]
+                #for x in [0..4]
+                    #renderer.moveSignal y, x, 2
+        #renderer.buildChannel 2, 2, 3, channelStat
+        #renderer.buildChannel 3, 3, 3, channelStat
+        #renderer.buildChannel 4, 4, 5, channelStat

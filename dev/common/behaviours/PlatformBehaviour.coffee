@@ -1,6 +1,6 @@
 class PlatformBehaviour
 
-    constructor: ( @platformType ) ->
+    constructor: ( @platformType, @eventBus ) ->
 
     getType: ->
         @platformType

@@ -1,7 +1,14 @@
+if require?
+  Types = require '../config/Types'
+else
+  Types = window.Types
+
 class ChannelBehaviour
 
+    constructor: ( @eventBus ) ->
+
     getType: ->
-        "channel"
+        Types.Entities.Channel
 
     requestAccept: ( signal, state ) ->
         if signal.owner is state.owner
@@ -23,16 +30,18 @@ class ChannelBehaviour
             state.life -= signal.strength
             if state.life <= 0
                 state.owner = signal.owner
-                # Trigger UI event
+                @eventBus.trigger 'owner:channel', state.field.xy, state.direction, state.owner
 
     route: ( state ) ->
        _.each state.signals, (signal, index) ->
            availableRoutes = _.filter state.routing, (route, direction) ->
                 route? and route.object isnt signal.source
-           destination = availableRoutes[0]
+           destNum = Math.ceil(Math.random()*100)%availableRoutes.length
+           destination = availableRoutes[destNum]
            if destination.requestAccept signal
-               destination.trigger 'accept', signal, (signal) ->
-                   state.signals = _.without state.signals, signal
+              @eventBus.trigger 'move:signal', state.field.xy, destNum
+              destination.trigger 'accept', signal, (signal) ->
+                state.signals = _.without state.signals, signal
 
 if module? and module.exports
   exports = module.exports = ChannelBehaviour

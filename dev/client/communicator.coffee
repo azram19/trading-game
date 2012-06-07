@@ -48,10 +48,10 @@ class Communicator
     console.error 'Communicator: Unable to connect Socket.IO', reason
 
   handlePing: =>
-    self = @
+    #self = @
     @socket.emit 'pong'
-    @socket.once 'lag', ( lag ) ->
-      self.lag = lag
+    @socket.once 'lag', ( lag ) =>
+      @lag = lag
 
   handleReconnected: ( transport, attempts ) =>
   handleReconnecting: ( delay, attempts ) =>

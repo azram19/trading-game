@@ -7,6 +7,8 @@ else
 
 class HQBehaviour
 
+    constructor: ( @eventBus ) ->
+
     getType: ->
         Types.Platforms.HQ
 
@@ -23,7 +25,8 @@ class HQBehaviour
             state.field.resource.trigger 'produce'
         production = =>
                 (
-                    state.owner.addResource(SignalFactory.build Types.Entities.Signal, state.extraction, res, state.owner)
+                    state.owner.addResource(SignalFactory.build Types.Entities.Signal, state.extraction, Types.Resources[res], state.owner)
+                    @eventBus.trigger 'resource:produce', state.field.xy, state.extraction, Types.Resources[res]
                 ) for res in Types.Resources.Names
         setInterval production, state.delay
 
@@ -34,9 +37,7 @@ class HQBehaviour
         else
             state.life -= signal.strength
             if state.life <= 0
-                null
-                #Trigger UI event
-                #GameEngine.trigger 'player:dead', state.owner
+                @eventBus.trigger 'player:lost', state.owner
 
     route: ( state ) ->
 

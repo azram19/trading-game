@@ -10,7 +10,7 @@ else
 
 class ResourceBehaviour
 
-    constructor: ( @resourceType ) ->
+    constructor: ( @resourceType, @eventBus ) ->
 
     getType: ->
         @resourceType
@@ -31,7 +31,8 @@ class ResourceBehaviour
             else
                 #we have enough resources, mining...
                 newSignal = SignalFactory.build Types.Entities.Signal, state.extraction, @resourceType, state.field.platform.state.owner
-                newSignal.path.push state.field.resource
+                newSignal.path.push state.field.xy
+                @eventBus.trigger 'resource:produce', state.field.xy, state.extraction, @resourceType
 
                 #can the platform accept the signal
                 acceptable = state.field.platform.requestAccept newSignal

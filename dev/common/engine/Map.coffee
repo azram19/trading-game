@@ -11,12 +11,9 @@ else
   Types = window.Types
 
 class Map
-  #fields: {} #level 0 on the map, resources and shit
-  #channels: {} #channels connecting fields
 
-  constructor: ( @minWidth, @maxWidth, @nonUser ) ->
+  constructor: ( @eventBus, @minWidth, @maxWidth, @nonUser ) ->
     @fields = {}
-    @channles = {}
     @diffRows = @maxWidth - @minWidth
     #initialize an empty map
     for y in [0 ... (2*@diffRows + 1)]
@@ -25,7 +22,7 @@ class Map
 
     #generate fields
     initializeField = ( o, y, x ) ->
-      field = new Field()
+      field = new Field(x, y)
       #console.log x + " " + y + ":field"
       field
 
@@ -40,7 +37,7 @@ class Map
             kind = Types.Resources.Metal
         else
             kind = Types.Resources.Tritium
-        resource = ObjectFactory.build kind, @nonUser
+        resource = ObjectFactory.build kind, @eventBus, @nonUser
         resource.state.field = o
         o.resource = resource
         o
@@ -61,9 +58,11 @@ class Map
 
   #k - direction [0..6] clockwise from the top
   addChannel: ( channel, y, x, k ) ->
-    @channels[y] ?= {}
-    @channels[y][x] ?= {}
-    @channels[y][x][k] = channel
+    @fields[y] ?= {}
+    @fields[y][x].channels ?= {}
+    channel.state.field = @fields[y][x]
+    channel.state.direction = k
+    @fields[y][x].channels[k] = channel
 
   dump: ->
     print = ( o, y, x ) ->
@@ -76,9 +75,11 @@ class Map
     @iterateFields print
 
   getChannel: (y, x, k) ->
-    if @channels?[y]?[x]?[k]?
-      return @channels[y][x][k]
-    return null
+    field = @getField y, x
+    if field?
+      return field.channels[k]
+    else
+      null
 
   getField: ( y, x ) ->
     if @fields[y]?
