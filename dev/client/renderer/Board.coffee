@@ -403,7 +403,7 @@ class Renderer
         @updateAll()
 
 #----------------------------------------#
-#--------For tests purposes only---------#
+#--------For test purposes only---------#
 
 player = ObjectFactory.build Types.Entities.Player
 manager = new GameManager [player], [[2,2]], 8, 15
@@ -433,8 +433,8 @@ $ ->
         renderer = new Renderer 8, 15
         renderer.setupBoard(state)
         window.renderer = renderer
-        for y in [0..7]
-                for x in [0..7]
+        for y in [0..4]
+                for x in [0..4]
                     renderer.moveSignal y, x, 2
         renderer.buildChannel 2, 2, 3, channelStat
         renderer.buildChannel 3, 3, 3, channelStat
