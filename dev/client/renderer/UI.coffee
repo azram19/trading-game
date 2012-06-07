@@ -117,7 +117,7 @@ class UI extends S.Drawer
                       el.length > 0
                   ).value()
 
-  hanldeClick: ( event ) ->
+  handleClick: ( event ) ->
     p = @getCoords event.stageX, eventStageY
 
     @handleClickOnField p.x, p.y
