@@ -289,19 +289,24 @@ class radialMenu
     @circle.visible = false
     @circleC.visible = false
 
-  hitTest: ( x, y ) =>
-    rsq = @length * @length
-
-    global = @button.parent.localToGlobal @x, @y
-
+  hitTest: ( x, y, recursive ) =>
     sq = ( a ) ->
       a * a
 
+    if @circle.visible
+      l = @expand_length
+    else if @circleC.visible
+      l = @compact_length
+
+    rsq = l + 10
+
+    global = @button.parent.localToGlobal @x, @y
+
     if rsq > 0
       if rsq > Math.sqrt( sq( x - global.x) + sq(y - global.y) )
-        true
-      else
-        _.any( child.hitTest x, y for child in @children )
+        return true
+      else if recursive
+        return _.any( child.hitTest x, y for child in @children )
 
     false
 

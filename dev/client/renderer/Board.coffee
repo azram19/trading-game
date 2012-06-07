@@ -56,7 +56,6 @@ class Drawer
         y = (point.y - @margin) / @verIncrement
         offset = @margin + Math.abs(@diffRows-y)*@horIncrement
         x = (point.x - offset) / (2*@horIncrement)
-        console.log [x,y]
         new Point Math.round(x), Math.round(y)
 
     # Arguments: direction
