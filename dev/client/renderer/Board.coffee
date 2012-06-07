@@ -374,8 +374,8 @@ class Renderer
 
     # builds a platform at field (x,y) given a field object, which helps
     # to indicate type of a platform
-    buildPlatform: (x, y, field) ->
-        @boardDR.buildPlatform(x, y, field.platform.type())
+    buildPlatform: (x, y, platform) ->
+        @boardDR.buildPlatform(x, y, platform.type())
 
     # captures a channel, (x,y) are the coordinates of the player's field
     # channel is the object at (x,y), helps to find the ownership

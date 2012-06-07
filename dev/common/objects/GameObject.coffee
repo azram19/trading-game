@@ -22,7 +22,7 @@ class GameObject
         @behaviour.requestAccept signal, @state
 
     actionMenu: ->
-        @behaviour.actionMenu state
+        @behaviour.actionMenu @state
 
     accept: ( signal, callback ) ->
         @behaviour.accept signal, @state, callback
