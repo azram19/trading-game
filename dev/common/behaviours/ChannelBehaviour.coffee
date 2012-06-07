@@ -10,8 +10,12 @@ class ChannelBehaviour
     getType: ->
         Types.Entities.Channel
 
-    menu: ->
-      [Types.Events.Routing]
+    actionMenu: ( state ) ->
+      menu = []
+      (
+        if sth.object?
+          menu.push 'routing:' + route
+      ) for route, sth of state.routing
 
     requestAccept: ( signal, state ) ->
         if signal.owner.id is state.owner.id

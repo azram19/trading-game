@@ -15,7 +15,7 @@ class ResourceBehaviour
     getType: ->
         @resourceType
 
-    menu: ->
+    actionMenu: ( state ) ->
       []
 
     requestAccept: ( signal, state ) ->

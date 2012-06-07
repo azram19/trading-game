@@ -15,6 +15,14 @@ class Map
   constructor: ( @eventBus, @minWidth, @maxWidth, @nonUser ) ->
     @fields = {}
     @diffRows = @maxWidth - @minWidth
+    @directionModificators =
+      0: [-1, -1]
+      1: [1, -1]
+      2: [1, 0]
+      3: [1, 1]
+      4: [-1, 1]
+      5: [-1, 0]
+
     #initialize an empty map
     for y in [0 ... (2*@diffRows + 1)]
         for x in [0 ... @maxWidth - Math.abs(@diffRows - y)]
@@ -63,6 +71,15 @@ class Map
     channel.state.field = @fields[y][x]
     channel.state.direction = k
     @fields[y][x].channels[k] = channel
+    [mX, mY] = @directionModificators[k]
+    nY = y + mY
+    nX = x + mX
+    if 0 <= nY < 2*@diffRows+1
+      @fields[nY] ?= {}
+      if 0 <= nX < @maxWidth
+        @fields[nY][nX].channels ?= {}
+        @fieldsp[nY][nX].channels[(k+3)%6] = channel
+
 
   dump: ->
     print = ( o, y, x ) ->
