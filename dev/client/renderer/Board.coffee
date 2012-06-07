@@ -426,8 +426,125 @@ class Renderer
 window.S.Drawer = Drawer
 window.S.Renderer = Renderer
 
-#$ ->
-    #if $('#radial').length <= 0
+render = ((global) ->
+  docStyle = document.documentElement.style
+  engine = undefined
+  if global.opera and Object::toString.call(opera) is "[object Opera]"
+    engine = "presto"
+  else if "MozAppearance" of docStyle
+    engine = "gecko"
+  else if "WebkitAppearance" of docStyle
+    engine = "webkit"
+  else engine = "trident"  if typeof navigator.cpuClass is "string"
+  vendorPrefix =
+    trident: "ms"
+    gecko: "Moz"
+    webkit: "Webkit"
+    presto: "O"
+  [{engine}]
+  helperElem = document.createElement("div")
+  undef = undefined
+  perspectiveProperty = vendorPrefix + "Perspective"
+  transformProperty = vendorPrefix + "Transform"
+  if helperElem.style[perspectiveProperty] isnt undef
+    (left, top, zoom) ->
+      content.style[transformProperty] = "translate3d(" + (-left) + "px," + (-top) + "px,0) scale(" + zoom + ")"
+  else if helperElem.style[transformProperty] isnt undef
+    (left, top, zoom) ->
+      content.style[transformProperty] = "translate(" + (-left) + "px," + (-top) + "px) scale(" + zoom + ")"
+  else
+    (left, top, zoom) ->
+      content.style.marginLeft = (if left then (-left / zoom) + "px" else "")
+      content.style.marginTop = (if top then (-top / zoom) + "px" else "")
+      content.style.zoom = zoom or ""
+)(this)
+
+$ ->
+    contentWidth = 2000
+    contentHeight = 2000
+    cellWidth = 100
+    cellHeight = 100
+    content = document.getElementById("grid")
+    context = content.getContext("2d")
+    tiling = new Tiling
+
+    render = (left, top, zoom) ->
+      content.width = clientWidth
+      content.height = clientHeight
+      context.clearRect 0, 0, clientWidth, clientHeight
+      tiling.setup clientWidth, clientHeight, contentWidth, contentHeight, cellWidth, cellHeight
+      tiling.render left, top, zoom, paint
+
+    paint = (row, col, left, top, width, height, zoom) ->
+      context.fillStyle = (if row % 2 + col % 2 > 0 then "#ddd" else "#fff")
+      context.fillRect left, top, width, height
+      context.fillStyle = "black"
+      context.font = (14 * zoom).toFixed(2) + "px \"Helvetica Neue\", Helvetica, Arial, sans-serif"
+      context.fillText row + "," + col, left + (6 * zoom), top + (18 * zoom)
+
+    container = document.getElementById("canvasWrapper")
+    content = document.getElementById("background")
+    clientWidth = 0
+    clientHeight = 0
+    scroller = new Scroller(render,
+      zooming: true
+    )
+    rect = container.getBoundingClientRect()
+    scroller.setPosition rect.left + container.clientLeft, rect.top + container.clientTop
+
+    reflow = ->
+      clientWidth = container.clientWidth
+      clientHeight = container.clientHeight
+      scroller.setDimensions clientWidth, clientHeight, contentWidth, contentHeight
+
+    window.addEventListener "resize", reflow, false
+    reflow()
+
+    if "ontouchstart" of window
+      container.addEventListener "touchstart", ((e) ->
+        return  if e.touches[0] and e.touches[0].target and e.touches[0].target.tagName.match(/input|textarea|select/i)
+        scroller.doTouchStart e.touches, e.timeStamp
+        e.preventDefault()
+      ), false
+      document.addEventListener "touchmove", ((e) ->
+        scroller.doTouchMove e.touches, e.timeStamp, e.scale
+      ), false
+      document.addEventListener "touchend", ((e) ->
+        scroller.doTouchEnd e.timeStamp
+      ), false
+      document.addEventListener "touchcancel", ((e) ->
+        scroller.doTouchEnd e.timeStamp
+      ), false
+    else
+        mousedown = false
+        container.addEventListener "mousedown", ((e) ->
+            return  if e.target.tagName.match(/input|textarea|select/i)
+            scroller.doTouchStart [
+                pageX: e.pageX
+                pageY: e.pageY
+            ], e.timeStamp
+            mousedown = true
+        ), false
+        document.addEventListener "mousemove", ((e) ->
+            return  unless mousedown
+            scroller.doTouchMove [
+                pageX: e.pageX
+                pageY: e.pageY
+            ], e.timeStamp
+            mousedown = true
+        ), false
+        document.addEventListener "mouseup", ((e) ->
+            return  unless mousedown
+            scroller.doTouchEnd e.timeStamp
+            mousedown = false
+        ), false
+        
+        container.addEventListener (if navigator.userAgent.indexOf("Firefox") > -1 then "DOMMouseScroll" else "mousewheel"), ((e) ->
+            scroller.doMouseZoom (if e.detail then (e.detail * -120) else e.wheelDelta), e.timeStamp, e.pageX, e.pageY
+        ), false
+
+
+    #if $('#radial').length <= 0   
         #renderer = new Renderer 8, 15
         #renderer.setupBoard(state)
         #window.renderer = renderer
