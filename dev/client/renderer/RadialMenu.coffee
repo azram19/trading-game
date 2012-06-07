@@ -49,7 +49,7 @@ class radialMenu
     @expandTime = 500
     @compactTime = 500
     @hideTime = 200
-    @showTime = 200
+    @showTime = 100
 
     @priority = 100
 
@@ -178,6 +178,7 @@ class radialMenu
       .drawCircle( @x_o, @y_o, @compact_length )
 
     @actionButton = new Shape()
+    @actionButton.onClick = @action
 
     if @children.length < 1
       @actionButton =  @drawButtonOrange @actionButton

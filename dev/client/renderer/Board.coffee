@@ -34,7 +34,7 @@ class Drawer
         @size = size
 
     # Sets the margin: distance between left border of the screen and center of the leftmost
-    # hex in the middle row of the board and the distance between the top border of the 
+    # hex in the middle row of the board and the distance between the top border of the
     # screen and center of a hex in the top row of the board
     setMargin: (margin) ->
         @margin = margin
@@ -57,7 +57,7 @@ class Drawer
         offset = @margin + Math.abs(@diffRows-y)*@horIncrement
         x = (point.x - offset) / 2*@horIncrement
         new Point(x,y)
-    
+
     # Arguments: direction
     # Returns point with tick sizes for particular direction
     getTicks: (direction) ->
@@ -221,7 +221,7 @@ class OffSignals
         shape.visible = false
         shape.isSignal = true
         @stage.addChild shape
-        
+
     toogleCache: (status) ->
         length = @stage.getNumChildren() - 1
         for i in [0..length]
@@ -281,7 +281,7 @@ class SignalsDrawer
             if signal.isSignal and signal.isVisible
                 if @helper.getDistance(signal.k * signal.tickSizeX, signal.k * signal.tickSizeY) >= @helper.distance
                     signal.visible = false
-                else   
+                else
                     signal.x += signal.tickSizeX
                     signal.y += signal.tickSizeY
                     signal.k += 1
@@ -337,16 +337,16 @@ class Renderer
         if canvasOverlay?
             @overlayST = new Stage canvasOverlay
             @addStage @overlayST
-            window.Mouse = new MouseClass canvasOverlay, 1280, 800   
+            window.Mouse = new MouseClass canvasOverlay, 1280, 800
         if canvasSignals?
             @signalsST = new Stage canvasSignals
-            @offST = new Stage canvasOff 
+            @offST = new Stage canvasOff
             @addStage @signalsST
             @addStage @offST
         ###
         if canvasUI?
             @UIST = new Stage canvasUI
-            @addStage @UIST            
+            @addStage @UIST
         ###
         helper = new Drawer @ownershipST, minRow, maxRow
         @boardDR = new BoardDrawer @ownershipST, @resourcesST, @gridST, @platformsST, @channelsST, @overlayST, helper
@@ -367,7 +367,7 @@ class Renderer
 
 #---------------------Interface----------------------#
 
-    # moves signal from field (x,y) in particular direction 
+    # moves signal from field (x,y) in particular direction
     moveSignal: (x, y, direction) ->
         @signalsDR.createSignal(x, y, direction)
 
@@ -426,7 +426,7 @@ channelStat =
 
 window.channelStat = channelStat
 window.state = state
-window.Drawer = Drawer
+window.S.Drawer = window.Drawer = Drawer
 
 $ ->
     if $('#radial').length <= 0
@@ -439,5 +439,5 @@ $ ->
         renderer.buildChannel 2, 2, 3, channelStat
         renderer.buildChannel 3, 3, 3, channelStat
         renderer.buildChannel 4, 4, 5, channelStat
-        
+
 

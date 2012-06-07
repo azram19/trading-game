@@ -3,7 +3,7 @@ ComClient = require './communicationClient'
 _ = require( 'underscore' )._
 Backbone = require( 'backbone' )
 parseCookie = require('connect').utils.parseCookie
-
+util = require 'util'
 ###
 Stores information about all connected clients, and handles actual
 message passing to and between clients.
@@ -51,6 +51,12 @@ class Communicator
       hs = socket.handshake
       client = new ComClient socket
       @clients[ client.getId() ] = client
+
+      if hs.session.auth?
+        if hs.session.auth.google?
+          socket.emit 'user', hs.session.auth.google.user
+        else
+          socket.emit 'user', hs.session.auth.facebook.user
 
       socket.on 'message:add', ( data ) ->
         socket.broadcast.to( client.getChannel() ).emit 'message:new', data

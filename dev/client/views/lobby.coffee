@@ -15,6 +15,7 @@ class LobbyView extends Backbone.View
 
     #Listen to the server
     @communicator.on 'message:new', @handleServerMessage
+    @communicator.on 'user', @handleUser
 
     KeyboardJS.bind.key 'enter', @newMessage, =>
       $( '#chat textarea:focus' ).val ''
@@ -23,7 +24,7 @@ class LobbyView extends Backbone.View
   addMessage: ( model ) =>
     console.log "Lobby: New message"
 
-    msg = @messageTemplate message: model.toJSON()
+    msg = @messageTemplate message: model.toJSON(), user: @user
     $( '#chat ul' ).append msg
     $( "#chat .nano" ).nanoScroller scroll: 'bottom'
 
@@ -31,6 +32,9 @@ class LobbyView extends Backbone.View
     console.log "Lobby: Server message"
     msg = new Message data
     @collection.add msg
+
+  handleUser: ( user ) =>
+    @user = user
 
   newMessage: =>
     #Get the textarea and check if we are focused on it

@@ -1,5 +1,9 @@
-class UI extends Drawer
-  constructor: ( @stage, @minRow, @maxRow, @engine ) ->
+class UI extends S.Drawer
+  constructor: ( @minRow, @maxRow, @engine ) ->
+    canvas = document.getElementById "UI"
+    @stage = new Stage canvas
+    @stage.autoclear = false
+
     super @stage, @minRow, @maxRow
 
     _.extend @, Backbone.Events
@@ -130,15 +134,3 @@ class UI extends Drawer
     console.log "Rendering finished"
 
 window.S.UIClass = UI
-
-$ ->
-  canvas = document.getElementById "UI"
-  if canvas?
-    stage = new Stage canvas
-    stage.autoclear = false
-    window.UI = UI = new S.UIClass stage, 8, 15
-    UI.initializeMenus()
-    window.M = m = UI.createMenu 6,6
-    m.drawIt()
-    m.show()
-

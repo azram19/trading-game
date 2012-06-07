@@ -13,7 +13,6 @@ class Communicator
     #connect to the host
     @socket = io.connect @host, @socketConfig
 
-
     #listening to basic connection events
     @socket.on 'connecting', @handleConnecting
     @socket.on 'connect', @handleConnected
