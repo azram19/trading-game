@@ -76,13 +76,13 @@ class Map
     @iterateFields print
 
   getChannel: (y, x, k) ->
-    if channels?[y]?[x]?[k]?
-      return channels[y][x][k]
+    if @channels?[y]?[x]?[k]?
+      return @channels[y][x][k]
     return null
 
   getField: ( y, x ) ->
-    if fields[y]?
-      return fields[y][x]
+    if @fields[y]?
+      return @fields[y][x]
 
     return null
 
