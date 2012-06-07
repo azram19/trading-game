@@ -32,26 +32,29 @@ class ObjectFactory
     constructor: ->
         @builders = {}
         @builders[Types.Entities.Platform] = (id, args) =>
-            owner = args[0]
-            type = args[1]
+            events = args[0]
+            owner = args[1]
+            type = args[2]
             name = 'Platform' + id
             state = _.extend new ObjectState(), _.clone(Properties.platform)
             state = _.extend state, {'name': name, 'id': id, 'owner': owner}
-            object = new GameObject new PlatformBehaviour(type), state
+            object = new GameObject new PlatformBehaviour(type, events), state
 
         @builders[Types.Entities.HQ] = (id, args) =>
-            owner = args[0]
+            events = args[0]
+            owner = args[1]
             name = 'HQ' + id
             state = _.extend new ObjectState(), _.clone(Properties.HQ)
             state = _.extend state, {'name': name, 'id': id, 'owner': owner}
-            object = new GameObject new HQBehaviour(), state
+            object = new GameObject new HQBehaviour(events), state
 
         @builders[Types.Entities.Channel] = (id, args) =>
-            owner = args[0]
+            events = args[0]
+            owner = args[1]
             name = 'Channel' + id
             state = _.extend new ObjectState(), _.clone(Properties.channel)
             state = _.extend state, {'name': name, 'id': id, 'owner': owner}
-            object = new GameObject new ChannelBehaviour(), state
+            object = new GameObject new ChannelBehaviour(events), state
 
         @builders[Types.Entities.Player] = (id, args) =>
             player = _.extend new Player(), _.clone( Properties.player )
@@ -66,18 +69,20 @@ class ObjectFactory
             #signal = _.extend new Signal(strength, type, source), {'name': name, 'id': id}
 
         @builders[Types.Resources.Metal] = (id, args) =>
-            owner = args[0]
+            events = args[0]
+            owner = args[1]
             name = 'Metal' + id
             state = _.extend new ObjectState(), _.clone(Properties.resource)
             state = _.extend state, {'name': name, 'id': id, 'owner': owner}
-            object = new GameObject new ResourceBehaviour(Types.Resources.Metal), state
+            object = new GameObject new ResourceBehaviour(Types.Resources.Metal, events), state
 
         @builders[Types.Resources.Tritium] = (id, args) =>
-            owner = args[0]
+            events = args[0]
+            owner = args[1]
             name = 'Tritium' + id
             state = _.extend new ObjectState(), _.clone(Properties.resource)
             state = _.extend state, {'name': name, 'id': id, 'owner': owner}
-            object = new GameObject new ResourceBehaviour(Types.Resources.Tritium), state
+            object = new GameObject new ResourceBehaviour(Types.Resources.Tritium, events), state
 
         _.extend @builders, SignalFactory.builders
 

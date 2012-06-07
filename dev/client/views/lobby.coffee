@@ -16,6 +16,9 @@ class LobbyView extends Backbone.View
     #Listen to the server
     @communicator.on 'message:new', @handleServerMessage
     @communicator.on 'user', @handleUser
+    #Update list of games when something interesting happens
+    @communicator.on 'game:new', @handleNewGame
+    @communicator.on 'game:close', @handleGameClose
 
     KeyboardJS.bind.key 'enter', @newMessage, =>
       $( '#chat textarea:focus' ).val ''
@@ -27,6 +30,10 @@ class LobbyView extends Backbone.View
     msg = @messageTemplate message: model.toJSON(), user: @user
     $( '#chat ul' ).append msg
     $( "#chat .nano" ).nanoScroller scroll: 'bottom'
+
+  handleNewGame: ( data ) =>
+    console.log 'Lobby: New game has been created'
+    game = new Game data
 
   handleServerMessage: ( data ) =>
     console.log "Lobby: Server message"

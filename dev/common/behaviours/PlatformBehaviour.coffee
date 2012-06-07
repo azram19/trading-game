@@ -1,12 +1,14 @@
 class PlatformBehaviour
 
-    constructor: ( @platformType ) ->
+    constructor: ( @platformType, @eventBus ) ->
 
     getType: ->
         @platformType
 
+    actionMenu: ->
+
     requestAccept: ( signal, state ) ->
-        if signal.owner is state.owner
+        if signal.owner.id is state.owner.id
             availableRoutes = _.filter state.routing, (route, direction) ->
                 route.in && route.object is signal.source
             availableRoutes.length > 0 and state.capacity + 1 <= state.signals.length
@@ -17,7 +19,7 @@ class PlatformBehaviour
 
     accept: ( signal, state, callback ) ->
         callback signal
-        if signal.owner is state.owner
+        if signal.owner.id is state.owner.id
             signal.source = state.field.platform
             signal.path.push state.field.platform
             _.delay state.signals.push, state.delay, signal
@@ -26,7 +28,7 @@ class PlatformBehaviour
             state.life -= signal.strength
             if state.life < 0
                 state.owner = signal.owner
-                #Trigger UI event
+                @eventBus.trigger 'owner:platform', state.field.xy, state
 
     depleted: ( state ) ->
 
@@ -36,7 +38,8 @@ class PlatformBehaviour
             route.out
 
         _.each state.signals, (signal) ->
-            availableRoutes[0].object.trigger 'accept', signal, (signal) ->
+            destNum = Math.ceil(Math.random()*100)%availableRoutes.length
+            availableRoutes[destNum].object.trigger 'accept', signal, (signal) ->
                 state.signals = _.without state.signals, signal
 
 if module? and module.exports

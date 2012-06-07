@@ -78,8 +78,8 @@ class BoardDrawer
         @platformsST.update()
 
     capturePlatform: (x, y, owner) ->
-        point = @helper.getPoint(x, y)
-        @drawOwnership(point, owner)
+        point = @helper.getPoint x, y
+        @drawOwnership point, owner
         @ownershipST.update()
 
     buildChannel: (x, y, direction, owner) ->
@@ -98,6 +98,7 @@ class BoardDrawer
 
     drawOwnership: (point, owner) ->
         g = new Graphics()
+        # FIXME Ids can be very, very random
         switch owner.id
             when 0 then g.beginFill("#274E7D")
             when 1 then g.beginFill("#900020")
@@ -391,6 +392,7 @@ class Renderer
     # It clears all the stages and. To be discussed whether to clear Signals
     # stage
     setupBoard: (boardState) ->
+        @clearAll()
         @signalsDR.setupFPS()
         @signalsDR.setupOffSignals()
         @boardDR.setupBoard(boardState)
@@ -401,39 +403,38 @@ class Renderer
 #----------------------------------------#
 #--------For test purposes only---------#
 
-player = ObjectFactory.build Types.Entities.Player
-manager = new GameManager [player], [[2,2]], 8, 15
-state = manager.map
-console.log state
+#player = ObjectFactory.build Types.Entities.Player
+#manager = new GameManager [player], [[2,2]], 8, 15
+#state = manager.map
+#console.log state
 
-channelStat =
-    state: {
-        owner:
-            id: 1
-    }
-    platform: {
-        type: () -> 8
-        behaviour:
-            platformType: {}
-        state:
-            owner:
-                id: 1
-        }
+#channelStat =
+    #state: {
+        #owner:
+            #id: 1
+    #}
+    #platform: {
+        #type: () -> 8
+        #behaviour:
+            #platformType: {}
+        #state:
+            #owner:
+                #id: 1
+        #}
 
-window.channelStat = channelStat
-window.state = state
-window.S.Drawer = window.Drawer = Drawer
+#window.channelStat = channelStat
+#window.state = state
+window.S.Drawer = Drawer
+window.S.Renderer = Renderer
 
-$ ->
-    if $('#radial').length <= 0
-        renderer = new Renderer 8, 15
-        renderer.setupBoard(state)
-        window.renderer = renderer
-        for y in [0..4]
-                for x in [0..4]
-                    renderer.moveSignal y, x, 2
-        renderer.buildChannel 2, 2, 3, channelStat
-        renderer.buildChannel 3, 3, 3, channelStat
-        renderer.buildChannel 4, 4, 5, channelStat
-
-
+#$ ->
+    #if $('#radial').length <= 0
+        #renderer = new Renderer 8, 15
+        #renderer.setupBoard(state)
+        #window.renderer = renderer
+        #for y in [0..4]
+                #for x in [0..4]
+                    #renderer.moveSignal y, x, 2
+        #renderer.buildChannel 2, 2, 3, channelStat
+        #renderer.buildChannel 3, 3, 3, channelStat
+        #renderer.buildChannel 4, 4, 5, channelStat

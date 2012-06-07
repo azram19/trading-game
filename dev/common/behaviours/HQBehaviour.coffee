@@ -7,8 +7,12 @@ else
 
 class HQBehaviour
 
+    constructor: ( @eventBus ) ->
+
     getType: ->
         Types.Platforms.HQ
+
+    menu: ->
 
     requestAccept: ( signal, state ) ->
         if signal.owner is state.owner
@@ -23,20 +27,21 @@ class HQBehaviour
             state.field.resource.trigger 'produce'
         production = =>
                 (
-                    state.owner.addResource(SignalFactory.build Types.Entities.Signal, state.extraction, res, state.owner)
+                    state.owner.addResource(SignalFactory.build Types.Entities.Signal, @eventBus, state.extraction, Types.Resources[res], state.field.platform)
+                    @eventBus.trigger 'resource:produce', state.field.xy, state.extraction, Types.Resources[res]
                 ) for res in Types.Resources.Names
         setInterval production, state.delay
 
     accept: ( signal, state, callback ) ->
         callback signal
-        if signal.owner is state.owner
+        console.log signal
+        if signal.owner.id is state.owner.id
             state.owner.addResource signal
+            @eventBus.trigger 'resource:receive', state.field.xy, signal.strength, signal.type
         else
             state.life -= signal.strength
             if state.life <= 0
-                null
-                #Trigger UI event
-                #GameEngine.trigger 'player:dead', state.owner
+                @eventBus.trigger 'player:lost', state.owner
 
     route: ( state ) ->
 
