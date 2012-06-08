@@ -50,16 +50,18 @@ class UI extends S.Drawer
     title ?= ""
     desc ?= ""
 
-    if desc.length > 0
-      m = new S.radialMenu null, @stage.canvas, 0, 0, title, desc
+
+    eventsStructure = eventsStructure[stName]
+    submenuNames = @getPrefixes menuStructure
+
+    if desc.length > 0 or not submenuNames.length
+      m = new S.radialMenu @events, @stage.canvas, 0, 0, title, desc
       m.setEvent fullname
+      console.log fullname
 
       m
     else
-      m = new S.radialMenu null, @stage.canvas, 0, 0, title, desc
-
-      eventsStructure = eventsStructure[stName]
-      submenuNames = @getPrefixes menuStructure
+      m = new S.radialMenu @events, @stage.canvas, 0, 0, title, desc
 
       (
         subMenu = @buildMenu submenuName,
