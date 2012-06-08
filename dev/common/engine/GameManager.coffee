@@ -22,7 +22,6 @@ class GameManager
     HQs = (createHQ user for user in @users)
     @nonUser = ObjectFactory.build Types.Entities.Player
     @map = new Map @eventBus, minWidth, maxWidth, @nonUser
-    console.log minWidth, maxWidth
     @initialMapState( @map, HQs, startPoints )
     #@map.dump()
 

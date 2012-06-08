@@ -108,7 +108,7 @@ class Terrain extends S.Drawer
           blue: b,
           alpha: a
         ).darkenByAmount(
-         10
+         0.1
         )
 
         @setPixel(

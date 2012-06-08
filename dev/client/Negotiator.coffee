@@ -75,3 +75,97 @@ $ ->
      for x in [0..4]
       negotiate.renderer.moveSignal y, x, 2
     window.negotiate = negotiate
+
+    contentWidth = 2000
+    contentHeight = 2000
+    clientWidth = 0
+    clientHeight = 0
+
+    container = $('#canvasWrapper')[0]
+    content = $('#UI')[0]
+    context = content.getContext '2d'
+
+    # Canvas renderer
+    render = (left, top, zoom) ->
+      #Sync current dimensions with canvas
+      content.width = clientWidth
+      content.height = clientHeight
+
+      # Full clearing
+      # context.clearRect 0, 0, clientWidth, clientHeight
+      console.log 'left', left, 'top', top, 'zoom', zoom
+      negotiate.renderer.setupBoard negotiate.game.map
+      #tiling.render left, top, zoom, paint
+
+    # Initialize Scroller
+    scroller = new Scroller render, zooming: true
+    rect = container.getBoundingClientRect()
+  
+    scroller.setPosition rect.left + container.clientLeft, rect.top + container.clientTop
+
+    # Reflow handling
+    reflow = ->
+      clientWidth = container.clientWidth
+      clientHeight = container.clientHeight
+      scroller.setDimensions clientWidth, clientHeight, contentWidth, contentHeight
+
+    window.addEventListener "resize", reflow, false
+    reflow()
+
+    if 'ontouchstart' of window
+      container.addEventListener "touchstart", ((e) ->
+        # Don't react if initial down happens on a form element
+        if e.touches[0] and e.touches[0].target and e.touches[0].target.tagName.match /input|textarea|select/i
+          return
+
+        scroller.doTouchStart e.touches, e.timeStamp
+        e.preventDefault()
+      ), false
+
+      document.addEventListener "touchmove", ((e) ->
+        scroller.doTouchMove e.touches, e.timeStamp, e.scale
+      ), false
+
+      document.addEventListener "touchend", ((e) ->
+        scroller.doTouchEnd e.timeStamp
+      ), false
+
+      document.addEventListener "touchcancel", ((e) ->
+        scroller.doTouchEnd e.timeStamp
+      ), false
+
+    else
+
+      mousedown = false
+
+      container.addEventListener "mousedown", ((e) ->
+        if e.target.tagName.match /input|textarea|select/i
+          return
+
+        scroller.doTouchStart [
+          pageX: e.pageX
+          pageY: e.pageY
+        ], e.timeStamp
+
+        mousedown = true
+      ), false
+
+      document.addEventListener "mousemove", ((e) ->
+        return unless mousedown
+
+        scroller.doTouchMove [
+          pageX: e.pageX,
+          pageY: e.pageY
+        ], e.timeStamp
+
+        mousedown = true
+      ), false
+
+      document.addEventListener "mouseup", ((e) ->
+        scroller.doTouchEnd e.timeStamp
+        mousedown = false
+      ), false
+
+      container.addEventListener "mousewheel", ((e) ->
+        scroller.doMouseZoom e.wheelDelta, e.timeStamp, e.pageX, e.pageY
+      ), false
