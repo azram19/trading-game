@@ -75,7 +75,7 @@ $ ->
      for x in [0..4]
       negotiate.renderer.moveSignal y, x, 2
     window.negotiate = negotiate
-
+    ###
     contentWidth = 2000
     contentHeight = 2000
     clientWidth = 0
@@ -169,3 +169,4 @@ $ ->
       container.addEventListener "mousewheel", ((e) ->
         scroller.doMouseZoom e.wheelDelta, e.timeStamp, e.pageX, e.pageY
       ), false
+      ###
