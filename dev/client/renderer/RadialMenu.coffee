@@ -14,7 +14,6 @@ class radialMenu
 
     @positive_action = 'Yes'
     @negative_action = 'No'
-    @event = 'yes'
 
     ###
     Get the context and stage we will be drawing to. Only for the root it will be the actuall context, for every other element it will get
@@ -121,11 +120,11 @@ class radialMenu
     @children.push menu
 
   action: () =>
-    console.log "trigger " + @event
+    console.log "trigger: " + @event
     @engine.trigger @event, @obj
+    @click()
 
   setEvent: ( ev ) ->
-    console.log "set" + ev
     @event = ev
 
   setPositiveAction: ( @positive_action ) ->

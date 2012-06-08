@@ -18,8 +18,11 @@ class UI extends S.Drawer
     p = @getPoint i, j
 
     menuStructure = @events.getMenu i, j
-
     obj = @events.getField i, j
+
+    if not menuStructure?
+      return
+
     menu = new S.radialMenu @events, @stage.canvas, p.x, p.y, "", "", true, obj
 
     eventsStructure = window.Types.Events
@@ -39,22 +42,26 @@ class UI extends S.Drawer
   #eventsStructure [a:b:c] ...
   buildMenu: ( name, eventsStructure, menuStructure, fullname ) =>
 
-    title = eventsStructure[name].title
-    desc = eventsStructure[name].desc
+    stName = name[0].toUpperCase() + name[1..]
+
+    title = eventsStructure[stName].title
+    desc = eventsStructure[stName].desc
 
     title ?= ""
     desc ?= ""
 
-    if desc.length > 0
-      m = new S.radialMenu null, @stage.canvas, 0, 0, title, desc
+
+    eventsStructure = eventsStructure[stName]
+    submenuNames = @getPrefixes menuStructure
+
+    if desc.length > 0 or not submenuNames.length
+      m = new S.radialMenu @events, @stage.canvas, 0, 0, title, desc
       m.setEvent fullname
+      console.log fullname
 
       m
     else
-      m = new S.radialMenu null, @stage.canvas, 0, 0, title, desc
-
-      eventsStructure = eventsStructure[name]
-      submenuNames = @getPrefixes menuStructure
+      m = new S.radialMenu @events, @stage.canvas, 0, 0, title, desc
 
       (
         subMenu = @buildMenu submenuName,
@@ -125,11 +132,14 @@ class UI extends S.Drawer
       @handleClickOnField p.x, p.y
 
   handleClickOnField: ( i, j ) =>
-    console.log [i,j]
-    @destroyMenu @curMenu
+    if @curMenu?
+      @destroyMenu @curMenu
+
     @curMenu = @createMenu i, j
-    @curMenu.show()
-    @curMenu.click()
+
+    if @curMenu?
+      @curMenu.show()
+      @curMenu.click()
 
   destroyMenu: ( menu ) ->
     if menu?
