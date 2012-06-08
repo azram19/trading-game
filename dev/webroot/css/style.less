@@ -151,14 +151,7 @@ p {
 }
 
 #canvasWrapper {
-  position: absolute;
-  left: 20px;
-  top: 20px;
-  bottom: 20px;
-  right: 240px;
-  border: 5px solid black;
-  cursor: default;
-  overflow: hidden;
+  position: relative;
 
   -webkit-user-select: none;
   -moz-user-select: none;
@@ -169,8 +162,6 @@ p {
 
   & > canvas{
     position:absolute;
-    top:0;
-    left:0;
     background:transparent;
 
     -webkit-transform-origin: left top;
