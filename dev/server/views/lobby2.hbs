@@ -100,31 +100,29 @@
               <div class='tab-pane' id='highscores'>
 
               </div>
-              <div class='tab-pane active' id='gameMenu'>
-                <div class='row-fluid'>
-                  <div class='span6 games'>
-                    <h2>Games</h2>
-                    <ul>
-                      <li>
-                        <div class='name'>
-                          <h3>klosdfsdf</h3>
-                          <span>
-                            <span class='number'>4</span>/8
-                          </span>
-                        </div>
-                        <div class='meta'>
-                          <span class='gameType'>
-                            Deathmatch
-                          </span>
-                        </div>
-                      </li>
-                    </ul>
-                  </div>
-                  <div class='span6 options'>
-                    <button class='btn playBtn'>Play</button>
-                    <button class='btn createBtn'>Create game</button>
-                  </div>
-                </div>
+              <div class='tab-pane active games' id='gameMenu'>
+                {{#each games}}
+                  {{#with this}}
+                    <div class='row-fluid'>
+                      <div class='span6 game'>
+                          <div class='name'>
+                            <h3>{{name}}</h3>
+                            <span>
+                              <span class='number'>{{playersConnected}}</span>/{{playersRequried}}
+                            </span>
+                          </div>
+                          <div class='meta'>
+                            <span class='gameType'>
+                              {{typeData.name}}
+                            </span>
+                          </div>
+                      </div>
+                      <div class='span6 options'>
+                        <a class='btn playBtn' href='/game/{{name}}/join'>Play</a>
+                      </div>
+                    </div>
+                  {{/with}}
+                {{/each}}
               </div>
             </div>
           </div>

@@ -25,6 +25,8 @@ class Communicator
     Configure authorization and shared session between Express and
     Socket.io
     ###
+    @app.io.set 'log level', 1
+
     @app.io.set 'authorization', ( data, accept) ->
       #checks if there is a cookie
       if data.headers.cookie

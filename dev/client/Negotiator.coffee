@@ -46,6 +46,9 @@ class Negotiator
     @renderer = new S.Renderer minWidth, maxWidth, _.pluck(@game.users, 'id')
     @renderer.setupBoard @game.map
     window.ui = @ui =  new S.UIClass @, minWidth, maxWidth
+    window.t = @terrain = new S.Terrain 'background', minWidth, maxWidth
+
+    #@terrain.draw 2 - not extremely fast, disabled for debugging
 
   getMenu: ( x, y ) ->
     field = @getField x, y

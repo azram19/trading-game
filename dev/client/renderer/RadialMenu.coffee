@@ -187,9 +187,10 @@ class radialMenu
     @initializeDOM()
 
     @$title.x = 15
+    @$title.y = 5
 
     @$actionTitle.x = 15
-    @$actionTitle.y = 35
+    @$actionTitle.y = 45
 
     if @root
       @container.addChild @$title

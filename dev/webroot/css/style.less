@@ -483,9 +483,24 @@ p {
     text-align:right;
   }
 
-  .playBtn{
-    margin:16px 0;
+  .games{
+      & > .row-fluid{
+      padding-bottom: 32px;
+      margin-top: 32px;
+      border-bottom: 1px rgba(0, 0, 0, 0.15) solid;
 
+      &:first-child{
+        margin-top:16px;
+      }
+
+      &:last-child{
+        margin-bottom:0;
+        border-bottom:none;
+      }
+    }
+  }
+
+  .playBtn{
     font-family: 'Open Sans', sans-serif;
     font-weight:800;
     font-size: 36px;
@@ -494,7 +509,7 @@ p {
     padding: 0 20px;
     line-height: 60px;
     height:60px;
-    width:150px;
+    width:110px;
     border-radius: 5px;
     background: -webkit-linear-gradient(top, #F38630 0%,#FA6900 100%);
     color: white;

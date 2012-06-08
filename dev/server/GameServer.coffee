@@ -4,11 +4,14 @@ Types = require '../common/config/Types'
 class GameServer
 
     constructor: ( @lobbyCommunicator ) ->
+        @typesConfig = []
+
         @games = [
           {
             name: 'AwesomeGame'
             channel: 'channel1'
             type: Types.Games.FFA
+            typeData: @getGameTypeData Types.Games.FFA
             players: [
               [
                 'me'
@@ -22,6 +25,7 @@ class GameServer
             name: 'UberAwesomeGame'
             channel: 'channel2'
             type: Types.Games.Team.Side2
+            typeData: @getGameTypeData Types.Games.Team.Side2
             players: [
               [
                 '37signals'
@@ -47,6 +51,15 @@ class GameServer
 
     joinGame: ( name, user ) ->
 
+    getGameTypeData: ( type ) ->
+      #@typesConfig[type]
+
+      {
+        name: 'Team Match'
+        numberOfSides: 2
+        playersOnASide: 3
+        teams: true
+      }
 
     getGames: ->
       JSON.stringify @games

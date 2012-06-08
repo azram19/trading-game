@@ -31,7 +31,36 @@ app.get '/radialDemo', ( req, res) ->
    res.render 'radialDemo'
 
 app.get '/lobby2', ( req, res) ->
-   res.render 'lobby2'
+  games = JSON.parse app.gameServer.getGames()
+  games = _.map games, ( o ) ->
+    o.playersConnected = ( _.flatten o.players ).length
+    o.playersRequried =
+      o.typeData.numberOfSides *
+      o.typeData.playersOnASide
+
+    o
+
+  req.session.games = games
+
+  res.render 'lobby2'
+    games: games
+
+app.get '/game/:gameName/join', ( req, res) ->
+
+  #Get player and game details
+  player = req.session.player
+  gameName = req.params.gameName
+
+  #Mock object
+  player = {}
+  player.name = 'john'
+
+  app.gameServer.joinGame gameName, player.name
+
+  res.redirect '/game/' + gameName
+
+app.get '/game/:gameName', ( req, res ) ->
+   res.render 'board'
 
 app.get '/', ( req, res ) ->
     if app.requireAuth and req.loggedIn
@@ -44,10 +73,19 @@ app.get '/lobby', ( req, res ) =>
     res.redirect '/'
   else
     app.Mongoose.model('User').find {}, (err, docs) ->
-        console.log docs
+        games = JSON.parse app.gameServer.getGames()
+        games = _.map games, ( o ) ->
+          o.playersConnected = ( _.flatten o.players ).length
+          o.playersRequried =
+            o.typeData.numberOfSides *
+            o.typeData.playersOnASide
+
+        req.session.games = games
+
         res.render 'lobby2'
             users: _.toArray docs
             numberOfUsers: docs.length
+            games: games
 
 port =  process.env.PORT || process.env['PORT_WWW']  || 3000
 
