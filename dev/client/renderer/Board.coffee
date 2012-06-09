@@ -1,6 +1,6 @@
 class Drawer
     margin: 100
-    size: 40
+    size: 30
     div: 60
 
     # horIncrement is a horizontal distance between centers of two hexes divided by two
@@ -86,7 +86,7 @@ class BoardDrawer extends Drawer
         super minRow, maxRow
         @uiHandler = new UIHandler @overlayST, minRow, maxRow
         @colors = ["#274E7D", "#900020", "#FFA000", "#B80049", "#00A550", "#9999FF", "#367588", "#FFFFFF"]
-        @cacheStages = [@ownershipST, @resourcesST, @gridST, @platformsST, @channelsST]
+        @cacheStages = [@ownershipST, @resourcesST, @gridST, @platformsST, @channelsST, @overlayST]
 
     buildPlatform: (x, y, type) ->
         point = @getPoint(x, y)
@@ -180,22 +180,26 @@ class BoardDrawer extends Drawer
                     if boardState.getChannel(i, j, k)?.state?
                         @drawChannel(point, k)
         @toogleCache true
-        @uiHandler.toogleCache true
+        #@uiHandler.toogleCache true
 
     toogleCache: (status) ->
         for stage in @cacheStages
             if status
-                stage.cache(0,0, @width, @height)
+                stage.cache(0,0, @width+5, @height+5)
             else
-                shape.uncache()
+                stage.uncache()
         true
 
 class UIHandler extends Drawer
     constructor: (@stage, minRow, maxRow) ->
         super minRow, maxRow
         @update = false
-        @stage.enableMouseOver(20)
+        #@stage.enableMouseOver(20)
+        @stage.onMouseOver = @mouseOverField
+        @stage.onMouseOut = @mouseOutField
+        #@overlay = @drawOverlay(new Point 0, 0)
         Ticker.addListener this
+        @k = 0
 
     drawOverlay: (point) ->
         g = new Graphics()
@@ -206,20 +210,45 @@ class UIHandler extends Drawer
         overlay.y = point.y
         overlay.alpha = 0.01
         @stage.addChild overlay
-        overlay.onMouseOver = @mouseOverField
-        overlay.onMouseOut = @mouseOutField
 
     mouseOverField: (event) =>
-        event.target.alpha = 0.2
-        event.target.updateCache()
-        @update = true
+        console.log event
+        x = event.stageX
+        y = event.stageY
+        if x?
+            fieldCoords = @getCoords(x,y)
+            point = @getPoint(fieldCoords.x, fieldCoords.y)
+            @overlay.x = point.x
+            @overlay.y = point.y
+            @overlay.alpha = 0.2
+            @update = true
+        #event.target.alpha = 0.2
+        #event.target.updateCache()
+        #@update = true
+
+    fun: () ->
+        x = @stage.mouseX
+        y = @stage.mouseY
+        if x?
+            fieldCoords = @getCoords(new Point(x,y))
+            point = @getPoint(fieldCoords.x, fieldCoords.y)
+            @overlay.x = point.x
+            @overlay.y = point.y
+            @overlay.alpha = 0.2
+            console.log @overlay
+            @update = true
+            @k++
+        if @k is 5
+            Ticker.setPaused true
 
     mouseOutField: (event) =>
+        console.log "out"
         event.target.alpha = 0.01
         event.target.updateCache()
         @update = true
 
     tick: () ->
+        #@fun()
         if(@update)
             @update = false
             @stage.update()

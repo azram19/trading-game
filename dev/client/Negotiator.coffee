@@ -42,7 +42,7 @@ class Negotiator
   getGameState: ( channel ) ->
     player = S.ObjectFactory.build S.Types.Entities.Player
     player2 = S.ObjectFactory.build S.Types.Entities.Player
-    manager = new S.GameManager @, [player, player2], [[2,2], [3,3]], 10, 22
+    manager = new S.GameManager @, [player, player2], [[2,2], [3,3]], 8, 15
     @game = manager
 
   #setScroll: ( x, y ) ->
