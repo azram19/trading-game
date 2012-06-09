@@ -7,7 +7,6 @@ class LobbyView extends Backbone.View
 
     #Get temaplates
     @messageTemplate = Handlebars.templates['lobbyMessage']
-    console.debug Handlebars.templates
     @messagesTemplate = Handlebars.templates['lobbyMessages']
 
     #Bind to changes and update the view

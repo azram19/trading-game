@@ -1,5 +1,4 @@
 $ ->
-  console.log "lobby"
   w = window
   w.communicator = communicator = new S.Communicator()
   w.messages = messages = new S.Collections.Messages([{'author':'pies','message':'asdasd'}])
