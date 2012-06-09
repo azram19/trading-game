@@ -46,4 +46,4 @@ class PlatformBehaviour
 if module? and module.exports
   exports = module.exports = PlatformBehaviour
 else
-  window['PlatformBehaviour'] = PlatformBehaviour
+  window.S.PlatformBehaviour = PlatformBehaviour

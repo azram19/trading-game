@@ -30,4 +30,4 @@ class ObjectState
 if module? and module.exports
   exports = module.exports = ObjectState
 else
-  window['ObjectState'] = ObjectState
+  window.S.ObjectState = ObjectState

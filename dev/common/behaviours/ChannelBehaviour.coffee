@@ -1,14 +1,15 @@
+S = {}
 if require?
-  Types = require '../config/Types'
+  S.Types = require '../config/Types'
 else
-  Types = window.Types
+  S.Types = window.Types
 
 class ChannelBehaviour
 
     constructor: ( @eventBus ) ->
 
     getType: ->
-        Types.Entities.Channel
+        S.Types.Entities.Channel
 
     actionMenu: ( state ) ->
       menu = ['routing']
@@ -51,4 +52,4 @@ class ChannelBehaviour
 if module? and module.exports
   exports = module.exports = ChannelBehaviour
 else
-  window['ChannelBehaviour'] = ChannelBehaviour
+  window.S.ChannelBehaviour = ChannelBehaviour

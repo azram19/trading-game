@@ -1,4 +1,4 @@
 class Messages extends Backbone.Collection
-  model: Message
+  model: S.Models.Message
 
-@Messages = Messages
+window.S.Collections.Messages = Messages

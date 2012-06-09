@@ -3,4 +3,4 @@ class Message extends Backbone.Model
     author: "unknowkn"
     message: "Hello world"
 
-@Message = Message
+window.S.Models.Message = Message

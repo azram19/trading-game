@@ -1,5 +1,6 @@
 _ = require('underscore')._
-Types = require '../common/config/Types'
+S = {}
+S.Types = require '../common/config/Types'
 
 class GameServer
 
@@ -10,8 +11,8 @@ class GameServer
           {
             name: 'AwesomeGame'
             channel: 'channel1'
-            type: Types.Games.FFA
-            typeData: @getGameTypeData Types.Games.FFA
+            type: S.Types.Games.FFA
+            typeData: @getGameTypeData S.Types.Games.FFA
             players: [
               [
                 'me'
@@ -24,8 +25,8 @@ class GameServer
           {
             name: 'UberAwesomeGame'
             channel: 'channel2'
-            type: Types.Games.Team.Side2
-            typeData: @getGameTypeData Types.Games.Team.Side2
+            type: S.Types.Games.Team.Side2
+            typeData: @getGameTypeData S.Types.Games.Team.Side2
             players: [
               [
                 '37signals'

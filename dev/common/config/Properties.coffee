@@ -1,8 +1,9 @@
+S = {}
 if require?
-    Types = require './Types'
+    S.Types = require './Types'
     _ = require('underscore')._
 else
-    Types = window.Types
+    S.Types = window.S.Types
     _ = window._
 
 Properties =
@@ -63,8 +64,8 @@ Properties =
         resources: {}
 
 (
-    Properties.player.resources[Types.Resources.Names[i]] = Types.Resources.Amounts[i]
-) for i in [0...Types.Resources.Names.length]
+    Properties.player.resources[S.Types.Resources.Names[i]] = S.Types.Resources.Amounts[i]
+) for i in [0...S.Types.Resources.Names.length]
 
 defaultRoute =
     object: null
@@ -78,4 +79,4 @@ defaultRoute =
 if module? and module.exports
   exports = module.exports = Properties
 else
-  window['Properties'] = Properties
+  window.S.Properties = Properties

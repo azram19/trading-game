@@ -1,16 +1,17 @@
+S = {}
 if require?
-    SignalFactory = require '../config/SignalFactory'
-    Types = require '../config/Types'
+    S.SignalFactory = require '../config/SignalFactory'
+    S.Types = require '../config/Types'
 else
-    Types = window.Types
-    SignalFactory = window.SignalFactory
+    S.Types = window.S.Types
+    S.SignalFactory = window.S.SignalFactory
 
 class HQBehaviour
 
     constructor: ( @eventBus ) ->
 
     getType: ->
-        Types.Platforms.HQ
+        S.Types.Platforms.HQ
 
     actionMenu: ( state ) ->
       menu = ['build:channel', 'routing']
@@ -28,9 +29,9 @@ class HQBehaviour
             state.field.resource.trigger 'produce'
         production = =>
                 (
-                    state.owner.addResource(SignalFactory.build Types.Entities.Signal, @eventBus, state.extraction, Types.Resources[res], state.field.platform)
-                    @eventBus.trigger 'resource:produce', state.field.xy, state.extraction, Types.Resources[res]
-                ) for res in Types.Resources.Names
+                    state.owner.addResource(S.SignalFactory.build S.Types.Entities.Signal, @eventBus, state.extraction, S.Types.Resources[res], state.field.platform)
+                    @eventBus.trigger 'resource:produce', state.field.xy, state.extraction, S.Types.Resources[res]
+                ) for res in S.Types.Resources.Names
         setInterval production, state.delay
 
     accept: ( signal, state, callback ) ->
@@ -49,4 +50,4 @@ class HQBehaviour
 if module? and module.exports
   exports = module.exports = HQBehaviour
 else
-  window['HQBehaviour'] = HQBehaviour
+  window.S.HQBehaviour = HQBehaviour

@@ -1,23 +1,24 @@
+S = {}
 if require?
     _ = require('underscore')._
-    Types = require './Types'
-    Signal = require '../objects/Signal'
+    S.Types = require './Types'
+    S.Signal = require '../objects/Signal'
 else
     _ = window._
-    Signal = window.Signal
-    Types = window.Types
+    S.Signal = window.S.Signal
+    S.Types = window.S.Types
 
 class SignalFactory
 
     constructor: ->
         @builders = {}
-        @builders[Types.Entities.Signal] = (id, args) =>
+        @builders[S.Types.Entities.Signal] = (id, args) =>
             events = args[0]
             strength = args[1]
             type = args[2]
             source = args[3]
             name = 'Signal' + id
-            signal = _.extend new Signal(events, strength, type, source), {'name': name, 'id': id}
+            signal = _.extend new S.Signal(events, strength, type, source), {'name': name, 'id': id}
 
     build: ( kind, args... ) ->
         if not kind
@@ -31,4 +32,4 @@ class SignalFactory
 if module? and module.exports
   exports = module.exports = new SignalFactory()
 else
-  window['SignalFactory'] = new SignalFactory()
+  window.S.SignalFactory = new SignalFactory()

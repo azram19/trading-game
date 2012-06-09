@@ -2,62 +2,63 @@
 load dependencies for server and client
 coffee declraes all varialbes in
 ###
+S = {}
 if require? #server
     _ = require('underscore')._
-    Properties = require './Properties'
-    Types = require './Types'
-    Player = require '../models/Player'
-    GameObject = require '../objects/GameObject'
-    SignalFactory = require './SignalFactory'
-    ObjectState = require '../objects/ObjectState'
-    HQBehaviour = require '../behaviours/HQBehaviour'
-    ChannelBehaviour = require '../behaviours/ChannelBehaviour'
-    PlatformBehaviour = require '../behaviours/PlatformBehaviour'
-    ResourceBehaviour = require '../behaviours/ResourceBehaviour'
+    S.Properties = require './Properties'
+    S.Types = require './Types'
+    S.Player = require '../models/Player'
+    S.GameObject = require '../objects/GameObject'
+    S.SignalFactory = require './SignalFactory'
+    S.ObjectState = require '../objects/ObjectState'
+    S.HQBehaviour = require '../behaviours/HQBehaviour'
+    S.ChannelBehaviour = require '../behaviours/ChannelBehaviour'
+    S.PlatformBehaviour = require '../behaviours/PlatformBehaviour'
+    S.ResourceBehaviour = require '../behaviours/ResourceBehaviour'
 else #client
     _ = window._
-    Properties = window.Properties
-    Types = window.Types
-    Player = window.Player
-    GameObject = window.GameObject
-    SignalFactory = window.SignalFactory
-    ObjectState = window.ObjectState
-    HQBehaviour = window.HQBehaviour
-    ChannelBehaviour = window.ChannelBehaviour
-    PlatformBehaviour = window.PlatformBehaviour
-    ResourceBehaviour = window.ResourceBehaviour
+    S.Properties = window.S.Properties
+    S.Types = window.S.Types
+    S.Player = window.S.Player
+    S.GameObject = window.S.GameObject
+    S.SignalFactory = window.S.SignalFactory
+    S.ObjectState = window.S.ObjectState
+    S.HQBehaviour = window.S.HQBehaviour
+    S.ChannelBehaviour = window.S.ChannelBehaviour
+    S.PlatformBehaviour = window.S.PlatformBehaviour
+    S.ResourceBehaviour = window.S.ResourceBehaviour
 
 class ObjectFactory
 
     constructor: ->
         @builders = {}
-        @builders[Types.Entities.Platform] = (id, args) =>
+        @builders[S.Types.Entities.Platform] = (id, args) =>
             events = args[0]
             owner = args[1]
             type = args[2]
             name = 'Platform' + id
-            state = _.extend new ObjectState(), _.clone(Properties.platform)
+            state = _.extend new S.ObjectState(), _.clone(S.Properties.platform)
             state = _.extend state, {'name': name, 'id': id, 'owner': owner}
-            object = new GameObject new PlatformBehaviour(type, events), state
+            object = new S.GameObject new S.PlatformBehaviour(type, events), state
 
-        @builders[Types.Entities.HQ] = (id, args) =>
+        @builders[S.Types.Entities.HQ] = (id, args) =>
             events = args[0]
             owner = args[1]
             name = 'HQ' + id
-            state = _.extend new ObjectState(), _.clone(Properties.HQ)
+            state = _.extend new S.ObjectState(), _.clone(S.Properties.HQ)
             state = _.extend state, {'name': name, 'id': id, 'owner': owner}
-            object = new GameObject new HQBehaviour(events), state
+            object = new S.GameObject new S.HQBehaviour(events), state
 
-        @builders[Types.Entities.Channel] = (id, args) =>
+        @builders[S.Types.Entities.Channel] = (id, args) =>
             events = args[0]
             owner = args[1]
             name = 'Channel' + id
-            state = _.extend new ObjectState(), _.clone(Properties.channel)
+            state = _.extend new S.ObjectState(), _.clone(S.Properties.channel)
             state = _.extend state, {'name': name, 'id': id, 'owner': owner}
-            object = new GameObject new ChannelBehaviour(events), state
+            object = new S.GameObject new S.ChannelBehaviour(events), state
 
-        @builders[Types.Entities.Player] = (id, args) =>
-            player = _.extend new Player(), _.clone( Properties.player )
+        @builders[S.Types.Entities.Player] = (id, args) =>
+            player = _.extend new S.Player(), _.clone( S.Properties.player )
             name = 'Player_' + id
             _.extend player, {'name': name, 'id': id}
 
@@ -68,23 +69,23 @@ class ObjectFactory
             #name = 'Signal' + id
             #signal = _.extend new Signal(strength, type, source), {'name': name, 'id': id}
 
-        @builders[Types.Resources.Metal] = (id, args) =>
+        @builders[S.Types.Resources.Metal] = (id, args) =>
             events = args[0]
             owner = args[1]
             name = 'Metal' + id
-            state = _.extend new ObjectState(), _.clone(Properties.resource)
+            state = _.extend new S.ObjectState(), _.clone(S.Properties.resource)
             state = _.extend state, {'name': name, 'id': id, 'owner': owner}
-            object = new GameObject new ResourceBehaviour(Types.Resources.Metal, events), state
+            object = new S.GameObject new S.ResourceBehaviour(S.Types.Resources.Metal, events), state
 
-        @builders[Types.Resources.Tritium] = (id, args) =>
+        @builders[S.Types.Resources.Tritium] = (id, args) =>
             events = args[0]
             owner = args[1]
             name = 'Tritium' + id
-            state = _.extend new ObjectState(), _.clone(Properties.resource)
+            state = _.extend new S.ObjectState(), _.clone(S.Properties.resource)
             state = _.extend state, {'name': name, 'id': id, 'owner': owner}
-            object = new GameObject new ResourceBehaviour(Types.Resources.Tritium, events), state
+            object = new S.GameObject new S.ResourceBehaviour(S.Types.Resources.Tritium, events), state
 
-        _.extend @builders, SignalFactory.builders
+        _.extend @builders, S.SignalFactory.builders
 
     build: ( kind, args... ) ->
         if not kind
@@ -99,4 +100,4 @@ class ObjectFactory
 if module? and module.exports
   exports = module.exports = new ObjectFactory()
 else
-  window['ObjectFactory'] = new ObjectFactory()
+  window.S.ObjectFactory = new ObjectFactory()

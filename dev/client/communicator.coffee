@@ -108,4 +108,4 @@ class Communicator
           @com.trigger 'left'
           @channel = ''
 
-window['Communicator'] = Communicator
+window.S.Communicator = Communicator

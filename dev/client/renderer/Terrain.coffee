@@ -89,7 +89,7 @@ class Terrain extends S.Drawer
     bitmap
 
   generateHeightMap: () ->
-    @heightMap = new HeightMap 1024, 1024
+    @heightMap = new S.HeightMap 1024, 1024
     @heightMap.run()
 
   applyHeightMap: () ->

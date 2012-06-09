@@ -26,4 +26,4 @@ class Signal
 if module? and module.exports
   exports = module.exports = Signal
 else
-  window['Signal'] = Signal
+  window.S.Signal = Signal

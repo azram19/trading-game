@@ -4,7 +4,7 @@
 
 # The height map is basically an array of numbers, each element represents
 # a point on a map and each number represents the height of that grid.
-class @HeightMap
+class HeightMap
 
 	# Initialise the height map with a `size` which must be 2<sup>n</sup>+1.
 	# Call the `reset` function to put the height_map into a state that is ready
@@ -135,3 +135,5 @@ class @HeightMap
 			sw: @get_cell(x,   y+1)
 			se: @get_cell(x+1, y+1)
 		}
+
+window.S.HeightMap = HeightMap

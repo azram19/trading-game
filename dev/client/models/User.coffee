@@ -24,5 +24,5 @@ class User extends Backbone.Model
 
         db.close()
 
-@User = User
+window.S.Models.User = User
 ###

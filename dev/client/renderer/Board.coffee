@@ -107,16 +107,16 @@ class BoardDrawer
     drawPlatform: (point, type) ->
         g = new Graphics()
         switch type
-            when Types.Platforms.Normal then g.beginFill("#A6B4B0")
-            when Types.Platforms.HQ then g.beginFill("#C5B356")
+            when S.Types.Platforms.Normal then g.beginFill("#A6B4B0")
+            when S.Types.Platforms.HQ then g.beginFill("#C5B356")
         g.drawPolyStar(point.x, point.y, 2*@helper.size/3, 6, 0, 90)
         @platformsST.addChild new Shape g
 
     drawResource: (point, resource) ->
         g = new Graphics()
         switch resource
-            when Types.Resources.Metal then g.beginFill("#FFFFFF")
-            when Types.Resources.Tritium then g.beginFill("#FFFF00")
+            when S.Types.Resources.Metal then g.beginFill("#FFFFFF")
+            when S.Types.Resources.Tritium then g.beginFill("#FFFF00")
         g.drawCircle(point.x, point.y, 6)
         @resourcesST.addChild new Shape g
 
@@ -399,10 +399,11 @@ class Renderer
         Ticker.setFPS 60
         @updateAll()
 
-#----------------------------------------#
-#--------For test purposes only---------#
 window.S.Drawer = Drawer
 window.S.Renderer = Renderer
+
+#----------------------------------------#
+#--------For test purposes only---------#
 ###
 player = ObjectFactory.build Types.Entities.Player
 manager = new GameManager Backbone.Events, [player], [[2,2]], 8, 15

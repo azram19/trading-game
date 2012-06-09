@@ -1,14 +1,15 @@
 #node.js requirements
+S = {}
 if require?
   _ = require 'underscore'
-  Field = require '../objects/Field'
-  ObjectFactory = require '../config/ObjectFactory'
-  Types = require '../config/Types'
+  S.Field = require '../objects/Field'
+  S.ObjectFactory = require '../config/ObjectFactory'
+  S.Types = require '../config/Types'
 else
   _ = window._
-  Field = window.Field
-  ObjectFactory = window.ObjectFactory
-  Types = window.Types
+  S.Field = window.S.Field
+  S.ObjectFactory = window.S.ObjectFactory
+  S.Types = window.S.Types
 
 class Map
 
@@ -30,7 +31,7 @@ class Map
 
     #generate fields
     initializeField = ( o, x, y ) ->
-      field = new Field(x, y)
+      field = new S.Field(x, y)
       #console.log x + " " + y + ":field"
       field
 
@@ -42,10 +43,10 @@ class Map
       if res < chance
         kind = ''
         if res > chance / 2
-            kind = Types.Resources.Metal
+            kind = S.Types.Resources.Metal
         else
-            kind = Types.Resources.Tritium
-        resource = ObjectFactory.build kind, @eventBus, @nonUser
+            kind = S.Types.Resources.Tritium
+        resource = S.ObjectFactory.build kind, @eventBus, @nonUser
         resource.state.field = o
         o.resource = resource
         o
@@ -129,4 +130,4 @@ class Map
 if module? and module.exports
   exports = module.exports = Map
 else
-  window['Map'] = Map
+  window.S.Map = Map

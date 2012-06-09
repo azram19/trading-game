@@ -21,4 +21,4 @@ class Player
 if module? and module.exports
   exports = module.exports = Player
 else
-  window['Player'] = Player
+  window.S.Player = Player

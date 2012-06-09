@@ -40,4 +40,4 @@ Types =
 if module? and module.exports
   exports = module.exports = Types
 else
-  window['Types'] = Types
+  window.S.Types = Types

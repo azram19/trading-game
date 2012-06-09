@@ -23,9 +23,9 @@ class UI extends S.Drawer
     if not menuStructure?
       return
 
-    menu = new S.radialMenu @events, @stage.canvas, p.x, p.y, "", "", true, obj
+    menu = new S.RadialMenu @events, @stage.canvas, p.x, p.y, "", "", true, obj
 
-    eventsStructure = window.Types.Events
+    eventsStructure = S.Types.Events
     submenuNames = @getPrefixes menuStructure
 
     ( subMenu = @buildMenu submenuName,
@@ -55,13 +55,13 @@ class UI extends S.Drawer
     submenuNames = @getPrefixes menuStructure
 
     if desc.length > 0 or not submenuNames.length
-      m = new S.radialMenu @events, @stage.canvas, 0, 0, title, desc
+      m = new S.RadialMenu @events, @stage.canvas, 0, 0, title, desc
       m.setEvent fullname
       console.log fullname
 
       m
     else
-      m = new S.radialMenu @events, @stage.canvas, 0, 0, title, desc
+      m = new S.RadialMenu @events, @stage.canvas, 0, 0, title, desc
 
       (
         subMenu = @buildMenu submenuName,

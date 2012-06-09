@@ -9,4 +9,4 @@ class Field
 if module? and module.exports
   exports = module.exports = Field
 else
-  window['Field'] = Field
+  window.S.Field = Field

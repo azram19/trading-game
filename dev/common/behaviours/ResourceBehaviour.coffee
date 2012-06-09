@@ -1,12 +1,13 @@
 #node.js requirements
+S = {}
 if require?
   _ = require 'underscore'
-  SignalFactory = require '../config/SignalFactory'
-  Types = require '../config/Types'
+  S.SignalFactory = require '../config/SignalFactory'
+  S.Types = require '../config/Types'
 else
   _ = window._
-  SignalFactory = window.SignalFactory
-  Types = window.Types
+  S.SignalFactory = window.S.SignalFactory
+  S.Types = window.S.Types
 
 class ResourceBehaviour
 
@@ -33,7 +34,7 @@ class ResourceBehaviour
                     clearInterval @PID
             else
                 #we have enough resources, mining...
-                newSignal = SignalFactory.build Types.Entities.Signal, @eventBus, state.extraction, @resourceType, state.field.platform
+                newSignal = S.SignalFactory.build S.Types.Entities.Signal, @eventBus, state.extraction, @resourceType, state.field.platform
                 newSignal.path.push state.field.xy
                 @eventBus.trigger 'resource:produce', state.field.xy, state.extraction, @resourceType
 
@@ -53,4 +54,4 @@ class ResourceBehaviour
 if module? and module.exports
   exports = module.exports = ResourceBehaviour
 else
-  window['ResourceBehaviour'] = ResourceBehaviour
+  window.S.ResourceBehaviour = ResourceBehaviour

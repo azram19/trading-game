@@ -1,4 +1,4 @@
-class radialMenu
+class RadialMenu
   event: ""
 
   desc: ""
@@ -75,7 +75,7 @@ class radialMenu
     @alpha = Math.PI / 6
     @beta = -(Math.PI * 7/6)
 
-    #Children elements - class radialMenu
+    #Children elements - class RadialMenu
     @children = []
 
     @initializeDOM = _.once () =>
@@ -596,14 +596,14 @@ class radialMenu
     if @root
       @stage.update()
 
-window.S.radialMenu = radialMenu
+window.S.RadialMenu = RadialMenu
 
 $ ->
   canvas = document.getElementById "radial"
   if canvas?
-    window.Mouse = new MouseClass canvas
+    #window.Mouse = new MouseClass canvas
 
-    window.r = r = new radialMenu null, canvas, 250, 250, "piesek", "", true
+    window.r = r = new S.RadialMenu null, canvas, 250, 250, "piesek", "", true
 
 
 
@@ -615,16 +615,16 @@ $ ->
     rd8 = "<p>Her power of repulsion for the planet was so great that it had carried her far into space, where she can be seen today, by the aid of powerful telescopes, hurtling through the heavens ten thousand miles from Mars; a tiny satellite that will thus encircle Barsoom to the end of time.</p>"
     rd9 = "<p>Her power of repulsion for the planet was so great that it had carried her far into space, where she can be seen today, by the aid of powerful telescopes, hurtling through the heavens ten thousand miles from Mars; a tiny satellite that will thus encircle Barsoom to the end of time.</p>"
 
-    r2 = new radialMenu null, canvas, 0, 0, "kotek", rd5
-    r3 = new radialMenu null, canvas, 0, 0, "malpka", rd5
-    r4 = new radialMenu null, canvas, 0, 0, "ptaszek", rd5
-    r0 = new radialMenu null, canvas, 0, 0, "dziubek", rd5
+    r2 = new RadialMenu null, canvas, 0, 0, "kotek", rd5
+    r3 = new RadialMenu null, canvas, 0, 0, "malpka", rd5
+    r4 = new RadialMenu null, canvas, 0, 0, "ptaszek", rd5
+    r0 = new RadialMenu null, canvas, 0, 0, "dziubek", rd5
 
-    r5 = new radialMenu null, canvas, 0, 0, "gawron", rd5
-    r6 = new radialMenu null, canvas, 0, 0, "slon", rd6
-    r7 = new radialMenu null, canvas, 0, 0, "dzwon", rd7
-    r8 = new radialMenu null, canvas, 0, 0, "dzwon1", rd8
-    r9 = new radialMenu null, canvas, 0, 0, "dzwon2", rd9
+    r5 = new RadialMenu null, canvas, 0, 0, "gawron", rd5
+    r6 = new RadialMenu null, canvas, 0, 0, "slon", rd6
+    r7 = new RadialMenu null, canvas, 0, 0, "dzwon", rd7
+    r8 = new RadialMenu null, canvas, 0, 0, "dzwon1", rd8
+    r9 = new RadialMenu null, canvas, 0, 0, "dzwon2", rd9
 
     r.addChild r2
     r.addChild r3
@@ -641,7 +641,4 @@ $ ->
 
     r.drawIt()
     r.show()
-
-window.radialMenu = radialMenu
-
 

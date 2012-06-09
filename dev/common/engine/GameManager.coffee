@@ -1,27 +1,28 @@
 #node.js requirements
+S = {}
 if require?
   _ = require 'underscore'
-  Field = require '../objects/Field'
-  ObjectFactory = require '../config/ObjectFactory'
-  Types = require '../config/Types'
-  Map = require './Map'
+  S.Field = require '../objects/Field'
+  S.ObjectFactory = require '../config/ObjectFactory'
+  S.Types = require '../config/Types'
+  S.Map = require './Map'
 else
   _ = window._
-  Field = window.Field
-  ObjectFactory = window.ObjectFactory
-  Types = window.Types
-  Map = window.Map
+  S.Field = window.S.Field
+  S.ObjectFactory = window.S.ObjectFactory
+  S.Types = window.S.Types
+  S.Map = window.S.Map
 
 class GameManager
 
   constructor: ( @eventBus, @users, startPoints, minWidth, maxWidth ) ->
     createHQ = ( user ) =>
       id = Math.random()
-      ObjectFactory.build Types.Entities.HQ, @eventBus, user
+      S.ObjectFactory.build S.Types.Entities.HQ, @eventBus, user
 
     HQs = (createHQ user for user in @users)
-    @nonUser = ObjectFactory.build Types.Entities.Player
-    @map = new Map @eventBus, minWidth, maxWidth, @nonUser
+    @nonUser = S.ObjectFactory.build S.Types.Entities.Player
+    @map = new S.Map @eventBus, minWidth, maxWidth, @nonUser
     @initialMapState( @map, HQs, startPoints )
     #@map.dump()
 
@@ -43,4 +44,4 @@ class GameManager
 if module? and module.exports
   exports = module.exports = GameManager
 else
-  window['GameManager'] = GameManager
+  window.S.GameManager = GameManager

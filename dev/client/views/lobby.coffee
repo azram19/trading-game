@@ -1,6 +1,6 @@
 #View responsible for the game lobby
 class LobbyView extends Backbone.View
-  collection: Messages
+  collection: S.Collections.Messages
 
   initialize: ->
     @communicator = @options.communicator
@@ -33,11 +33,11 @@ class LobbyView extends Backbone.View
 
   handleNewGame: ( data ) =>
     console.log 'Lobby: New game has been created'
-    game = new Game data
+    game = new S.Models.Game data
 
   handleServerMessage: ( data ) =>
     console.log "Lobby: Server message"
-    msg = new Message data
+    msg = new S.Models.Message data
     @collection.add msg
 
   handleUser: ( user ) =>
@@ -56,7 +56,7 @@ class LobbyView extends Backbone.View
       textarea.val ''
 
       #create the message
-      msg = new Message
+      msg = new S.Models.Message
         author: author
         message: message
 
@@ -72,4 +72,4 @@ class LobbyView extends Backbone.View
     $( '#chat ul' ).html msgs
     $( "#chat .nano" ).nanoScroller()
 
-window['LobbyView'] = LobbyView
+window.S.Views.LobbyView = LobbyView
