@@ -44,7 +44,7 @@ class Communicator
   handleDisconnected: =>
     console.info "Communicator: Disconnected from the server."
 
-  handleError: ( reason ) =>4322
+  handleError: ( reason ) =>
     console.error 'Communicator: Unable to connect Socket.IO', reason
 
   handlePing: =>
