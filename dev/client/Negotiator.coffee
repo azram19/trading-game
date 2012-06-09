@@ -31,6 +31,7 @@ class Negotiator
       channel = S.ObjectFactory.build S.Types.Entities.Channel, @, owner
       @game.map.addChannel channel, x, y, k
       @renderer.buildChannel x, y, k, channel
+      @renderer.changeOwnership x, y, owner.id
     @.on 'routing', (obj, k, incoming, outgoing) =>
       console.debug 'routing', obj, k, incoming, outgoing
       obj[k].in = incoming
@@ -38,7 +39,8 @@ class Negotiator
 
   getGameState: ( channel ) ->
     player = S.ObjectFactory.build S.Types.Entities.Player
-    manager = new S.GameManager @, [player], [[2,2]], 8, 15
+    player2 = S.ObjectFactory.build S.Types.Entities.Player
+    manager = new S.GameManager @, [player, player2], [[2,2], [3,3]], 8, 15
     @game = manager
 
   setupUI: ->

@@ -5,7 +5,7 @@ class Drawer
 
     # horIncrement is a horizontal distance between centers of two hexes divided by two
     # verIncrement is a vertical distance between centers of two hexes
-    constructor: (@stage, @minRow, @maxRow) ->
+    constructor: (@minRow, @maxRow) ->
         @horIncrement = Math.ceil Math.sqrt(3)*@size/2
         @verIncrement = Math.ceil 3*@size/2
         @diffRows = @maxRow - @minRow
@@ -67,49 +67,59 @@ class Drawer
     getDistance: (x, y) ->
         Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2))
 
-class BoardDrawer
-    constructor: (@ownershipST, @resourcesST, @gridST, @platformsST, @channelsST, @overlayST, @helper) ->
-        @uiHandler = new UIHandler @overlayST, @helper
+class BoardDrawer extends Drawer
+    constructor: (@ownershipST, @resourcesST, @gridST, @platformsST, @channelsST, @overlayST, minRow, maxRow, @players) ->
+        super minRow, maxRow
+        @uiHandler = new UIHandler @overlayST, minRow, maxRow
+        @colors = ["#274E7D", "#900020", "#FFA000", "#B80049", "#00A550", "#9999FF", "#367588", "#FFFFFF"]
 
     buildPlatform: (x, y, type) ->
-        point = @helper.getPoint(x, y)
+        point = @getPoint(x, y)
         @drawPlatform(point, type)
         @platformsST.update()
 
-    capturePlatform: (x, y, owner) ->
-        point = @helper.getPoint x, y
-        @drawOwnership point, owner
+    capturePlatform: (x, y, ownerid) ->
+        point = @getPoint x, y
+        @drawOwnership point, ownerid
         @ownershipST.update()
 
-    buildChannel: (x, y, direction, owner) ->
-        point = @helper.getPoint(x, y)
-        destination = @helper.getDestination(point, direction)
+    buildChannel: (x, y, direction, ownerid) ->
+        point = @getPoint(x, y)
+        destination = @getDestination(point, direction)
         @drawChannel(point, direction)
-        @drawOwnership(destination, owner)
+        @drawOwnership(destination, ownerid)
         @channelsST.update()
         @ownershipST.update()
 
-    captureChannel: (x, y, direction, owner) ->
-        point = @helper.getPoint(x, y)
-        destination = @helper.getDestination(point, direction)
-        @drawOwnership(destination, owner)
+    captureChannel: (x, y, direction, ownerid) ->
+        point = @getPoint(x, y)
+        destination = @getDestination(point, direction)
+        @drawOwnership(destination, ownerid)
         @ownershipST.update()
 
-    drawOwnership: (point, owner) ->
+    changeOwnership: (x, y, ownerid) ->
+        point = @getPoint(x, y)
+        @drawOwnership(point, ownerid)
+        @ownershipST.update()
+
+    drawOwnership: (point, ownerid) ->
         g = new Graphics()
-        # FIXME Ids can be very, very random
-        switch owner.id
-            when 0 then g.beginFill("#274E7D")
-            when 1 then g.beginFill("#900020")
-        g.drawPolyStar(point.x, point.y, @helper.size, 6, 0, 90)
-        @ownershipST.addChild new Shape g
+        g.setStrokeStyle(3)
+        if ownerid?
+            g.beginStroke(@colors[_.indexOf(@players, ownerid)])
+            .drawPolyStar(point.x, point.y, @size*0.95, 6, 0, 90)
+            @ownershipST.addChild new Shape g
+        else
+            g.beginStroke("#616166")
+            .drawPolyStar(point.x, point.y, @size, 6, 0, 90)
+            @gridST.addChild new Shape g
 
     drawPlatform: (point, type) ->
         g = new Graphics()
         switch type
             when S.Types.Platforms.Normal then g.beginFill("#A6B4B0")
             when S.Types.Platforms.HQ then g.beginFill("#C5B356")
-        g.drawPolyStar(point.x, point.y, 2*@helper.size/3, 6, 0, 90)
+        g.drawPolyStar(point.x, point.y, 2*@size/3, 6, 0, 90)
         @platformsST.addChild new Shape g
 
     drawResource: (point, resource) ->
@@ -121,7 +131,7 @@ class BoardDrawer
         @resourcesST.addChild new Shape g
 
     drawChannel: (point, direction) ->
-        destination = @helper.getDestination(point, direction)
+        destination = @getDestination(point, direction)
         g = new Graphics()
         g.moveTo(point.x, point.y)
             .setStrokeStyle(3)
@@ -130,42 +140,36 @@ class BoardDrawer
             .lineTo(destination.x, destination.y)
         @channelsST.addChild new Shape g
 
-    drawStroke: (point) ->
-        g = new Graphics()
-        g.beginStroke("#616166")
-            .setStrokeStyle(3)
-            .drawPolyStar(point.x, point.y, @helper.size, 6, 0, 90)
-        @gridST.addChild new Shape g
-
     drawHex: (point, field) ->
+        @drawOwnership point
         if field.platform.type?
-            @drawOwnership point, field.platform.state.owner
+            @drawOwnership point, field.platform.state.owner.id
         if field.resource.behaviour?
             @drawResource point, field.resource.type()
         if field.platform.type?
-            @drawPlatform point, field.platform.type()
-        @drawStroke point
+            @drawPlatform point, field.platform.type()       
         @uiHandler.drawOverlay point
 
     setupBoard: (boardState) ->
-        for j in [0 ... (2*@helper.diffRows + 1)]
-            for i in [0 ... @helper.maxRow - Math.abs(@helper.diffRows - j)]
-                point = @helper.getPoint(i, j)
+        for j in [0 ... (2*@diffRows + 1)]
+            for i in [0 ... @maxRow - Math.abs(@diffRows - j)]
+                point = @getPoint(i, j)
                 @drawHex(point, boardState.getField(i, j))
                 for k in [0 .. 5]
                     if boardState.getChannel(i, j, k)?.state?
                         @drawChannel(point, k)
         true
 
-class UIHandler
-    constructor: (@stage, @helper) ->
+class UIHandler extends Drawer
+    constructor: (@stage, minRow, maxRow) ->
+        super minRow, maxRow
         @stage.enableMouseOver(20)
         Ticker.addListener this
 
     drawOverlay: (point) ->
         g = new Graphics()
         g.beginFill("#FFFF00")
-            .drawPolyStar(point.x, point.y, @helper.size, 6, 0, 90)
+            .drawPolyStar(point.x, point.y, @size, 6, 0, 90)
         overlay = new Shape g
         overlay.alpha = 0.01
         @stage.addChild overlay
@@ -230,11 +234,12 @@ class OffSignals
                 shape.uncache()
         true
 
-class SignalsDrawer
+class SignalsDrawer extends Drawer
     signalRadius: 8
     signalCount: 50
 
-    constructor: (@stage, @offStage, @helper) ->
+    constructor: (@stage, @offStage, minRow, maxRow) ->
+        super minRow, maxRow
         @offSignals = new OffSignals @offStage
         Ticker.addListener this
 
@@ -256,8 +261,8 @@ class SignalsDrawer
             @stage.addChild signal
         signal.x = point.x
         signal.y = point.y
-        signal.tickSizeX = @helper.ticksX[dir]
-        signal.tickSizeY = @helper.ticksY[dir]
+        signal.tickSizeX = @ticksX[dir]
+        signal.tickSizeY = @ticksY[dir]
         signal.visible = true
         signal.k = 0
         @stage.update()
@@ -270,14 +275,14 @@ class SignalsDrawer
         null
 
     createSignal: (y, x, direction) ->
-        point = @helper.getPoint(x, y)
+        point = @getPoint(x, y)
         @drawSignal(point, direction)
         @stage.update()
 
     tick: () ->
         for signal in @stage.children
             if signal.isSignal and signal.isVisible
-                if @helper.getDistance(signal.k * signal.tickSizeX, signal.k * signal.tickSizeY) >= @helper.distance
+                if @getDistance(signal.k * signal.tickSizeX, signal.k * signal.tickSizeY) >= @distance
                     signal.visible = false
                 else
                     signal.x += signal.tickSizeX
@@ -298,12 +303,12 @@ class BackgroundDrawer
         @stage.update()
 
 class Renderer
-    constructor: (minRow, maxRow) ->
+    constructor: (minRow, maxRow, players) ->
         #canvasBackground = document.getElementById "background"
         canvasOwnership = document.getElementById "ownership"
         canvasResources = document.getElementById "resources"
-        canvasGrid = document.getElementById "grid"
         canvasPlatforms = document.getElementById "platforms"
+        canvasGrid = document.getElementById "grid"
         canvasChannels = document.getElementById "channels"
         canvasOverlay = document.getElementById "overlay"
         canvasSignals = document.getElementById "signals"
@@ -323,12 +328,12 @@ class Renderer
         if canvasResources?
             @resourcesST = new Stage canvasResources
             @addStage @resourcesST
-        if canvasGrid?
-            @gridST = new Stage canvasGrid
-            @addStage @gridST
         if canvasPlatforms?
             @platformsST = new Stage canvasPlatforms
             @addStage @platformsST
+        if canvasGrid?
+            @gridST = new Stage canvasGrid
+            @addStage @gridST
         if canvasChannels?
             @channelsST = new Stage canvasChannels
             @addStage @channelsST
@@ -345,9 +350,8 @@ class Renderer
             @UIST = new Stage canvasUI
             @addStage @UIST
         ###
-        helper = new Drawer @ownershipST, minRow, maxRow
-        @boardDR = new BoardDrawer @ownershipST, @resourcesST, @gridST, @platformsST, @channelsST, @overlayST, helper
-        @signalsDR = new SignalsDrawer @signalsST, @offST, helper
+        @boardDR = new BoardDrawer @ownershipST, @resourcesST, @gridST, @platformsST, @channelsST, @overlayST, minRow, maxRow, players
+        @signalsDR = new SignalsDrawer @signalsST, @offST, minRow, maxRow
 
     addStage: (stage) ->
         @stages.push stage
@@ -370,7 +374,8 @@ class Renderer
 
     # builds a channel at field (x,y) in given direction
     buildChannel: (x, y, direction, channel) ->
-        @boardDR.buildChannel(x, y, direction, channel.state.owner)
+        console.log channel
+        @boardDR.buildChannel(x, y, direction, channel.state.owner.id)
 
     # builds a platform at field (x,y) given a field object, which helps
     # to indicate type of a platform
@@ -380,12 +385,15 @@ class Renderer
     # captures a channel, (x,y) are the coordinates of the player's field
     # channel is the object at (x,y), helps to find the ownership
     # direction indicates the field which will be captured with the channel
-    captureChannel: (x, y, direction, channel) ->
-        @boardDR.captureChannel(x, y, direction, channel.state.owner)
+    captureChannel: (x, y, direction, state) ->
+        @boardDR.captureChannel(x, y, direction, state.owner.id)
 
     # captures a platform at (x,y), field is a field object at (x,y)
-    capturePlatform: (x, y, field) ->
-        @boardDR.capturePlatform(x, y, field.platform.state.owner)
+    capturePlatform: (x, y, state) ->
+        @boardDR.capturePlatform(x, y, state.owner.id)
+
+    changeOwnership: (x, y, id) ->
+        @boardDR.capturePlatform(x, y, id)
 
     # Resets all the canvases, using the current boardState
     # It clears all the stages and. To be discussed whether to clear Signals

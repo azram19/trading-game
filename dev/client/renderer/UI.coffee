@@ -6,7 +6,7 @@ class UI extends S.Drawer
 
     canvas.onclick = @handleClick
 
-    super @stage, @minRow, @maxRow
+    super @minRow, @maxRow
 
     @curMenu = null
 
