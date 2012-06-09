@@ -7,6 +7,9 @@ class Terrain extends S.Drawer
     @map = []
     @bitmaps = {}
 
+    @heightMap = {}
+    @shadowMap = []
+
     @typesOfTerrain = [
       'dirt',
       'grass',
@@ -31,7 +34,25 @@ class Terrain extends S.Drawer
         s: 5
         l: 2
 
+    @materials =
+      water:
+        a: 100
+        d: 100
+        s: 100
+        alpha: 100
+
+    @sun =
+      x: 100
+      y: 100
+      z: 100
+      a: 100
+      d: 100
+      s: 100
+
     super @minRow, @maxRow
+
+    @bitmapWidth = @distance + @margin*2
+    @bitmapHeight = @size*2 + @margin*2
 
     @previousHitTest = [0, 0]
 
@@ -41,14 +62,16 @@ class Terrain extends S.Drawer
       .drawPolyStar(0, 0, @size+1, 6, 0, 90)
     @hitHexMap.visible = false
 
+    @hitBitmap = null
+
     #offset fix
-    @stage.x = -82
-    @stage.y = -101
+    @stage.x = -90
+    @stage.y = -100
 
     @stage.addChild @hitHexMap
     @stage.update()
 
-  createBitmapCanvas: (width = 200, height = 200) =>
+  createBitmapCanvas: (width = @bitmapWidth, height = @bitmapHeight) =>
     can = $( "<canvas width=#{ width } height=#{ height } />" )
         .appendTo( 'body' ).hide()
 
@@ -73,13 +96,16 @@ class Terrain extends S.Drawer
     @bitmaps[type]
 
   generateFieldBitmap: ( type, n=1 ) ->
-    bitmap = @context.createImageData 200, 200
+    bitmap = @context.createImageData @bitmapWidth, @bitmapHeight
 
     @drawField bitmap, 0, 0, type, n
 
+    if not @hitBitmap?
+      @hitBitmap = bitmap
+
     bitmapCanvas = @createBitmapCanvas()
     context = bitmapCanvas.getContext '2d'
-    context.clearRect 0, 0, 200, 200
+    context.clearRect 0, 0, @bitmapWidth, @bitmapHeight
     bitmapCanvas.getContext('2d').putImageData bitmap, 0, 0
 
     @bitmaps[type] = new Bitmap bitmapCanvas
@@ -88,12 +114,79 @@ class Terrain extends S.Drawer
 
     bitmap
 
+  generateShadowMap: () ->
+    light =
+      x: 0
+      y: 0
+      z: 0
+
+    mapWidth = 1024
+    mapHeight = 1024
+
+    shadowMap = []
+
+    for x in [0...1024]
+      shadowMap[x] = []
+      for y in [0...1024]
+        z = @getPointHeight x, y
+
+        c = {}
+
+        normal = Math.sqrt( x*x + y*y + z*z )
+
+        light.x = (@sun.x - x)/normal
+        light.y = (@sun.y - y)/normal
+        light.z = (@sun.z - z)/normal
+
+        shadowMap[x][y] = 255
+
+        c.x = x
+        c.y = y
+        c.z = z
+
+        if z < 200
+          shadowMap[x][y] = 0
+
+        ###
+        while 0 <= x < mapWidth and
+          0 <= y < mapHeight and
+          z < 255 and
+          not (c.x == @sun.x and
+            c.y == @sun.y and
+            c.z == @sun.z)
+
+          c.x += light.x
+          c.y += light.y
+          c.z += light.z
+
+          lerpX = Math.round c.x
+          lerpY = Math.round c.y
+
+          if c.z < @getPointHeight lerpX, lerpY
+            @shadowMap[x][y] = 0
+            break
+        ###
+
+    shadowMap
+
   generateHeightMap: () ->
-    @heightMap = new S.HeightMap 1024, 1024
+    @heightMap = new S.HeightMap 32, 32
     @heightMap.run()
 
+  getPointHeight: (x, y) ->
+    tx = Math.floor x/32
+    ty = Math.floor y/32
+
+    tile = @heightMap.tile tx, ty
+
+    line = Line.create([x, y, 0],[0, 0, 1])
+    plane = Plane.create([tx*32, ty*32,0], [], [])
+
+    tile.nw
+
   applyHeightMap: () ->
-    #@generateHeightMap()
+    @generateHeightMap()
+    @shadowMap = @generateShadowMap()
     console.log "height map generated"
     context = @stage.canvas.getContext '2d'
     terrainData = context.getImageData 0, 0, 1024, 1024
@@ -101,23 +194,28 @@ class Terrain extends S.Drawer
     for x in [0...1024]
       for y in [0...1024]
         [r, g, b, a] = @getPixel terrainData, x, y
-        #height = @heightMap.get_cell x, y
+
+        shadow = @shadowMap[x][y]
+
         c = net.brehaut.Color(
           red: r,
           green: g,
           blue: b,
           alpha: a
-        ).darkenByAmount(
-         0.1
         )
+
+        if shadow == 255
+          c = net.brehaut.Color( c ).darkenByAmount(
+            0.1
+          )
 
         @setPixel(
           terrainData,
           x,
           y,
-          [c.getRed(),
-          c.getGreen(),
-          c.getBlue(),
+          [Math.round(255*c.getRed()),
+          Math.round(255*c.getGreen()),
+          Math.round(255*c.getBlue()),
           a]
         )
 
@@ -155,8 +253,6 @@ class Terrain extends S.Drawer
   draw: ( n=1 ) ->
     @hitHexMap.visible = true
 
-    #d = @maxRow * @size * 4
-
     @context = @stage.canvas.getContext '2d'
 
     for j in [0 ... (2*@diffRows + 1)]
@@ -184,7 +280,13 @@ class Terrain extends S.Drawer
 
     for px in [p.x-@size...p.x+@size+n] by n
       for py in [p.y-@size...p.y+@size+n] by n
-        if @fieldHitTest i, j, px, py, n
+        if @hitBimap?
+          [r,g,b,a] = @getPixel @hitBimap, px, py
+
+          if a > 0
+            @drawPoint image, px, py, colour, n
+
+        else if @fieldHitTest i, j, px, py, n
           @drawPoint image, px, py, colour, n
 
     null

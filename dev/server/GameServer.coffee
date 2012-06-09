@@ -6,7 +6,7 @@ S.Types = require '../common/config/Types'
 class GameServer
 
   constructor: ->
-    @games = []
+    @games = {}
     _.extend @, Backbone.Events
 
     @enforceAvailableGames()
@@ -23,7 +23,8 @@ class GameServer
     ).value()
     (
       if not (type in presentGames)
-        @games.push @createGame(type)
+        createdGame = @createGame type
+        @games[createdGame.name] = createdGame
     ) for type, info of S.Types.Games.Info
     @.trigger 'update:games', @games
 
@@ -35,8 +36,12 @@ class GameServer
       players: []
       type: type
       typeData: S.Types.Games.Info[type]
+      manager: {}
 
   joinGame: ( name, user ) ->
+    @games[name].players.push user
+    console.log 'game joined'
+    @.trigger 'update:games', @games[name]
 
   getGames: ->
     JSON.stringify @games

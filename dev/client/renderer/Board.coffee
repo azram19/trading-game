@@ -168,7 +168,7 @@ class BoardDrawer extends Drawer
         if field.resource.behaviour?
             @drawResource point, field.resource.type()
         if field.platform.type?
-            @drawPlatform point, field.platform.type()       
+            @drawPlatform point, field.platform.type()
         @uiHandler.drawOverlay point
 
     setupBoard: (boardState) ->

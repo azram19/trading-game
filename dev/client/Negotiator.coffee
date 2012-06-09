@@ -77,11 +77,3 @@ class Negotiator
     @game.map.getField x, y
 
 window.S.Negotiator = Negotiator
-
-$ ->
-  if $('#canvasWrapper').length > 0
-    negotiate = new S.Negotiator()
-    for y in [0..4]
-     for x in [0..4]
-      negotiate.renderer.moveSignal y, x, 2
-    window.negotiate = negotiate
