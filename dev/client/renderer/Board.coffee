@@ -1,6 +1,6 @@
 class Drawer
     margin: 100
-    size: 30
+    size: 50
     div: 60
 
     # horIncrement is a horizontal distance between centers of two hexes divided by two
@@ -430,7 +430,7 @@ window.state = state
 
 $ ->
 
-    if $('#radial').length <= 0   
+    if $('#radial').length <= 0
         renderer = new Renderer 8, 15
         renderer.setupBoard(state)
         window.renderer = renderer
@@ -512,13 +512,13 @@ $ ->
             scroller.doTouchEnd e.timeStamp
             mousedown = false
         ), false
-        
+
         container.addEventListener (if navigator.userAgent.indexOf("Firefox") > -1 then "DOMMouseScroll" else "mousewheel"), ((e) ->
             scroller.doMouseZoom (if e.detail then (e.detail * -120) else e.wheelDelta), e.timeStamp, e.pageX, e.pageY
         ), false
 
 
-    #if $('#radial').length <= 0   
+    #if $('#radial').length <= 0
         #renderer = new Renderer 8, 15
         #renderer.setupBoard(state)
         #window.renderer = renderer

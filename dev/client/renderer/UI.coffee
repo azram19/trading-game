@@ -4,15 +4,112 @@ class UI extends S.Drawer
     @stage = new Stage canvas
     @stage.autoclear = false
 
-    canvas.onclick = @handleClick
-
     super @stage, @minRow, @maxRow
+
+    @canvasContainer = $( "#canvasWrapper" ).first()
+
+    @canvasDimensions = {}
+    @canvasDimensions.x = (@margin-@horIncrement) + @maxRow * @distance
+    @canvasDimensions.y = (@margin+@size) + (@diffRows * 2) * @verIncrement
+
+    @setScroller()
+
+    @canvasContainer.find( 'canvas' ).each ( i, el ) =>
+      ctx = el.getContext '2d'
+      ctx.canvas.width  = @canvasDimensions.x
+      ctx.canvas.height = @canvasDimensions.y
+
+    @scrollX= 0
+    @scrollY = 0
+
+    $(canvas).bind "contextmenu", @handleClick
+    $(this).bind "contextmenu", ( e ) ->
+      e.preventDefault()
+
+    $( window ).resize @resizeViewport
 
     @curMenu = null
 
   initializeMenus: () ->
 
     null
+
+  resizeViewport: () =>
+    viewportHeight = window.innerHeight
+    viewportWidth = window.innerWidth - 200
+
+    @canvasContainer.css(
+      height: viewportHeight
+      width: viewportWidth
+      overflow: 'hidden'
+    ).first()
+
+    @scroller.setDimensions viewportWidth, viewportHeight, @canvasDimensions.x, @canvasDimensions.y
+
+  setScroller: () ->
+    viewportHeight = window.innerHeight
+    viewportWidth = window.innerWidth - 200
+
+    @canvasContainer.css(
+      height: viewportHeight
+      width: viewportWidth
+      overflow: 'hidden'
+    ).first()
+
+    @scroller = new Scroller @scroll
+    @scroller.setDimensions viewportWidth, viewportHeight, @canvasDimensions.x, @canvasDimensions.y
+
+    @mousedown = false
+
+    @canvasContainer.get()[0].addEventListener("mousedown", (e) =>
+        @scroller.doTouchStart([{
+            pageX: e.pageX
+            pageY: e.pageY
+        }], e.timeStamp)
+
+        @mousedown = true
+    , false)
+
+    document.addEventListener("mousemove", (e) =>
+        if not @mousedown
+            return
+
+        @scroller.doTouchMove([{
+            pageX: e.pageX
+            pageY: e.pageY
+        }], e.timeStamp)
+
+        @mousedown = true
+    , false)
+
+    document.addEventListener("mouseup", (e) =>
+        if not @mousedown
+          return
+
+        @scroller.doTouchEnd(e.timeStamp)
+
+        @mousedown = false
+    , false)
+
+  scroll: (x, y) =>
+    @scrollX = x
+    @scrollY = y
+
+    #console.log [x, y]
+    #console.log 'scroll ' + x + ' ' + y
+    #@events.trigger 'scroll', x, y
+
+
+    @canvasContainer.find( 'canvas' ).not( '.noScroll' ).each(
+      (i,el) ->
+        $el = $ el
+
+        $el.css(
+          top: -y
+          left: -x
+        )
+    )
+
 
   createMenu: (i, j) ->
     p = @getPoint i, j
@@ -124,12 +221,20 @@ class UI extends S.Drawer
   handleClick: ( event ) =>
     [x, y] = @getXY event
 
+    if event.button != 2
+      return
+
+    p = @getCoords (new Point x, y)
+
     if @curMenu? and @curMenu.hitTest x, y, true
+     if @curMenu.positionI == p.x and @curMenu.positionJ == p.y
+        @curMenu.hide @curMenu.destroy
+        @curMenu = null
       return
     else
-      p = @getCoords (new Point x, y)
-
       @handleClickOnField p.x, p.y
+
+    event.preventDefault()
 
   handleClickOnField: ( i, j ) =>
     if @curMenu?
@@ -138,6 +243,8 @@ class UI extends S.Drawer
     @curMenu = @createMenu i, j
 
     if @curMenu?
+      @curMenu.positionI = i
+      @curMenu.positionJ = j
       @curMenu.show()
       @curMenu.click()
 

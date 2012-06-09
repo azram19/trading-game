@@ -12,6 +12,9 @@ class RadialMenu
 
     @menuId = _.uniqueId()
 
+    $( @canvas ).bind "contextmenu", ( e ) ->
+      e.preventDefault()
+
     @positive_action = 'Yes'
     @negative_action = 'No'
 
@@ -121,7 +124,7 @@ class RadialMenu
 
   action: () =>
     console.log "trigger: " + @event
-    @engine.trigger @event, @obj
+    @engine.trigger @event, @obj.x, @obj.y
     @click()
 
   setEvent: ( ev ) ->
@@ -159,7 +162,8 @@ class RadialMenu
       else
         @drawButtonOrange @button
 
-    @button.onClick = @click
+    if not @root
+      @button.onClick = @click
 
     @circle = new Shape()
     @circle.visible = false
@@ -220,9 +224,15 @@ class RadialMenu
     Ticker.addListener @, false
 
   destroy: () ->
-    Ticker.removeListener @
-
     child.destroy() for child in @children
+
+    @hideText()
+    @button.visible = false
+    @container.visible = false
+
+    $( @canvas ).unbind "contextmenu", ( e ) ->
+      e.preventDefault()
+    Ticker.removeListener @
 
   drawButtonOrange: ( button ) ->
     button.graphics
@@ -267,12 +277,17 @@ class RadialMenu
     @$title.visible = true
     @button.visible = true
 
-  hide: () =>
+  hide: ( fn ) =>
     @showing = false
     @hiding = true
 
     x = 0
     y = 0
+
+    if fn?
+      @hideFn = fn
+    else
+      @hideFn = () ->
 
     if not @root and @x != x and @y != y
       @steps = @showTime/Ticker.getInterval()
@@ -349,7 +364,9 @@ class RadialMenu
     ) for c in @children
 
     @circle.visible = true
-    @circleC.visible = true
+
+    if @children.length > 1
+      @circleC.visible = true
 
   hideChildren: () =>
     @expanded = false
@@ -397,6 +414,12 @@ class RadialMenu
       @hiding = false
       @visible = false
       @$title.visible = false
+
+      if @root
+        @hideText()
+        @button.visible = false
+        @container.visible = false
+        @hideFn()
     else
       @steps--
       @x -= @stepX
@@ -510,7 +533,7 @@ class RadialMenu
 
       @rotateSteps--
 
-  click: () =>
+  click: ( show ) =>
     if not @expanded
       @expand true #show my children
 

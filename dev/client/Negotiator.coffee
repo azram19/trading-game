@@ -35,18 +35,22 @@ class Negotiator
       console.debug 'routing', obj, k, incoming, outgoing
       obj[k].in = incoming
       obj[k].out = outgoint
+    @.on 'scroll', @setScroll
 
   getGameState: ( channel ) ->
     player = S.ObjectFactory.build S.Types.Entities.Player
-    manager = new S.GameManager @, [player], [[2,2]], 8, 15
+    manager = new S.GameManager @, [player], [[2,2]], 16, 31
     @game = manager
+
+  setScroll: ( x, y ) ->
+    @renderer.setScroll x, y
 
   setupUI: ->
     [minWidth, maxWidth] = @game.getDimensions()
-    @renderer = new S.Renderer minWidth, maxWidth, _.pluck(@game.users, 'id')
-    @renderer.setupBoard @game.map
     window.ui = @ui =  new S.UIClass @, minWidth, maxWidth
     window.t = @terrain = new S.Terrain 'background', minWidth, maxWidth
+    @renderer = new S.Renderer minWidth, maxWidth, _.pluck(@game.users, 'id')
+    @renderer.setupBoard @game.map
 
     #@terrain.draw 2 - not extremely fast, disabled for debugging
 
