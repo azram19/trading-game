@@ -37,6 +37,7 @@ class Negotiator
       obj[k].in = incoming
       obj[k].out = outgoint
     @.on 'scroll', @setScroll
+    @.on 'scroll', @setViewport
 
   getGameState: ( channel ) ->
     player = S.ObjectFactory.build S.Types.Entities.Player
@@ -46,6 +47,9 @@ class Negotiator
 
   setScroll: ( x, y ) ->
     @renderer.setScroll x, y
+
+  setViewport: ( width, height ) ->
+    @renderer.setScroll width, height
 
   setupUI: ->
     [minWidth, maxWidth] = @game.getDimensions()
