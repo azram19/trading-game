@@ -42,14 +42,14 @@ class Negotiator
   getGameState: ( channel ) ->
     player = S.ObjectFactory.build S.Types.Entities.Player
     player2 = S.ObjectFactory.build S.Types.Entities.Player
-    manager = new S.GameManager @, [player, player2], [[2,2], [3,3]], 8, 15
+    manager = new S.GameManager @, [player, player2], [[2,2], [3,3]], 10, 22
     @game = manager
 
-  setScroll: ( x, y ) ->
-    @renderer.setScroll x, y
+  #setScroll: ( x, y ) ->
+    #@renderer.setScroll x, y
 
-  setViewport: ( width, height ) ->
-    @renderer.setScroll width, height
+  #setViewport: ( width, height ) ->
+    #@renderer.setScroll width, height
 
   setupUI: ->
     [minWidth, maxWidth] = @game.getDimensions()
@@ -77,11 +77,3 @@ class Negotiator
     @game.map.getField x, y
 
 window.S.Negotiator = Negotiator
-
-$ ->
-  if $('#canvasWrapper').length > 0
-    negotiate = new S.Negotiator()
-    for y in [0..4]
-     for x in [0..4]
-      negotiate.renderer.moveSignal y, x, 2
-    window.negotiate = negotiate

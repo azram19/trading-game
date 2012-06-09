@@ -8,9 +8,13 @@ class LobbyView extends Backbone.View
     #Get temaplates
     @messageTemplate = Handlebars.templates['lobbyMessage']
     @messagesTemplate = Handlebars.templates['lobbyMessages']
+    #@gamesTemplate = Handlebars.templates['lobbyGames']
+    #@gameTemplate = Handlebars.template['lobbyGame']
 
     #Bind to changes and update the view
     @collection.bind 'add', @addMessage
+    @games = new S.Collections.Messages
+    @games.bind 'add', @addGame
 
     #Listen to the server
     @communicator.on 'message:new', @handleServerMessage
@@ -30,9 +34,14 @@ class LobbyView extends Backbone.View
     $( '#chat ul' ).append msg
     $( "#chat .nano" ).nanoScroller scroll: 'bottom'
 
+  # Add new game to lobby
+  addGame: ( model ) =>
+    console.log "Lobby: New Game"
+
   handleNewGame: ( data ) =>
     console.log 'Lobby: New game has been created'
     game = new S.Models.Game data
+    @games.add game
 
   handleServerMessage: ( data ) =>
     console.log "Lobby: Server message"

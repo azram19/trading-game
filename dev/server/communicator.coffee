@@ -27,7 +27,7 @@ class Communicator
     ###
     @app.io.set 'log level', 1
 
-    @app.io.set 'authorization', ( data, accept) ->
+    @app.io.set 'authorization', ( data, accept ) ->
       #checks if there is a cookie
       if data.headers.cookie
 
@@ -49,21 +49,29 @@ class Communicator
         #if there isn't turn down the connection
         accept 'No cookie transmitted', false
 
+    app.gameServer.on 'update:games', (games) =>
+      #console.dir 'new games arrived'
+      @app.io.sockets.in('lobby').emit 'games:new', games
+
+    app.gameServer.on '', () ->
+
     @sockets.on 'connection', ( socket ) =>
       hs = socket.handshake
       client = new ComClient socket
-      @clients[ client.getId() ] = client
+      @clients[client.getId()] = client
       client.joinChannel 'lobby'
-      console.log @app.io.sockets.manager.rooms
+      #console.log @app.io.sockets.manager.rooms
 
       if hs.session.auth?
-        if hs.session.auth.google?
-          socket.emit 'user', hs.session.auth.google.user
-        else
-          socket.emit 'user', hs.session.auth.facebook.user
+        app.Mongoose.model('User').findOne id: hs.session.auth.userId, (docs, err) ->
+          socket.emit 'user', docs
 
       socket.on 'message:add', ( data ) ->
         socket.broadcast.to( client.getChannel() ).emit 'message:new', data
+
+      socket.on 'join:game', ( gameName, userId ) =>
+        console.log 'joining game'
+        @app.gameServer.joinGame gameName, userId
 
       #client want to join a channel
       socket.on 'join:channel', ( channel, fn ) ->
@@ -84,10 +92,6 @@ class Communicator
         socket.leave channel
 
         data.currentChannel = null
-
-      app.gameServer.on 'update:games', (games) ->
-        console.dir 'new games arrived'
-        socket.broadcast.to( '/lobby' ).emit 'new:games', games
 
     setInterval @ping, 1000
 
