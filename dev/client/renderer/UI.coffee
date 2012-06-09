@@ -35,8 +35,8 @@ class UI extends S.Drawer
     null
 
   resizeViewport: () =>
-    viewportHeight = window.innerHeight
-    viewportWidth = window.innerWidth - 200
+    @viewportWidth = viewportHeight = window.innerHeight
+    @viewportHeight = viewportWidth = window.innerWidth - 200
 
     @canvasContainer.css(
       height: viewportHeight
@@ -45,6 +45,8 @@ class UI extends S.Drawer
     ).first()
 
     @scroller.setDimensions viewportWidth, viewportHeight, @canvasDimensions.x, @canvasDimensions.y
+
+    @events.trigger 'resize', viewportWidth, viewportHeight
 
   setScroller: () ->
     viewportHeight = window.innerHeight
@@ -60,6 +62,8 @@ class UI extends S.Drawer
     @scroller.setDimensions viewportWidth, viewportHeight, @canvasDimensions.x, @canvasDimensions.y
 
     @mousedown = false
+
+    @events.trigger 'resize', viewportWidth, viewportHeight
 
     @canvasContainer.get()[0].addEventListener("mousedown", (e) =>
         @scroller.doTouchStart([{
@@ -95,9 +99,7 @@ class UI extends S.Drawer
     @scrollX = x
     @scrollY = y
 
-    #console.log [x, y]
-    #console.log 'scroll ' + x + ' ' + y
-    #@events.trigger 'scroll', x, y
+    @events.trigger 'scroll', x, y
 
 
     @canvasContainer.find( 'canvas' ).not( '.noScroll' ).each(

@@ -1,6 +1,6 @@
 class Drawer
     margin: 100
-    size: 50
+    size: 40
     div: 60
 
     # horIncrement is a horizontal distance between centers of two hexes divided by two
@@ -10,6 +10,8 @@ class Drawer
         @verIncrement = Math.ceil 3*@size/2
         @diffRows = @maxRow - @minRow
         @distance = 2*@horIncrement
+        @width = @margin+(@maxRow-1)*@distance+@horIncrement
+        @height = @margin+(@diffRows)*2*@verIncrement+@size
         @ticksX = []
         @ticksY = []
         @offsetX = []
@@ -18,6 +20,8 @@ class Drawer
         @scrollY = 0
         @setupOffsets()
         @setupTicks()
+        @viewportHeight = 0
+        @viewportWidth = 0
 
     # Setups table of offsets according to direction
     setupOffsets: () ->
@@ -30,6 +34,10 @@ class Drawer
             @ticksX[i] = @offsetX[i]/@div
             @ticksY[i] = @offsetY[i]/@div
         true
+
+    setViewport: (width, height) ->
+        @viewportHeight = height
+        @viewportWidth = width
 
     setScroll: (x, y) ->
         @scrollX = x
@@ -78,15 +86,18 @@ class BoardDrawer extends Drawer
         super minRow, maxRow
         @uiHandler = new UIHandler @overlayST, minRow, maxRow
         @colors = ["#274E7D", "#900020", "#FFA000", "#B80049", "#00A550", "#9999FF", "#367588", "#FFFFFF"]
+        @cacheStages = [@ownershipST, @resourcesST, @gridST, @platformsST, @channelsST]
 
     buildPlatform: (x, y, type) ->
         point = @getPoint(x, y)
         @drawPlatform(point, type)
+        @platformsST.updateCache()
         @platformsST.update()
 
     capturePlatform: (x, y, ownerid) ->
         point = @getPoint x, y
         @drawOwnership point, ownerid
+        @ownershipST.updateCache()
         @ownershipST.update()
 
     buildChannel: (x, y, direction, ownerid) ->
@@ -94,6 +105,8 @@ class BoardDrawer extends Drawer
         destination = @getDestination(point, direction)
         @drawChannel(point, direction)
         @drawOwnership(destination, ownerid)
+        @ownershipST.updateCache()
+        @channelsST.updateCache()
         @channelsST.update()
         @ownershipST.update()
 
@@ -101,11 +114,13 @@ class BoardDrawer extends Drawer
         point = @getPoint(x, y)
         destination = @getDestination(point, direction)
         @drawOwnership(destination, ownerid)
+        @ownershipST.updateCache()
         @ownershipST.update()
 
     changeOwnership: (x, y, ownerid) ->
         point = @getPoint(x, y)
         @drawOwnership(point, ownerid)
+        @ownershipST.updateCache()
         @ownershipST.update()
 
     drawOwnership: (point, ownerid) ->
@@ -164,19 +179,31 @@ class BoardDrawer extends Drawer
                 for k in [0 .. 5]
                     if boardState.getChannel(i, j, k)?.state?
                         @drawChannel(point, k)
+        @toogleCache true
+        @uiHandler.toogleCache true
+
+    toogleCache: (status) ->
+        for stage in @cacheStages
+            if status
+                stage.cache(0,0, @width, @height)
+            else
+                shape.uncache()
         true
 
 class UIHandler extends Drawer
     constructor: (@stage, minRow, maxRow) ->
         super minRow, maxRow
+        @update = false
         @stage.enableMouseOver(20)
         Ticker.addListener this
 
     drawOverlay: (point) ->
         g = new Graphics()
         g.beginFill("#FFFF00")
-            .drawPolyStar(point.x, point.y, @size, 6, 0, 90)
+        g.drawPolyStar(0, 0, @size, 6, 0, 90)
         overlay = new Shape g
+        overlay.x = point.x
+        overlay.y = point.y
         overlay.alpha = 0.01
         @stage.addChild overlay
         overlay.onMouseOver = @mouseOverField
@@ -184,16 +211,28 @@ class UIHandler extends Drawer
 
     mouseOverField: (event) =>
         event.target.alpha = 0.2
+        event.target.updateCache()
         @update = true
 
     mouseOutField: (event) =>
         event.target.alpha = 0.01
+        event.target.updateCache()
         @update = true
 
     tick: () ->
         if(@update)
             @update = false
             @stage.update()
+
+    toogleCache: (status) ->
+        length = @stage.getNumChildren() - 1
+        for i in [0..length]
+            shape = @stage.getChildAt i
+            if status
+                shape.cache(-@horIncrement, -@size, (@distance), (@size)*2)
+            else
+                shape.uncache()
+        true
 
 class OffSignals
     signalRadius: 8
@@ -443,95 +482,6 @@ window.state = state
 
 
 $ ->
-
-    if $('#radial').length <= 0
-        renderer = new Renderer 8, 15
-        renderer.setupBoard(state)
-        window.renderer = renderer
-        for y in [0..4]
-                for x in [0..4]
-                    renderer.moveSignal y, x, 2
-        renderer.buildChannel 2, 2, 3, channelStat
-        renderer.buildChannel 3, 3, 3, channelStat
-        renderer.buildChannel 4, 4, 5, channelStat
-
-    contentWidth = 2000
-    contentHeight = 2000
-    cellWidth = 100
-    cellHeight = 100
-    container = document.getElementById("canvasWrapper")
-    content = document.getElementById("grid")
-    context = renderer.gridST.canvas.getContext("2d")
-
-    render = (left, top, zoom) ->
-      content.width = clientWidth
-      content.height = clientHeight
-      context.clearRect 0, 0, clientWidth, clientHeight
-      renderer.gridST.update()
-
-    clientWidth = 0
-    clientHeight = 0
-    scroller = new Scroller(render,
-      zooming: true
-    )
-    rect = container.getBoundingClientRect()
-    scroller.setPosition rect.left + container.clientLeft, rect.top + container.clientTop
-
-    reflow = ->
-      clientWidth = container.clientWidth
-      clientHeight = container.clientHeight
-      scroller.setDimensions clientWidth, clientHeight, contentWidth, contentHeight
-
-    window.addEventListener "resize", reflow, false
-    reflow()
-
-    if "ontouchstart" of window
-      container.addEventListener "touchstart", ((e) ->
-        return  if e.touches[0] and e.touches[0].target and e.touches[0].target.tagName.match(/input|textarea|select/i)
-        scroller.doTouchStart e.touches, e.timeStamp
-        e.preventDefault()
-      ), false
-      document.addEventListener "touchmove", ((e) ->
-        scroller.doTouchMove e.touches, e.timeStamp, e.scale
-      ), false
-      document.addEventListener "touchend", ((e) ->
-        scroller.doTouchEnd e.timeStamp
-      ), false
-      document.addEventListener "touchcancel", ((e) ->
-        scroller.doTouchEnd e.timeStamp
-      ), false
-    else
-        mousedown = false
-        container.addEventListener "mousedown", ((e) ->
-            console.log 'poprostu kurwa no nie'
-            return  if e.target.tagName.match(/input|textarea|select/i)
-            scroller.doTouchStart [
-                pageX: e.pageX
-                pageY: e.pageY
-            ], e.timeStamp
-            mousedown = true
-        ), false
-        document.addEventListener "mousemove", ((e) ->
-            console.log 'boże czy Ty to widzisz?'
-            return  unless mousedown
-            scroller.doTouchMove [
-                pageX: e.pageX
-                pageY: e.pageY
-            ], e.timeStamp
-            mousedown = true
-        ), false
-        document.addEventListener "mouseup", ((e) ->
-            console.log "widzę"
-            return  unless mousedown
-            scroller.doTouchEnd e.timeStamp
-            mousedown = false
-        ), false
-
-        container.addEventListener (if navigator.userAgent.indexOf("Firefox") > -1 then "DOMMouseScroll" else "mousewheel"), ((e) ->
-            scroller.doMouseZoom (if e.detail then (e.detail * -120) else e.wheelDelta), e.timeStamp, e.pageX, e.pageY
-        ), false
-
-
     #if $('#radial').length <= 0
         #renderer = new Renderer 8, 15
         #renderer.setupBoard(state)
@@ -542,5 +492,4 @@ $ ->
         #renderer.buildChannel 2, 2, 3, channelStat
         #renderer.buildChannel 3, 3, 3, channelStat
         #renderer.buildChannel 4, 4, 5, channelStat
-
 ###
