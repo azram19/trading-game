@@ -65,8 +65,9 @@ app.get '/game/:gameName', ( req, res ) ->
 app.get '/', ( req, res ) ->
     if app.requireAuth and req.loggedIn
       res.redirect 'lobby2'
-    res.render 'index',
-      title: 'Signals early chat tests'
+    else
+      res.render 'index',
+        title: 'Signals early chat tests'
 
 app.get '/lobby', ( req, res ) =>
   if app.requireAuth and not req.loggedIn

@@ -1,6 +1,6 @@
 class Drawer
     margin: 100
-    size: 50
+    size: 40
     div: 60
 
     # horIncrement is a horizontal distance between centers of two hexes divided by two
@@ -153,7 +153,7 @@ class BoardDrawer extends Drawer
         if field.resource.behaviour?
             @drawResource point, field.resource.type()
         if field.platform.type?
-            @drawPlatform point, field.platform.type()       
+            @drawPlatform point, field.platform.type()
         @uiHandler.drawOverlay point
 
     setupBoard: (boardState) ->
