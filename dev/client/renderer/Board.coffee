@@ -1,6 +1,6 @@
 class Drawer
     margin: 100
-    size: 30
+    size: 50
     div: 60
 
     # horIncrement is a horizontal distance between centers of two hexes divided by two
@@ -14,6 +14,8 @@ class Drawer
         @ticksY = []
         @offsetX = []
         @offsetY = []
+        @scrollX = 0
+        @scrollY = 0
         @setupOffsets()
         @setupTicks()
 
@@ -29,6 +31,10 @@ class Drawer
             @ticksY[i] = @offsetY[i]/@div
         true
 
+    setScroll: (x, y) ->
+        @scrollX = x
+        @scrollY = y
+
     # Sets the size of each field (distance between the center and a corner of a hex)
     setSize: (size) ->
         @size = size
@@ -43,7 +49,7 @@ class Drawer
     # Returns canvas coordinates in pixels
     getPoint: (x, y) ->
         offset = @margin + Math.abs(@diffRows - y)*@horIncrement
-        new Point(offset + 2*x*@horIncrement, @margin + y*@verIncrement)
+        new Point(offset + 2*x*@horIncrement - @scrollX, @margin + y*@verIncrement - scrollY)
 
     # Arguments: point with canvas coordinates and direction (0..5)
     # Returns canvas coordinates of destination point in particular direction
@@ -438,7 +444,7 @@ window.state = state
 
 $ ->
 
-    if $('#radial').length <= 0   
+    if $('#radial').length <= 0
         renderer = new Renderer 8, 15
         renderer.setupBoard(state)
         window.renderer = renderer
@@ -520,13 +526,13 @@ $ ->
             scroller.doTouchEnd e.timeStamp
             mousedown = false
         ), false
-        
+
         container.addEventListener (if navigator.userAgent.indexOf("Firefox") > -1 then "DOMMouseScroll" else "mousewheel"), ((e) ->
             scroller.doMouseZoom (if e.detail then (e.detail * -120) else e.wheelDelta), e.timeStamp, e.pageX, e.pageY
         ), false
 
 
-    #if $('#radial').length <= 0   
+    #if $('#radial').length <= 0
         #renderer = new Renderer 8, 15
         #renderer.setupBoard(state)
         #window.renderer = renderer
