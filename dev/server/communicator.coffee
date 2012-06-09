@@ -49,10 +49,12 @@ class Communicator
         #if there isn't turn down the connection
         accept 'No cookie transmitted', false
 
-    @sockets.on 'connection', ( socket ) ->
+    @sockets.on 'connection', ( socket ) =>
       hs = socket.handshake
       client = new ComClient socket
       @clients[ client.getId() ] = client
+      client.joinChannel 'lobby'
+      console.log @app.io.sockets.manager.rooms
 
       if hs.session.auth?
         if hs.session.auth.google?
@@ -83,7 +85,13 @@ class Communicator
 
         data.currentChannel = null
 
+      app.gameServer.on 'update:games', (games) ->
+        console.dir 'new games arrived'
+        socket.broadcast.to( '/lobby' ).emit 'new:games', games
+
     setInterval @ping, 1000
+
+
 
   clientLeaveChannel: ( client ) ->
       channel = client.getChannel()

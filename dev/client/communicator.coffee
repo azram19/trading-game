@@ -39,12 +39,12 @@ class Communicator
     console.error 'Communicator: Unable to connect Socket.IO', reason
 
   handleConnecting: ( transport ) =>
-    console.info "Communicator: Connecting" + transport
+    console.info "Communicator: Connecting " + transport
 
   handleDisconnected: =>
     console.info "Communicator: Disconnected from the server."
 
-  handleError: ( reason ) =>
+  handleError: ( reason ) =>4322
     console.error 'Communicator: Unable to connect Socket.IO', reason
 
   handlePing: =>

@@ -14,6 +14,7 @@ class ComClient
 
   joinChannel: ( channel ) =>
     @channel = channel
+    @socket.join channel
 
   leaveChannel: ( channel ) =>
     @channel = null

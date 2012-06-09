@@ -1,68 +1,44 @@
 _ = require('underscore')._
+Backbone = require 'backbone'
 S = {}
 S.Types = require '../common/config/Types'
 
 class GameServer
 
-    constructor: ( @lobbyCommunicator ) ->
-        @typesConfig = []
+  constructor: ->
+    @games = []
+    _.extend @, Backbone.Events
 
-        @games = [
-          {
-            name: 'AwesomeGame'
-            channel: 'channel1'
-            type: S.Types.Games.FFA
-            typeData: @getGameTypeData S.Types.Games.FFA
-            players: [
-              [
-                'me'
-                'you'
-                'someone'
-                'someoneelse'
-              ]
-            ]
-          }
-          {
-            name: 'UberAwesomeGame'
-            channel: 'channel2'
-            type: S.Types.Games.Team.Side2
-            typeData: @getGameTypeData S.Types.Games.Team.Side2
-            players: [
-              [
-                '37signals'
-                'basecamp'
-              ]
-              [
-                'Carsonified'
-                'heroku'
-              ]
-            ]
-          }
-        ]
+    @enforceAvailableGames()
 
-    newGame: ( gameName, gameType, player1 ) ->
-      newGame =
-        name: gameName
-        channel: _.uniqueId 'channel-'
-        type: gameType
-        players: []
-      @games.push newGame
-      @lobbyCommunicator.emit 'game:new', newGame
-      @joinGame gameName, player1
+  enforceAvailableGames: ->
+    presentGames = _.chain(@games).map( (game) ->
+      maxPlayers = game.typeData.numberOfSides * game.typeData.playersOnASide
+      players = _.flatten(game.players).length
+      [game.type, maxPlayers is players]
+    ).filter( (game) ->
+      not game[1]
+    ).map((game) ->
+      game[0]
+    ).value()
+    (
+      if not (type in presentGames)
+        @games.push @createGame(type)
+    ) for type, info of S.Types.Games.Info
+    @.trigger 'update:games', @games
 
-    joinGame: ( name, user ) ->
+  createGame: ( type ) ->
+    id = _.uniqueId()
+    game =
+      name: 'game-' + id
+      channel: 'channel-' + id
+      players: []
+      type: type
+      typeData: S.Types.Games.Info[type]
 
-    getGameTypeData: ( type ) ->
-      #@typesConfig[type]
+  joinGame: ( name, user ) ->
 
-      {
-        name: 'Team Match'
-        numberOfSides: 2
-        playersOnASide: 3
-        teams: true
-      }
-
-    getGames: ->
-      JSON.stringify @games
+  getGames: ->
+    JSON.stringify @games
 
 module.exports = exports = GameServer

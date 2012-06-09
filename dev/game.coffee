@@ -18,8 +18,8 @@ app.everyauth.helpExpress app
 #config the app
 config = require('./config.coffee')(app, express)
 
+app.gameServer = new GameServer
 app.communicator = new Communicator app
-app.gameServer = new GameServer app.communicator
 
 app.get '/board', ( req, res) ->
    res.render 'board'
