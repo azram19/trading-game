@@ -4,7 +4,7 @@ class UI extends S.Drawer
     @stage = new Stage canvas
     @stage.autoclear = false
 
-    super @stage, @minRow, @maxRow
+    super @minRow, @maxRow
 
     @canvasContainer = $( "#canvasWrapper" ).first()
 

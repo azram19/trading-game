@@ -31,7 +31,7 @@ class Terrain extends S.Drawer
         s: 5
         l: 2
 
-    super @stage, @minRow, @maxRow
+    super @minRow, @maxRow
 
     @previousHitTest = [0, 0]
 
