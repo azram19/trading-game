@@ -8,10 +8,6 @@ class UI extends S.Drawer
 
     @canvasContainer = $( "#canvasWrapper" ).first()
 
-    @canvasDimensions = {}
-    @canvasDimensions.x = (@margin-@horIncrement) + @maxRow * @distance
-    @canvasDimensions.y = (@margin+@size) + (@diffRows * 2) * @verIncrement
-
     @setScroller()
 
     @canvasContainer.find( 'canvas' ).each ( i, el ) =>
@@ -29,6 +25,10 @@ class UI extends S.Drawer
     $( window ).resize @resizeViewport
 
     @curMenu = null
+    @menuHelper = new S.MapHelper @events, @minRow, @maxRow
+
+  getLoadingStage: ( @loading ) ->
+  setLoadingStage: ( @loading ) ->
 
   initializeMenus: () ->
 
@@ -117,6 +117,7 @@ class UI extends S.Drawer
     p = @getPoint i, j
 
     menuStructure = @events.getMenu i, j
+    console.debug menuStructure
     obj = @events.getField i, j
 
     if not menuStructure?
@@ -134,6 +135,10 @@ class UI extends S.Drawer
 
       menu.addChild subMenu
     ) for submenuName in submenuNames
+
+    menu.setActionHelper @menuHelper
+    menu.setObj obj
+    menu.setRoot menu
 
     menu
 
