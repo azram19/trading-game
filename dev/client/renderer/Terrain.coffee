@@ -148,6 +148,15 @@ class Terrain extends S.Drawer
 
     shadowMap
 
+  billinearInterpolation: ([x0,y0,z0], [x1,y1,z1], [x2,y2,z2], [x3,y3,z3]) ->
+    z = 0
+
+    #f(x,y) = @heightMap.get_cell x, y
+
+    #z =
+
+    z
+
   #we may either want to generate southern or northern triangle
   generateShadowedSubTile: (i, j, tile, north, shadowMap) ->
     for point, height of tile

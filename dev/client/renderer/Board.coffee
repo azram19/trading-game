@@ -1,6 +1,6 @@
 class Drawer
     margin: 100
-    size: 30
+    size: 45
     div: 60
 
     # horIncrement is a horizontal distance between centers of two hexes divided by two

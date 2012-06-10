@@ -400,13 +400,9 @@ class MapHelper extends S.Drawer
       @currentHelper.click.call @, i, j, k
 
   accept: ( i, j, k ) =>
-    console.log "accept"
     args = @currentHelper.generateArguments.call @, @i, @j, i, j, k
 
     @currentMenu.trigger "menu:helper:" + @currentEvent, args
-
-    console.log "trigger " + @currentEvent
-    console.debug @currentMenu
 
     @clean()
     @close()

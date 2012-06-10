@@ -146,7 +146,6 @@ class RadialMenu
   action: () =>
     if @actionHelper?
       @.on "menu:helper:" + @event, ( helperArgs ) =>
-        console.log @event + " on/off"
         @.off "menu:helper:" + @event
 
         myArgs = [@event]
