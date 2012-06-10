@@ -10,9 +10,6 @@ class HQBehaviour
 
     constructor: ( @eventBus ) ->
 
-    getType: ->
-        S.Types.Platforms.HQ
-
     actionMenu: ( state ) ->
       menu = ['build:channel', 'routing']
 

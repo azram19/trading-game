@@ -1,9 +1,6 @@
 class PlatformBehaviour
 
-    constructor: ( @platformType, @eventBus ) ->
-
-    getType: ->
-        @platformType
+    constructor: ( @eventBus ) ->
 
     actionMenu: ( state ) ->
       menu = ['build:channel', 'routing']
