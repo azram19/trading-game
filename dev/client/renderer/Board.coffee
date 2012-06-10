@@ -23,6 +23,15 @@ class Drawer
         @viewportHeight = 0
         @viewportWidth = 0
 
+        @canvasDimensions = {}
+        @canvasDimensions.x =
+            2*(@margin-@horIncrement) +
+            @maxRow * @distance
+
+        @canvasDimensions.y =
+            2*(@margin+@size) +
+            (@diffRows * 2-1) * @verIncrement
+
     # Setups table of offsets according to direction
     setupOffsets: () ->
         @offsetX = [-@horIncrement, @horIncrement, 2*@horIncrement, @horIncrement, -@horIncrement, -2*@horIncrement]
@@ -138,8 +147,8 @@ class BoardDrawer extends Drawer
     drawPlatform: (point, type) ->
         #g = new Graphics()
         switch type
-            when S.Types.Platforms.HQ then @setBitmap(point, 0)#g.beginFill("#C5B356")
-            when S.Types.Platforms.Normal then @setBitmap(point, 1)#g.beginFill("#A6B4B0")
+            when S.Types.Entities.Platforms.HQ then @setBitmap(point, 0)#g.beginFill("#C5B356")
+            when S.Types.Entities.Platforms.Normal then @setBitmap(point, 1)#g.beginFill("#A6B4B0")
         #g.drawPolyStar(point.x, point.y, 2*@size/3, 6, 0, 90)
         #@platformsST.addChild new Shape g
 

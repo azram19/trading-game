@@ -16,7 +16,7 @@ class GameObject
         @.on 'produce', @produce, @
 
     type: ->
-        @behaviour.getType()
+        @state.type
 
     requestAccept: ( signal ) ->
         @behaviour.requestAccept signal, @state

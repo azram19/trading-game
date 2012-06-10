@@ -8,6 +8,7 @@ else
 
 Properties =
     platform:
+        type: S.Types.Entities.Platforms.Normal
         id: 0
         name: 'Object'
         field: {}
@@ -19,6 +20,7 @@ Properties =
         life: 100
 
     channel:
+        type: S.Types.Entities.Channel
         id: 0
         name: 'Channel'
         field: {}
@@ -31,6 +33,7 @@ Properties =
         someField: "value"
 
     HQ:
+        type: S.Types.Entities.Platforms.HQ
         id: 0
         name: 'HQ'
         field: {}
@@ -42,6 +45,7 @@ Properties =
         life: 100
 
     signal:
+        type: S.Types.Entities.Signal
         id: 0
         name: 'Signal'
         strength: 0
@@ -50,6 +54,7 @@ Properties =
         path: []
 
     resource:
+        type: S.Types.Resources.Metal
         id: 0
         name: 'Resource'
         field: {}

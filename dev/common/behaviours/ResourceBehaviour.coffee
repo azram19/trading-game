@@ -13,9 +13,6 @@ class ResourceBehaviour
 
     constructor: ( @resourceType, @eventBus ) ->
 
-    getType: ->
-        @resourceType
-
     actionMenu: ( state ) ->
       []
 

@@ -12,17 +12,22 @@ class RadialMenu
 
     @menuId = _.uniqueId()
 
+    _.extend @, Backbone.Events
+
     $( @canvas ).bind "contextmenu", ( e ) ->
       e.preventDefault()
 
     @positive_action = 'Yes'
     @negative_action = 'No'
 
+    @actionHelper = null
+
     ###
     Get the context and stage we will be drawing to. Only for the root it will be the actuall context, for every other element it will get
     overwritten by root's context and stage.
     ###
     @stage = new Stage @canvas
+    @stage.autoclear = false
 
     #Container where we store all our children
     @container = new Container()
@@ -88,13 +93,13 @@ class RadialMenu
       ###
       @$title = new Text @text,
         "13px 'Cabin', Helvetica,Arial,sans-serif",
-        "#AAA"
+        "#FFF"
 
       @$title.visible = false
 
       @$actionTitle = new Text @positive_action,
         "13px 'Cabin', Helvetica,Arial,sans-serif",
-        "#AAA"
+        "#FFF"
 
       @$actionTitle.visible = false
 
@@ -119,13 +124,45 @@ class RadialMenu
     menu.beta = menu.beta - @children.length * @alpha
     menu.childIndex = @children.length
     menu.obj = @obj
+    menu.actionHelper = @actionHelper
 
     @children.push menu
 
+  setObj: ( obj ) ->
+    @obj = obj
+
+    child.setObj obj for child in @children
+
+  setRoot: ( root ) ->
+    @rootElement = root
+
+    child.setRoot root for child in @children
+
+  setActionHelper: ( actionHelper ) ->
+    @actionHelper = actionHelper
+
+    child.setActionHelper actionHelper for child in @children
+
   action: () =>
-    console.log "trigger: " + @event
-    @engine.trigger @event, @obj.x, @obj.y
-    @click()
+    if @actionHelper?
+      @.on "menu:helper:" + @event, ( helperArgs ) =>
+        console.log @event + " on/off"
+        @.off "menu:helper:" + @event
+
+        myArgs = [@event]
+        eventArgs = myArgs.concat helperArgs
+
+        @executeAction.apply @, eventArgs
+
+    @actionHelper.trigger @event, @
+
+    @rootElement.hide @rootElement.destroy
+
+  executeAction: () ->
+    console.log arguments
+    @engine.trigger.apply @engine, arguments
+
+  actionArgs: () ->
 
   setEvent: ( ev ) ->
     @event = ev
@@ -168,14 +205,14 @@ class RadialMenu
     @circle = new Shape()
     @circle.visible = false
     @circle.graphics
-      .setStrokeStyle(1)
+      .setStrokeStyle(2)
       .beginStroke( "rgba(0,0,0,#{@fadedOutOpacity})" )
       .drawCircle( @x_o, @y_o, @expand_length )
 
     @circleC = new Shape()
     @circleC.visible = false
     @circleC.graphics
-      .setStrokeStyle(1)
+      .setStrokeStyle(2)
       .beginStroke( "rgba(0,0,0,#{@fadedOutOpacity})" )
       .drawCircle( @x_o, @y_o, @compact_length )
 
@@ -542,18 +579,16 @@ class RadialMenu
 
         if @children.length < 1
           if not @descDisplayed
-            console.log 'd'
             @parent.displayText @
           else
-            console.log 'und'
             @parent.undisplayText @
     else
       if @children.length < 1
-        if not @descDisplayed
-          console.log 'd'
+        if @desc.length == 0
+          @action()
+        else if not @descDisplayed
           @parent.displayText @
         else
-          console.log 'und'
           @parent.undisplayText @
           @parent.expand true
 

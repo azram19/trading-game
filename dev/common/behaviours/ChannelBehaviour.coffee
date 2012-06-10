@@ -8,9 +8,6 @@ class ChannelBehaviour
 
     constructor: ( @eventBus ) ->
 
-    getType: ->
-        S.Types.Entities.Channel
-
     actionMenu: ( state ) ->
       menu = ['routing']
 

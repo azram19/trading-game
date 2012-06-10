@@ -15,28 +15,24 @@ else
 
 class GameManager
 
-  constructor: ( @eventBus, @users, startPoints, minWidth, maxWidth ) ->
+  constructor: ( @eventBus, @map ) ->
+
+  initialMapState: ( startPoints ) ->
     createHQ = ( user ) =>
       id = Math.random()
-      S.ObjectFactory.build S.Types.Entities.HQ, @eventBus, user
+      S.ObjectFactory.build S.Types.Entities.Platforms.HQ, @eventBus, user
 
     HQs = (createHQ user for user in @users)
-    @nonUser = S.ObjectFactory.build S.Types.Entities.Player
-    @map = new S.Map @eventBus, minWidth, maxWidth, @nonUser
-    @initialMapState( @map, HQs, startPoints )
-    #@map.dump()
+    (
+      [x,y] = startPoints[i]
+      @map.addPlatform HQs[i], x, y
+    ) for i in [0...HQs.length]
 
     (
       HQ.produce()
     ) for HQ in HQs
 
     null
-
-  initialMapState: ( map, HQs, startPoints ) ->
-    (
-      [x,y] = startPoints[i]
-      map.addPlatform HQs[i], x, y
-    ) for i in [0...HQs.length]
 
   getDimensions: ->
     [@map.minWidth, @map.maxWidth]

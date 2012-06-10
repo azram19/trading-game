@@ -1,10 +1,11 @@
 Types =
     Entities:
-        HQ: 1
-        Platform: 2
-        Channel: 3
-        Signal: 4
-        Player: 5
+        Channel: 1
+        Signal: 2
+        Player: 3
+        Platforms:
+          HQ: 4
+          Normal: 5
     Resources:
         Metal: 6
         Tritium: 7
@@ -16,9 +17,6 @@ Types =
             100
             100
         ]
-    Platforms:
-        Normal: 8
-        HQ: 9
     Events:
       Routing:
         title: 'set routing'
