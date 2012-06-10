@@ -51,6 +51,8 @@ class Terrain extends S.Drawer
 
     super @minRow, @maxRow
 
+    @heightScale = Math.floor(@canvasDimensions.x / 128)
+
     @bitmapWidth = @distance
     @bitmapHeight = @size*2
 
@@ -123,8 +125,8 @@ class Terrain extends S.Drawer
       for y in [0...@canvasDimensions.y]
         shadowMap[x][y] = 0
 
-    for i in [0..(@canvasDimensions.x/@size)*1.5-1] by 2
-      for j in [0..(@canvasDimensions.y/@size)*1.5-1] by 2
+    for i in [0..120] by 2
+      for j in [0..120] by 2
         @generateShadowedTile i, j, shadowMap
 
     shadowMap
@@ -148,47 +150,79 @@ class Terrain extends S.Drawer
 
     shadowMap
 
-  billinearInterpolation: ([x0,y0,z0], [x1,y1,z1], [x2,y2,z2], [x3,y3,z3]) ->
+  billinearInterpolation: (x, y) ->
     z = 0
 
-    #f(x,y) = @heightMap.get_cell x, y
+    x1 = Math.floor(x/@heightScale)
+    y1 = Math.floor(y/@heightScale)
 
-    #z =
+    tile = @heightMap.tile x1, y1
+
+    q11 = tile.sw
+    q21 = tile.se
+    q12 = tile.nw
+    q22 = tile.ne
+
+    x2 = x1 + 1
+    y2 = y1 + 1
+
+    x1 = Math.ceil(x1 * @heightScale)
+    y1 = Math.ceil(y1 * @heightScale)
+
+    x2 = Math.ceil(x2 * @heightScale)
+    y2 = Math.ceil(y2 * @heightScale)
+
+    fp = (q11 / ( (x2-x1)*(y2-y1) ) ) * (x2-x) * (y2-y) +
+      (q21 / ( (x2-x1)*(y2-y1) ) ) * (x-x1) * (y2-y) +
+      (q12 / ( (x2-x1)*(y2-y1) ) ) * (x2-x) * (y-y1) +
+      (q22 / ( (x2-x1)*(y2-y1) ) ) * (x-x1) * (y-y1)
+
+    z = fp
 
     z
 
   #we may either want to generate southern or northern triangle
   generateShadowedSubTile: (i, j, tile, north, shadowMap) ->
-    for point, height of tile
-      tile[point] = @scaleHeight height
-
-    height = @size/2
-    width = @size/2
+    height = @heightScale
+    width = @heightScale
 
     xStart = i * width
     yStart = j * height
 
     if north
-      shadow = @getShadowStrength tile.sw - (tile.nw + tile.ne)/2
+      start = tile.nw
 
       for x in [xStart...xStart+width]
         for y in [yStart..yStart+height-x+xStart]
-          shadowMap[x][y] = shadow
+          h = @getHeight x, y
+          shadowMap[x][y] =  h - 100
+          start = h
 
     else
-      shadow = @getShadowStrength (tile.sw + tile.se)/2 - tile.ne
+      start = tile.sw
 
       for x in [xStart...xStart+width]
         for y in [yStart+height-x+xStart...yStart+height]
-          shadowMap[x][y] = shadow
+          h = @getHeight x, y
+          shadowMap[x][y] = h - 100
+          start = h
 
     shadowMap
 
+  getHeight: (x, y) ->
+    @billinearInterpolation(x,y)
+
   scaleHeight: (h) ->
     if h?
-      Math.floor h
+      Math.floor h - 100
     else
       null
+
+  project: ( x, y, z ) ->
+    x2 = Math.round(x + z/4)
+    y2 = Math.round(y + z/2)
+
+    [x2,y2]
 
   getShadowStrength: (height) ->
     height
@@ -239,12 +273,15 @@ class Terrain extends S.Drawer
 
         shadow = @shadowMap[x][y]
 
+        [x2,y2] = @project x, y, (@getHeight x, y)
+        #[x2,y2] = [x,y]
+
         @setPixel(
           terrainData,
-          x,
-          y,
-          [Math.round(r+@shadowMap[x][y]*4),
-          Math.round(g+@shadowMap[x][y]*2.5),
+          x2,
+          y2,
+          [Math.round(r+@shadowMap[x][y]),
+          Math.round(g+@shadowMap[x][y]),
           Math.round(b+@shadowMap[x][y]),
           a]
         )
