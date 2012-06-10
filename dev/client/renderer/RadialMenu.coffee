@@ -145,15 +145,16 @@ class RadialMenu
 
   action: () =>
     if @actionHelper?
-      @actionHelper.trigger @event, @
-
       @.on "menu:helper:" + @event, ( helperArgs ) =>
+        console.log @event + " on/off"
         @.off "menu:helper:" + @event
 
         myArgs = [@event]
         eventArgs = myArgs.concat helperArgs
 
         @executeAction.apply @, eventArgs
+
+    @actionHelper.trigger @event, @
 
     @rootElement.hide @rootElement.destroy
 
@@ -570,7 +571,6 @@ class RadialMenu
       @rotateSteps--
 
   click: ( show ) =>
-    console.log 'click'
     if not @expanded
       @expand true #show my children
 
@@ -584,9 +584,6 @@ class RadialMenu
             @parent.undisplayText @
     else
       if @children.length < 1
-        console.log @desc
-        console.log @desc.length
-
         if @desc.length == 0
           @action()
         else if not @descDisplayed

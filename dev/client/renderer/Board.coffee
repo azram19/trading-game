@@ -147,8 +147,8 @@ class BoardDrawer extends Drawer
     drawPlatform: (point, type) ->
         g = new Graphics()
         switch type
-            when S.Types.Platforms.Normal then g.beginFill("#A6B4B0")
-            when S.Types.Platforms.HQ then g.beginFill("#C5B356")
+            when S.Types.Entities.Platforms.Normal then g.beginFill("#A6B4B0")
+            when S.Types.Entities.Platforms.HQ then g.beginFill("#C5B356")
         g.drawPolyStar(point.x, point.y, 2*@size/3, 6, 0, 90)
         @platformsST.addChild new Shape g
 
