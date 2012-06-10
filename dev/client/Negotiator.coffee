@@ -56,7 +56,10 @@ class Negotiator
     window.ui = @ui =  new S.UIClass @, minWidth, maxWidth
     window.t = @terrain = new S.Terrain 'background', minWidth, maxWidth
     @renderer = new S.Renderer minWidth, maxWidth, _.pluck(@game.users, 'id')
-    @renderer.setupBoard @game.map
+    console.log 'renderer constructor triggered'
+    $.when(@renderer.boardLoaded.promise()).done =>
+      console.log 'renderer constructor finished'
+      @renderer.setupBoard @game.map
 
     #@terrain.draw 2 - not extremely fast, disabled for debugging
 

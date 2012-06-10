@@ -1,6 +1,6 @@
 class Drawer
     margin: 100
-    size: 30
+    size: 45
     div: 60
 
     # horIncrement is a horizontal distance between centers of two hexes divided by two
@@ -82,7 +82,7 @@ class Drawer
         Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2))
 
 class BoardDrawer extends Drawer
-    constructor: (@ownershipST, @resourcesST, @gridST, @platformsST, @channelsST, @overlayST, minRow, maxRow, @players) ->
+    constructor: (@off2ST, @ownershipST, @resourcesST, @gridST, @platformsST, @channelsST, @overlayST, minRow, maxRow, @players) ->
         super minRow, maxRow
         @uiHandler = new UIHandler @overlayST, minRow, maxRow
         @colors = ["#274E7D", "#900020", "#FFA000", "#B80049", "#00A550", "#9999FF", "#367588", "#FFFFFF"]
@@ -136,12 +136,20 @@ class BoardDrawer extends Drawer
             @gridST.addChild new Shape g
 
     drawPlatform: (point, type) ->
-        g = new Graphics()
+        #g = new Graphics()
         switch type
-            when S.Types.Platforms.Normal then g.beginFill("#A6B4B0")
-            when S.Types.Platforms.HQ then g.beginFill("#C5B356")
-        g.drawPolyStar(point.x, point.y, 2*@size/3, 6, 0, 90)
-        @platformsST.addChild new Shape g
+            when S.Types.Platforms.HQ then @setBitmap(point, 0)#g.beginFill("#C5B356")
+            when S.Types.Platforms.Normal then @setBitmap(point, 1)#g.beginFill("#A6B4B0")
+        #g.drawPolyStar(point.x, point.y, 2*@size/3, 6, 0, 90)
+        #@platformsST.addChild new Shape g
+
+    setBitmap: (point, type) ->
+        console.log @off2ST
+        b = @off2ST.getChildAt(type).clone()
+        b.visible = true
+        b.x = point.x - 35
+        b.y = point.y - 40
+        @platformsST.addChild b
 
     drawResource: (point, resource) ->
         g = new Graphics()
@@ -387,9 +395,11 @@ class Renderer
         canvasOverlay = document.getElementById "overlay"
         canvasSignals = document.getElementById "signals"
         canvasOff = document.getElementById "off"
+        canvasOff2 = document.getElementById "off2"
         #canvasUI = document.getElementById "UI"
         @stages = []
-
+        @bitmaps = ["/img/hq.png", "/img/platform.png"]
+        @boardLoaded = $.Deferred()
         ###
         if canvasBackground?
             @backgroundST = new Stage canvasBackground
@@ -404,6 +414,7 @@ class Renderer
             @addStage @resourcesST
         if canvasPlatforms?
             @platformsST = new Stage canvasPlatforms
+            @off2ST = new Stage canvasOff2
             @addStage @platformsST
         if canvasGrid?
             @gridST = new Stage canvasGrid
@@ -424,8 +435,32 @@ class Renderer
             @UIST = new Stage canvasUI
             @addStage @UIST
         ###
-        @boardDR = new BoardDrawer @ownershipST, @resourcesST, @gridST, @platformsST, @channelsST, @overlayST, minRow, maxRow, players
-        @signalsDR = new SignalsDrawer @signalsST, @offST, minRow, maxRow
+        imagesLoaded = $.Deferred()
+        @loadImages imagesLoaded
+        $.when(imagesLoaded.promise()).done =>
+            console.log 'all Images have been loaded'
+            @boardDR = new BoardDrawer @off2ST, @ownershipST, @resourcesST, @gridST, @platformsST, @channelsST, @overlayST, minRow, maxRow, players
+            @signalsDR = new SignalsDrawer @signalsST, @offST, minRow, maxRow
+            @boardLoaded.resolve()
+
+    loadImages: (dfd) ->
+        k = 0
+        setImg = (event) =>
+            bitmap = new Bitmap event.target
+            bitmap.visible = false
+            @off2ST.addChild bitmap
+            k++
+            if k is @bitmaps.length
+                console.log 'image loaded event'
+                dfd.resolve()
+        
+        loadBitmap = (src) =>
+            img = new Image
+            img.src = src
+            img.onload = setImg
+
+        for src in @bitmaps
+            loadBitmap src
 
     addStage: (stage) ->
         @stages.push stage
@@ -473,7 +508,7 @@ class Renderer
     # It clears all the stages and. To be discussed whether to clear Signals
     # stage
     setupBoard: (boardState) ->
-        @clearAll()
+        #@clearAll()
         @signalsDR.setupFPS()
         @signalsDR.setupOffSignals()
         @boardDR.setupBoard(boardState)
