@@ -44,15 +44,15 @@ class Terrain extends S.Drawer
     @sun =
       x: 100
       y: 100
-      z: 100
+      z: 1000
       a: 100
       d: 100
       s: 100
 
     super @minRow, @maxRow
 
-    @bitmapWidth = @distance + @margin*2
-    @bitmapHeight = @size*2 + @margin*2
+    @bitmapWidth = @distance
+    @bitmapHeight = @size*2
 
     @previousHitTest = [0, 0]
 
@@ -65,8 +65,8 @@ class Terrain extends S.Drawer
     @hitBitmap = null
 
     #offset fix
-    @stage.x = -90
-    @stage.y = -100
+    @stage.x = -@horIncrement
+    @stage.y = -@size
 
     @stage.addChild @hitHexMap
     @stage.update()
@@ -86,8 +86,9 @@ class Terrain extends S.Drawer
     t
 
   randomTerrain: () ->
-    index = Math.floor((Math.random() * 100) % @typesOfTerrain.length)
-    @typesOfTerrain[index]
+    #index = Math.floor((Math.random() * 100) % @typesOfTerrain.length)
+    #@typesOfTerrain[index]
+    'grass'
 
   getFieldBitmap: ( type, n=1 ) ->
     if not @bitmaps[type]? or @n != n
@@ -115,112 +116,132 @@ class Terrain extends S.Drawer
     bitmap
 
   generateShadowMap: () ->
-    light =
-      x: 0
-      y: 0
-      z: 0
-
-    mapWidth = 1024
-    mapHeight = 1024
-
     shadowMap = []
 
-    for x in [0...1024]
+    for x in [0...@canvasDimensions.x]
       shadowMap[x] = []
-      for y in [0...1024]
-        z = @getPointHeight x, y
+      for y in [0...@canvasDimensions.y]
+        shadowMap[x][y] = 0
 
-        c = {}
-
-        normal = Math.sqrt( x*x + y*y + z*z )
-
-        light.x = (@sun.x - x)/normal
-        light.y = (@sun.y - y)/normal
-        light.z = (@sun.z - z)/normal
-
-        shadowMap[x][y] = 255
-
-        c.x = x
-        c.y = y
-        c.z = z
-
-        if z < 200
-          shadowMap[x][y] = 0
-
-        ###
-        while 0 <= x < mapWidth and
-          0 <= y < mapHeight and
-          z < 255 and
-          not (c.x == @sun.x and
-            c.y == @sun.y and
-            c.z == @sun.z)
-
-          c.x += light.x
-          c.y += light.y
-          c.z += light.z
-
-          lerpX = Math.round c.x
-          lerpY = Math.round c.y
-
-          if c.z < @getPointHeight lerpX, lerpY
-            @shadowMap[x][y] = 0
-            break
-        ###
+    for i in [0..(@canvasDimensions.x/@size)*1.5-1] by 2
+      for j in [0..(@canvasDimensions.y/@size)*1.5-1] by 2
+        @generateShadowedTile i, j, shadowMap
 
     shadowMap
 
+  generateShadowedTile: (i, j, shadowMap) ->
+    tileNW = @heightMap.tile i, j
+    @generateShadowedSubTile i, j, tileNW, false, shadowMap
+    @generateShadowedSubTile i, j, tileNW, true, shadowMap
+
+    tileNE = @heightMap.tile i+1, j
+    @generateShadowedSubTile i+1, j, tileNE, false, shadowMap
+    @generateShadowedSubTile i+1, j, tileNE, true, shadowMap
+
+    tileSW = @heightMap.tile i, j+1
+    @generateShadowedSubTile i, j+1, tileSW, false, shadowMap
+    @generateShadowedSubTile i, j+1, tileSW, true, shadowMap
+
+    tileSE = @heightMap.tile i+1, j+1
+    @generateShadowedSubTile i+1, j+1, tileSE, false, shadowMap
+    @generateShadowedSubTile i+1, j+1, tileSE, true, shadowMap
+
+    shadowMap
+
+  #we may either want to generate southern or northern triangle
+  generateShadowedSubTile: (i, j, tile, north, shadowMap) ->
+    for point, height of tile
+      tile[point] = @scaleHeight height
+
+    height = @size/2
+    width = @size/2
+
+    xStart = i * width
+    yStart = j * height
+
+    if north
+      shadow = @getShadowStrength tile.sw - (tile.nw + tile.ne)/2
+
+      for x in [xStart...xStart+width]
+        for y in [yStart..yStart+height-x+xStart]
+          shadowMap[x][y] = shadow
+
+    else
+      shadow = @getShadowStrength (tile.sw + tile.se)/2 - tile.ne
+
+      for x in [xStart...xStart+width]
+        for y in [yStart+height-x+xStart...yStart+height]
+          shadowMap[x][y] = shadow
+
+    shadowMap
+
+  scaleHeight: (h) ->
+    if h?
+      Math.floor h
+    else
+      null
+
+  getShadowStrength: (height) ->
+    height
+
   generateHeightMap: () ->
-    @heightMap = new S.HeightMap 32, 32
+    @heightMap = new S.HeightMap 129, 129
     @heightMap.run()
 
-  getPointHeight: (x, y) ->
-    tx = Math.floor x/32
-    ty = Math.floor y/32
+  generateMap: () ->
 
-    tile = @heightMap.tile tx, ty
+  generateSurroundingWater: () ->
+    context = @stage.canvas.getContext '2d'
+    terrainData = context.getImageData 0, 0, @canvasDimensions.x, @canvasDimensions.y
 
-    line = Line.create([x, y, 0],[0, 0, 1])
-    plane = Plane.create([tx*32, ty*32,0], [], [])
+    for x in [0...@canvasDimensions.x]
+      for y in [0...@canvasDimensions.y]
+        [r, g, b, a] = @getPixel terrainData, x, y
 
-    tile.nw
+        if a == 0
+          @drawPoint terrainData, x, y, @Config.colours.deepwater, 1
+
+    terrainCanvas = @createBitmapCanvas @canvasDimensions.x, @canvasDimensions.y
+    context = terrainCanvas.getContext '2d'
+    terrainCanvas.getContext('2d').putImageData terrainData, 0, 0
+
+    terrain = new Bitmap terrainCanvas
+
+    $( terrainCanvas ).remove()
+
+    @stage.removeAllChildren()
+    @stage.addChild terrain
+    @stage.x = 0
+    @stage.y = 0
+    @stage.update()
 
   applyHeightMap: () ->
     @generateHeightMap()
+    console.log "Height map generated"
     @shadowMap = @generateShadowMap()
-    console.log "height map generated"
-    context = @stage.canvas.getContext '2d'
-    terrainData = context.getImageData 0, 0, 1024, 1024
 
-    for x in [0...1024]
-      for y in [0...1024]
+    console.log "Shadow map generated"
+    context = @stage.canvas.getContext '2d'
+    terrainData = context.getImageData 0, 0, @canvasDimensions.x, @canvasDimensions.y
+
+    for x in [0...@canvasDimensions.x]
+      for y in [0...@canvasDimensions.y]
         [r, g, b, a] = @getPixel terrainData, x, y
 
         shadow = @shadowMap[x][y]
-
-        c = net.brehaut.Color(
-          red: r,
-          green: g,
-          blue: b,
-          alpha: a
-        )
-
-        if shadow == 255
-          c = net.brehaut.Color( c ).darkenByAmount(
-            0.1
-          )
 
         @setPixel(
           terrainData,
           x,
           y,
-          [Math.round(255*c.getRed()),
-          Math.round(255*c.getGreen()),
-          Math.round(255*c.getBlue()),
+          [Math.round(r+@shadowMap[x][y]*4),
+          Math.round(g+@shadowMap[x][y]*2.5),
+          Math.round(b+@shadowMap[x][y]),
           a]
         )
 
 
-    terrainCanvas = @createBitmapCanvas 1024, 1024
+    terrainCanvas = @createBitmapCanvas @canvasDimensions.x, @canvasDimensions.y
     context = terrainCanvas.getContext '2d'
     terrainCanvas.getContext('2d').putImageData terrainData, 0, 0
 
@@ -273,21 +294,34 @@ class Terrain extends S.Drawer
     @stage.update()
 
 
+  t: 0
+
   drawField: ( image, i, j, type, n=1 ) ->
     colour = @Config.colours[type]
 
     p = @getPoint i, j
+    p0 = @getPoint 0, 0
 
-    for px in [p.x-@size...p.x+@size+n] by n
+    for px in [p.x-@horIncrement...p.x+@horIncrement+n] by n
       for py in [p.y-@size...p.y+@size+n] by n
+        #map the point to the left top corner
+        dpx = px - p0.x + @horIncrement
+        dpy = py - p0.y + @size
+
+        if i == 0 and j == 0 and @t == 0
+          dpx = px - p0.x + @horIncrement
+          dpy = py - p0.y + @size
+          console.debug [p,p0,px,py,dpx,dpy]
+          @t = 1
+
         if @hitBimap?
           [r,g,b,a] = @getPixel @hitBimap, px, py
 
           if a > 0
-            @drawPoint image, px, py, colour, n
+            @drawPoint image, dpx, dpy, colour, n
 
         else if @fieldHitTest i, j, px, py, n
-          @drawPoint image, px, py, colour, n
+          @drawPoint image, dpx, dpy, colour, n
 
     null
 

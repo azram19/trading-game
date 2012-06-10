@@ -21,13 +21,12 @@ class Negotiator
     @.on 'resource:receive', (xy, amount, type) ->
       #console.debug xy, amount, type
     @.on 'build:platform', (x, y, type, owner) =>
-      #console.debug 'build:platform', x, y, owner
+      console.debug 'build:platform', x, y, owner
       platform = S.ObjectFactory.build S.Types.Entities.Platform, @, owner, type
       @game.map.addPlatform platform, x, y
       platform.trigger 'produce'
       @renderer.buildPlatform x, y, platform
     @.on 'build:channel', (x, y, k, owner) =>
-      console.debug 'build:channel', x, y, owner
       channel = S.ObjectFactory.build S.Types.Entities.Channel, @, owner
       @game.map.addChannel channel, x, y, k
       @renderer.buildChannel x, y, k, channel
@@ -68,7 +67,7 @@ class Negotiator
       else
         if _.isEmpty field.channels
           null
-        else if field.channels.length is 2
+        else if (_.keys field.channels).length > 1 and not field.platform.type?
           ['build:platform']
         else
           ['build:platform', 'build:channel']

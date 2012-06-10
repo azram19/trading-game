@@ -23,6 +23,15 @@ class Drawer
         @viewportHeight = 0
         @viewportWidth = 0
 
+        @canvasDimensions = {}
+        @canvasDimensions.x =
+            2*(@margin-@horIncrement) +
+            @maxRow * @distance
+
+        @canvasDimensions.y =
+            2*(@margin+@size) +
+            (@diffRows * 2-1) * @verIncrement
+
     # Setups table of offsets according to direction
     setupOffsets: () ->
         @offsetX = [-@horIncrement, @horIncrement, 2*@horIncrement, @horIncrement, -@horIncrement, -2*@horIncrement]
