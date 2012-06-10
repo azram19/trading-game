@@ -1,6 +1,6 @@
 class Drawer
-    margin: 100
-    size: 30
+    margin: 150
+    size: 45
     div: 60
 
     # horIncrement is a horizontal distance between centers of two hexes divided by two
@@ -510,8 +510,8 @@ class Renderer
     capturePlatform: (x, y, state) ->
         @boardDR.capturePlatform(x, y, state.owner.id)
 
-    changeOwnership: (x, y, id) ->
-        @boardDR.capturePlatform(x, y, id)
+    changeOwnership: (x, y, owner) ->
+        @boardDR.capturePlatform(x, y, owner.id)
 
     # Resets all the canvases, using the current boardState
     # It clears all the stages and. To be discussed whether to clear Signals

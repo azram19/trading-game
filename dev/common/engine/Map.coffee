@@ -18,10 +18,10 @@ class Map
     @diffRows = @maxWidth - @minWidth
     @directionModificators =
       0: [-1, -1]
-      1: [1, -1]
+      1: [0, -1]
       2: [1, 0]
       3: [1, 1]
-      4: [-1, 1]
+      4: [0, 1]
       5: [-1, 0]
 
     #initialize an empty map
@@ -93,6 +93,8 @@ class Map
 
     routingAddChannel x, y, k
     routingAddChannel nX, nY, nK
+    #if not (@getField(nX, nY).owner?)
+      #@eventBus.trigger("owner:channel", [nX, nY], channel.state.owner)
 
   addReverseChannel: ( channel, x, y, k ) ->
     @fields[y] ?= {}

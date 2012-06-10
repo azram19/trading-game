@@ -9,9 +9,9 @@ class Negotiator
       #console.debug 'move:signal', xy, dir
       @renderer.moveSignal xy[0], xy[1], dir
 
-    @.on 'owner:channel', (xy, dir, state) ->
+    @.on 'owner:channel', (xy, dir, owner) ->
       #console.debug 'owner:channel', xy, dir, state.owner
-      @renderer.captureChannel xy[0], xy[1], dir, state
+      @renderer.changeOwnership xy[0], xy[1], owner
 
     @.on 'owner:platform', (xy, state) ->
       #console.debug 'owner:platform', xy, state
@@ -37,6 +37,7 @@ class Negotiator
       channel = S.ObjectFactory.build S.Types.Entities.Channel, @, owner
       @game.map.addChannel channel, x, y, k
       @renderer.buildChannel x, y, k, channel
+
       @renderer.changeOwnership x, y, owner.id
 
     @.on 'routing', (obj, routing) =>
@@ -82,6 +83,7 @@ class Negotiator
       if field.platform.actionMenu?
         field.platform.actionMenu()
       else
+        console.log field.channels
         if _.isEmpty field.channels
           null
         else if (_.keys field.channels).length > 1 and not field.platform.type?
