@@ -2,6 +2,8 @@
 class ObjectState
 
     constructor: ->
+        # Type of the object
+        @type = 0
         # Object owner
         @owner = {}
         # Unique object id

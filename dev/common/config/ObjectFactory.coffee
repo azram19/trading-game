@@ -29,19 +29,19 @@ else #client
     S.ResourceBehaviour = window.S.ResourceBehaviour
 
 class ObjectFactory
-
+  
+    # change those crazy clone, extend to _.defaults
     constructor: ->
         @builders = {}
-        @builders[S.Types.Entities.Platform] = (id, args) =>
+        @builders[S.Types.Entities.Platforms.Normal] = (id, args) =>
             events = args[0]
             owner = args[1]
-            type = args[2]
             name = 'Platform' + id
             state = _.extend new S.ObjectState(), _.clone(S.Properties.platform)
-            state = _.extend state, {'name': name, 'id': id, 'owner': owner}
-            object = new S.GameObject new S.PlatformBehaviour(type, events), state
+            state = _.extend state, {'name': name, 'id': id, 'owner': owner, 'type': S.Types.Entities.Platforms.Normal}
+            object = new S.GameObject new S.PlatformBehaviour(events), state
 
-        @builders[S.Types.Entities.HQ] = (id, args) =>
+        @builders[S.Types.Entities.Platforms.HQ] = (id, args) =>
             events = args[0]
             owner = args[1]
             name = 'HQ' + id
@@ -74,7 +74,7 @@ class ObjectFactory
             owner = args[1]
             name = 'Metal' + id
             state = _.extend new S.ObjectState(), _.clone(S.Properties.resource)
-            state = _.extend state, {'name': name, 'id': id, 'owner': owner}
+            state = _.extend state, {'name': name, 'id': id, 'owner': owner, 'type': S.Types.Resources.Metal}
             object = new S.GameObject new S.ResourceBehaviour(S.Types.Resources.Metal, events), state
 
         @builders[S.Types.Resources.Tritium] = (id, args) =>
@@ -82,7 +82,7 @@ class ObjectFactory
             owner = args[1]
             name = 'Tritium' + id
             state = _.extend new S.ObjectState(), _.clone(S.Properties.resource)
-            state = _.extend state, {'name': name, 'id': id, 'owner': owner}
+            state = _.extend state, {'name': name, 'id': id, 'owner': owner, 'type': S.Types.Resources.Tritium}
             object = new S.GameObject new S.ResourceBehaviour(S.Types.Resources.Tritium, events), state
 
         _.extend @builders, S.SignalFactory.builders
