@@ -7,7 +7,7 @@ class Negotiator
     @renderer = {}
 
     @on 'move:signal', (xy, dir) ->
-      #console.debug 'move:signal', xy, dir
+      console.debug 'move:signal', xy, dir
       @renderer.moveSignal xy[0], xy[1], dir
 
     @on 'owner:channel', (xy, dir, owner) ->
@@ -48,7 +48,7 @@ class Negotiator
         ret =
           in: route.in
           out: route.out
-      console.log '[Negotiator] new routing: ', routingVaues
+      console.log '[Negotiator] new routing: ', routingValues
       @communicator.trigger 'send:routing', obj.xy[0], obj.xy[1], routingValues, obj.platform.state.owner
 
     @on 'scroll', @setScroll
@@ -84,16 +84,22 @@ class Negotiator
         field = @getField x, y
         _.extend field.platform.state.routing, routing
 
+    @communicator.on 'state:sync', (players, startingPoints, state) =>
+      @game.players = players
+      @game.startingPonts = startingPoints
+      @game.map.importGameState state
+      @renderer.setupBoard @game.map
+
     @communicator.on 'players:all:ready', =>
       console.log '[Negotiator] all players loaded'
-      @game.startGame()
+      @startGame()
 
     $.when(initiate.promise()).then( =>
-      console.log 'user and game info loaded'
+      #console.log 'user and game info loaded'
     )
 
     $.when(gameLoaded.promise()).done(@setupUI).then( =>
-      console.log 'UI has been loaded'
+      #console.log 'UI has been loaded'
       @communicator.trigger 'set:user:ready', @user.id
     )
     @initiateConnection initiate
@@ -135,6 +141,17 @@ class Negotiator
 
   startGame: ->
     @game.startGame()
+
+    requestSync = =>
+      mapState = JSON.stringify @game.map.extractGameState()
+      players = JSON.stringify @game.players
+      startingPoints = JSON.stringify @game.startingPoints
+      shaObj = new jsSHA mapState + players + startingPoints, 'ASCII'
+      hash = shaObj.getHash "SHA-512", "B64"
+      @communicator.trigger 'get:state:sync', @gameInfo.name, hash
+
+    @syncID = setInterval requestSync, 11*1000
+
   #setScroll: ( x, y ) ->
     #@renderer.setScroll x, y
 

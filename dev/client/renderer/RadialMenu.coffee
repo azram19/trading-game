@@ -311,7 +311,9 @@ class RadialMenu
       @stepOpacity = 0
 
     @$title.visible = true
-    @button.visible = true
+
+    if not @root
+      @button.visible = true
 
   hide: ( fn ) =>
     @showing = false
@@ -577,7 +579,9 @@ class RadialMenu
         @parent.collapseChildren @
 
         if @children.length < 1
-          if not @descDisplayed
+          if @desc.length == 0
+            @action()
+          else if not @descDisplayed
             @parent.displayText @
           else
             @parent.undisplayText @

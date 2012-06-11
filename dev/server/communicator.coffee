@@ -4,6 +4,7 @@ _ = require( 'underscore' )._
 Backbone = require( 'backbone' )
 parseCookie = require('connect').utils.parseCookie
 util = require 'util'
+crypto = require 'crypto'
 ###
 Stores information about all connected clients, and handles actual
 message passing to and between clients.
@@ -95,7 +96,7 @@ class Communicator
         socket.emit 'user:game', game
 
       socket.on 'get:game:state', ( name ) =>
-        game = @app.gameServer.getGameInstance(name)
+        game = @app.gameServer.getGameInstance name
         state = game.map.extractGameState()
         socket.emit 'game:state', game.players, game.startingPoints, state, game.map.minWidth, game.map.maxWidth, game.map.nonUser
 
@@ -114,6 +115,20 @@ class Communicator
       socket.on 'send:routing', ( x, y, routing, owner ) =>
         game = @app.gameServer.getUserGame owner.userId
         @app.gameServer.setRouting game.name, x, y, routing, owner
+
+      socket.on 'get:state:sync', ( name, hash ) =>
+        game = @app.gameServer.getGameInstance name
+        hashOwn = crypto.createHash 'sha512'
+        state = game.map.extractGameState()
+        hashOwn.update JSON.stringify(state), 'ascii'
+        players = game.players
+        hashOwn.update JSON.stringify(players), 'ascii'
+        startingPoints = game.startingPoints
+        hashOwn.update JSON.stringify(startingPoints), 'ascii'
+        hashOwn = hashOwn.digest 'base64'
+        console.log '[Communicator]', hashOwn
+        if hash isnt hashOwn
+          socket.emit 'state:sync', game.players, game.startingPoints, state
 
       #client want to join a channel
       socket.on 'join:channel', ( channel, fn ) =>
