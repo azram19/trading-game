@@ -12,6 +12,7 @@ class MapHelper extends S.Drawer
       negative: "rgba(255,0,0,0.4)"
       over: "rgba(255,255,255,0.3)"
       stroke: "rgba(0,0,0,0.8)"
+      fill: "rgba(255,255,255,0.2)"
 
     _.extend @, Backbone.Events
 
@@ -166,7 +167,7 @@ class MapHelper extends S.Drawer
           show: ( io, jo ) ->
             for z in [0...6]
               [i, j] = @getIJ io, jo, z
-              h = @drawHex i, j, 0, "rgba(255,0,0,0.6)", @colours.stroke
+              h = @drawHex i, j, 0, @colours.fill, @colours.stroke
               @fieldsObjs[i+":"+j] = h
               @stage.addChild h
 
@@ -200,7 +201,7 @@ class MapHelper extends S.Drawer
             color = "rgba(0,0,0,0.9)"
 
             h = @fieldsObjs[i+":"+j]
-            @drawHex i, j, 0, "rgba(255,0,0,0.6)", color, h
+            @drawHex i, j, 0,  @colours.fill, color, h
 
           click: ( i, j, k ) ->
             @accept( i, j, k )
