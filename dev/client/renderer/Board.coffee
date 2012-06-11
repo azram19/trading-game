@@ -203,7 +203,7 @@ class BoardDrawer extends Drawer
     drawResource: (point, resource) ->
         g = new Graphics()
         switch resource
-            when S.Types.Resources.Gold then g.beginFill("#00FF00")
+            when S.Types.Resources.Gold then g.beginFill("#FF0000")
             when S.Types.Resources.Food then g.beginFill("#0FFFF0")
             when S.Types.Resources.Resource then g.beginFill("#FFFFFF")
         g.drawCircle(point.x, point.y, 6)

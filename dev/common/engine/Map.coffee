@@ -27,7 +27,7 @@ class Map
 
     #Configure the map
     @flatteningFactor = 0.6
-    @groundLevel = 90
+    @groundLevel = 80
 
     mapHeight = @np2 2*(2*@diffRows + 1)
     mapWidth = @np2 2*(@maxWidth + 1)
@@ -87,7 +87,6 @@ class Map
     #generate fields
     initializeTerrain = ( o, x, y ) =>
       @fields[y][x].terrain = @determineTerrain x, y
-      console.log @fields[y][x].terrain
 
     @iterateFields initializeTerrain
 
@@ -164,9 +163,7 @@ class Map
     @fields[y][x].platform = platform
     #console.log x + " " + y + " add pl"
     (
-      console.log channel
       nDir = (+dir + 3) % 6
-      console.log dir, nDir
       platform.state.routing[dir].object = channel
       channel.state.routing[nDir].object = platform
     ) for dir, channel of @fields[y][x].channels

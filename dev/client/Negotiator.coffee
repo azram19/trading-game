@@ -7,7 +7,7 @@ class Negotiator
     @renderer = {}
 
     @on 'move:signal', (xy, dir) ->
-      #console.debug 'move:signal', xy, dir
+      console.debug 'move:signal', xy, dir
       @renderer.moveSignal xy[0], xy[1], dir
 
     @on 'owner:channel', (xy, dir, owner) ->
@@ -48,7 +48,7 @@ class Negotiator
         ret =
           in: route.in
           out: route.out
-      console.log '[Negotiator] new routing: ', routingVaues
+      console.log '[Negotiator] new routing: ', routingValues
       @communicator.trigger 'send:routing', obj.xy[0], obj.xy[1], routingValues, obj.platform.state.owner
 
     @on 'scroll', @setScroll
