@@ -1,9 +1,9 @@
 class Negotiator
 
-  constructor: ->
+  constructor: ( @communicator ) ->
     _.extend @, Backbone.Events
-    @getGameState()
-    @setupUI()
+    @game = {}
+    @renderer = {}
 
     @.on 'move:signal', (xy, dir) ->
       #console.debug 'move:signal', xy, dir
@@ -47,18 +47,59 @@ class Negotiator
 
     @.on 'scroll', @setViewport
 
-  getGameState: ( channel ) ->
-    nonuser = S.ObjectFactory.build S.Types.Entities.Player
-    map = new S.Map @, 8, 15, nonuser
+    gameLoaded = new $.Deferred()
+    initiate = new $.Deferred()
 
-    player = S.ObjectFactory.build S.Types.Entities.Player
-    player2 = S.ObjectFactory.build S.Types.Entities.Player
+    @communicator.on 'game:state', @setGameState(gameLoaded)
+    @communicator.on 'all:players:ready', =>
+      @game.startGame()
 
-    manager = new S.GameManager @, map
-    manager.users = [player, player2]
-    manager.initialMapState [[2,2], [3,3]]
-    @game = manager
+    $.when(initiate.promise()).then( =>
+      console.log 'user and game info loaded'
+    )
 
+    $.when(gameLoaded.promise()).done(@setupUI).then( =>
+      console.log 'UI has been loaded'
+      @communicator.trigger 'set:user:ready', @user.id
+    )
+    @initiateConnection(initiate)
+
+  initiateConnection: (dfd) ->
+    getUser = new $.Deferred()
+    getGame = new $.Deferred()
+
+    getUser.done (user) =>
+      console.log '[Negotitator] user: ', user
+      @user = user
+      @communicator.trigger 'get:user:game', @user.id
+
+    getGame.done (game) =>
+      console.log '[Negotiator] game: ', game
+      @gameInfo = game
+      @communicator.join @gameInfo.channel
+      @communicator.trigger 'get:game:state', @gameInfo.name
+      dfd.resolveWith @
+
+    @communicator.on 'user', ( user ) =>
+      getUser.resolve user
+
+    @communicator.on 'user:game', ( game ) ->
+      getGame.resolve game
+
+
+  setGameState: (dfd) ->
+    (state, minWidth, maxWidth, nonUser) =>
+      console.log '[Negotiator] game state', state, minWidth, maxWidth, nonUser
+      map = new S.Map @, minWidth, maxWidth, nonUser
+      map.importGameState state
+      @game = new S.GameManager @, map
+      player1 = S.ObjectFactory.build S.Types.Entities.Player
+      player2 = S.ObjectFactory.build S.Types.Entities.Player
+      @game.users = [player1, player2]
+      #@game.initialMapState [[2,2],[7,12]]
+      dfd.resolveWith @
+
+  startGame: ->
   #setScroll: ( x, y ) ->
     #@renderer.setScroll x, y
 

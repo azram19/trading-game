@@ -49,32 +49,50 @@ class Communicator
         #if there isn't turn down the connection
         accept 'No cookie transmitted', false
 
-    app.gameServer.on 'update:games', (games) =>
+    app.gameServer.on 'update:lobby:game', (game) =>
       #console.dir 'new games arrived'
-      @app.io.sockets.in('lobby').emit 'games:new', games
+      @app.io.sockets.in('lobby').emit 'game:change', game
 
-    app.gameServer.on '', () ->
+    app.gameServer.on 'new:game', (game) =>
+      #console.dir 'new games arrived'
+      @app.io.sockets.in('lobby').emit 'game:new', game
+
+    app.gameServer.on 'all:ready', ( channel ) =>
+      @app.io.sockets.in(channel).emit 'players:all:ready'
+
+    app.gameServer.on 'player:ready', ( channel, userId ) =>
+      @app.io.sockets.in(channel).emit 'player:ready', userId
+
+    app.gameServer.on 'player:joined', ( channel, player, position, HQ ) =>
+      #@app.io.sockets.in(channel).emit 'new:player', player, position, HQ
 
     @sockets.on 'connection', ( socket ) =>
       hs = socket.handshake
       client = new ComClient socket
       @clients[client.getId()] = client
       client.joinChannel 'lobby'
-      #console.log @app.io.sockets.manager.rooms
 
       if hs.session.auth?
-        app.Mongoose.model('User').findOne id: hs.session.auth.userId, (docs, err) ->
+        app.Mongoose.model('User').findOne id: hs.session.auth.userId, (err, docs) ->
           socket.emit 'user', docs
 
       socket.on 'message:add', ( data ) ->
         socket.broadcast.to( client.getChannel() ).emit 'message:new', data
 
-      socket.on 'join:game', ( gameName, userId ) =>
-        console.log 'joining game'
-        @app.gameServer.joinGame gameName, userId
+      socket.on 'get:user:game', ( userId ) =>
+        game = @app.gameServer.getUserGame(userId)
+        socket.emit 'user:game', game
+
+      socket.on 'get:game:state', ( name ) =>
+        game = @app.gameServer.getGameInstance(name)
+        state = game.map.extractGameState()
+        socket.emit 'game:state', state, game.map.minWidth, game.map.maxWidth, game.map.nonUser
+
+      socket.on 'set:user:ready', ( userId ) =>
+        @app.gameServer.setUserReady userId
 
       #client want to join a channel
-      socket.on 'join:channel', ( channel, fn ) ->
+      socket.on 'join:channel', ( channel, fn ) =>
         data = socket.handshake.session
 
         #leave a channel user is currently conencted to
@@ -82,10 +100,10 @@ class Communicator
         @clientJoinChannel client, channel
 
         data.currentChannel = channel
+        if fn?
+          fn true
 
-        fn true
-
-      socket.on 'leave:channel', ( channel ) ->
+      socket.on 'leave:channel', ( channel ) =>
         data = socket.handshake.session
 
         @clientLeaveChannel client
@@ -94,8 +112,6 @@ class Communicator
         data.currentChannel = null
 
     setInterval @ping, 1000
-
-
 
   clientLeaveChannel: ( client ) ->
       channel = client.getChannel()

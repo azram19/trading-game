@@ -1,6 +1,5 @@
 $ ->
   if $('#main.lobby2').length > 0
-    console.log 'fdsafdsaf'
     w = window
     w.communicator = communicator = new S.Communicator()
     w.messages = messages = new S.Collections.Messages([{'author':'pies','message':'asdasd'}])
@@ -12,10 +11,13 @@ $ ->
     lobby.render()
 
   if $('#canvasWrapper').length > 0
-    negotiate = new S.Negotiator()
-    #for y in [0..4]
-    # for x in [0..4]
-     # negotiate.trigger 'move:signal', [x,y], 2
-    window.negotiate = negotiate
+    location = window.location.href
+    if _.include location.split('/'), 'board'
+      console.log 'we\'re on board'
+    else
+      w = window
+      w.communicator = communicator = new S.Communicator()
+      negotiate = new S.Negotiator communicator
+      window.negotiate = negotiate
 
   null
