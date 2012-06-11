@@ -118,7 +118,8 @@ class Negotiator
     [minWidth, maxWidth] = @game.getDimensions()
     window.ui = @ui =  new S.UIClass @, minWidth, maxWidth
     window.t = @terrain = new S.Terrain 'background', minWidth, maxWidth
-    @renderer = new S.Renderer minWidth, maxWidth, _.pluck(@game.users, 'id')
+    console.log @game.players
+    @renderer = new S.Renderer minWidth, maxWidth, _.pluck(@game.players, 'id')
     console.log 'renderer constructor triggered'
     $.when(@renderer.boardLoaded.promise()).done =>
       console.log 'renderer constructor finished'
