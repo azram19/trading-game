@@ -27,7 +27,7 @@ class Map
 
     #Configure the map
     @flatteningFactor = 0.6
-    @groundLevel = 90
+    @groundLevel = 80
 
     mapHeight = @np2 2*(2*@diffRows + 1)
     mapWidth = @np2 2*(@maxWidth + 1)
