@@ -84,16 +84,22 @@ class Negotiator
         field = @getField x, y
         _.extend field.platform.state.routing, routing
 
+    @communicator.on 'state:sync', (players, startingPoints, state) =>
+      @game.players = players
+      @game.startingPonts = startingPoints
+      @game.map.importGameState state
+      @renderer.setupBoard @game.map
+
     @communicator.on 'players:all:ready', =>
       console.log '[Negotiator] all players loaded'
-      @game.startGame()
+      @startGame()
 
     $.when(initiate.promise()).then( =>
-      console.log 'user and game info loaded'
+      #console.log 'user and game info loaded'
     )
 
     $.when(gameLoaded.promise()).done(@setupUI).then( =>
-      console.log 'UI has been loaded'
+      #console.log 'UI has been loaded'
       @communicator.trigger 'set:user:ready', @user.id
     )
     @initiateConnection initiate
@@ -135,6 +141,17 @@ class Negotiator
 
   startGame: ->
     @game.startGame()
+
+    requestSync = =>
+      mapState = JSON.stringify @game.map.extractGameState()
+      players = JSON.stringify @game.players
+      startingPoints = JSON.stringify @game.startingPoints
+      shaObj = new jsSHA mapState + players + startingPoints, 'ASCII'
+      hash = shaObj.getHash "SHA-512", "B64"
+      @communicator.trigger 'get:state:sync', @gameInfo.name, hash
+
+    @syncID = setInterval requestSync, 11*1000
+
   #setScroll: ( x, y ) ->
     #@renderer.setScroll x, y
 

@@ -243,7 +243,6 @@ class Map
 
     @iterateFields ( field, x, y ) =>
       field = gameState[y][x]
-
       @addTerrain field.terrain, x, y
       #console.log x, y
       if field.platform.id?

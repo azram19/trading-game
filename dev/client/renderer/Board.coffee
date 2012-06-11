@@ -497,7 +497,7 @@ class Renderer
         imagesLoaded = $.Deferred()
         @loadImages imagesLoaded
         $.when(imagesLoaded.promise()).done =>
-            console.log 'all Images have been loaded'
+            console.log '[Renderer] all Images have been loaded'
             console.log @overlayST, "chuj2"
             @boardDR = new BoardDrawer eventBus, @off2ST, @ownershipST, @resourcesST, @gridST, @platformsST, @channelsST, @overlayST, minRow, maxRow, players, myPlayer
             @signalsDR = new SignalsDrawer @signalsST, @offST, minRow, maxRow
@@ -513,7 +513,7 @@ class Renderer
             @off2ST.addChild bitmap
             k++
             if k is @bitmaps.length
-                console.log 'image loaded event'
+                console.log '[Renderer] image loaded event'
                 dfd.resolve()
 
         loadBitmap = (src) =>
