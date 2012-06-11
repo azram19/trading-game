@@ -20,8 +20,9 @@ class LobbyView extends Backbone.View
     @communicator.on 'message:new', @handleServerMessage
     @communicator.on 'user', @handleUser
     #Update list of games when something interesting happens
-    @communicator.on 'game:new', @handleNewGame
-    @communicator.on 'game:close', @handleGameClose
+    @communicator.on 'game:lobby:new', @handleNewGame
+    @communicator.on 'game:lobby:change', @handleGameChange
+    @communicator.on 'game:lobby:close', @handleGameClose
 
     KeyboardJS.bind.key 'enter', @newMessage, =>
       $( '#chat textarea:focus' ).val ''

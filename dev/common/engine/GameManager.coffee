@@ -16,21 +16,23 @@ else
 class GameManager
 
   constructor: ( @eventBus, @map ) ->
+    @users = []
+    @startPoints = []
 
-  initialMapState: ( startPoints ) ->
-    createHQ = ( user ) =>
-      id = Math.random()
-      S.ObjectFactory.build S.Types.Entities.Platforms.HQ, @eventBus, user
+  addPlayer: ( playerObject, point ) ->
+    @users.push playerObject
+    @startPoints.push point
+    HQ = S.ObjectFactory.build S.Types.Entities.Platforms.HQ, @eventBus, playerObject
+    [x,y] = point
+    @map.addPlatform HQ, x, y
+    console.log HQ
+    HQ
 
-    HQs = (createHQ user for user in @users)
+  startGame: ->
     (
-      [x,y] = startPoints[i]
-      @map.addPlatform HQs[i], x, y
-    ) for i in [0...HQs.length]
-
-    (
-      HQ.produce()
-    ) for HQ in HQs
+      [x,y] = point
+      (@map.getField x, y).platform.produce()
+    ) for point in @startPoints
 
     null
 

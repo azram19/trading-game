@@ -27,7 +27,6 @@ class Communicator
     #listening to the client game events and pass them to the server
     @com.on 'all', @parseClientEvent, @, false
 
-
   ###
   communication layer handlers for communication events
   other objects can subscribe anyway using comuunicator.on event, fn

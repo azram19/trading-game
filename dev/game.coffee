@@ -42,28 +42,37 @@ app.get '/lobby2', ( req, res ) ->
          o.typeData.playersOnASide
  
        o
-    req.session.games = games
     res.render 'lobby2',
       games: games
 
 app.get '/game/:gameName/join', ( req, res ) ->
-
-  #Get player and game details
-  player = req.user.id
-  gameName = req.params.gameName
-  app.gameServer.joinGame gameName, player
-
-  res.redirect '/game/' + gameName
+  if app.requireAuth and req.loggedIn
+    #Get player and game details
+    player = req.user.id
+    gameName = req.params.gameName
+    app.gameServer.joinGame gameName, player
+ 
+    res.redirect '/game/' + gameName
+  else
+    res.redirect '/'
 
 app.get '/game/:gameName', ( req, res ) ->
-   res.render 'board'
+  if app.requireAuth and req.loggedIn
+    userId = req.user.id
+    game =  app.gameServer.getUserGame userId
+    if game.name isnt req.params.gameName
+      res.redirect '/game/' + game.name
+    else
+     res.render 'board'
+  else
+    res.redirect '/'
 
 app.get '/', ( req, res ) ->
     if app.requireAuth and req.loggedIn
       res.redirect 'lobby2'
     else
       res.render 'index',
-        title: 'Signals early chat tests'
+        title: 'Signals'
 
 port =  process.env.PORT || process.env['PORT_WWW']  || 3000
 

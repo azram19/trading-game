@@ -23,7 +23,7 @@ module.exports = ( app, express ) ->
   ObjectId = Schema.ObjectId
   app.Mongoose.connect app.mongoURL
   app.Mongoose.connection.on 'open', ->
-      console.log 'connected'
+      console.log 'connected to MongoLab'
 
   app.userSchema = new Schema
         name: String
