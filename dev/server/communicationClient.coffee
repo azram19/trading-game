@@ -1,6 +1,6 @@
 class ComClient
   constructor: ( @socket ) ->
-    @id = 7
+    @id = @socket.id
     @channel = null
 
   getChannel: =>

@@ -43,6 +43,9 @@ Types =
           name: 'Deathmatch'
           numberOfSides: 2
           playersOnASide: 1
+          minWidth: 8
+          maxWidth: 15
+          startingPoints: [[2,2],[6,12]]
           teams: false
         1:
           name: 'Deathmatch'

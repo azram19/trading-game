@@ -53,18 +53,18 @@ class Communicator
       #console.dir 'new games arrived'
       @app.io.sockets.in('lobby').emit 'game:change', game
 
-    app.gameServer.on 'new:game', (game) =>
+    app.gameServer.on 'new:lobby:game', (game) =>
       #console.dir 'new games arrived'
       @app.io.sockets.in('lobby').emit 'game:new', game
 
-    app.gameServer.on 'all:ready', ( channel ) =>
-      @app.io.sockets.in(channel).emit 'players:all:ready'
+    app.gameServer.on 'all:ready', ( game ) =>
+      @app.io.sockets.in(game).emit 'players:all:ready'
 
-    app.gameServer.on 'player:ready', ( channel, userId ) =>
-      @app.io.sockets.in(channel).emit 'player:ready', userId
+    app.gameServer.on 'player:ready', ( game, userId ) =>
+      @app.io.sockets.in(game).emit 'player:ready', userId
 
-    app.gameServer.on 'player:joined', ( channel, player, position, HQ ) =>
-      #@app.io.sockets.in(channel).emit 'new:player', player, position, HQ
+    app.gameServer.on 'player:joined', ( game, player, position, HQ ) =>
+      @app.io.sockets.in(game).emit 'new:player', player, position, HQ
 
     @sockets.on 'connection', ( socket ) =>
       hs = socket.handshake
@@ -81,12 +81,13 @@ class Communicator
 
       socket.on 'get:user:game', ( userId ) =>
         game = @app.gameServer.getUserGame(userId)
+        console.log game
         socket.emit 'user:game', game
 
       socket.on 'get:game:state', ( name ) =>
         game = @app.gameServer.getGameInstance(name)
         state = game.map.extractGameState()
-        socket.emit 'game:state', state, game.map.minWidth, game.map.maxWidth, game.map.nonUser
+        socket.emit 'game:state', game.players, game.startingPoints, state, game.map.minWidth, game.map.maxWidth, game.map.nonUser
 
       socket.on 'set:user:ready', ( userId ) =>
         @app.gameServer.setUserReady userId

@@ -16,25 +16,25 @@ else
 class GameManager
 
   constructor: ( @eventBus, @map ) ->
-    @users = []
-    @startPoints = []
+    @players = {}
+    @startingPoints = {}
 
-  addPlayer: ( playerObject, point ) ->
-    @users.push playerObject
-    @startPoints.push point
-    HQ = S.ObjectFactory.build S.Types.Entities.Platforms.HQ, @eventBus, playerObject
-    [x,y] = point
-    @map.addPlatform HQ, x, y
-    console.log HQ
-    HQ
+  addPlayer: ( playerObject, position ) ->
+    @players[playerObject.id] = playerObject
+    @startingPoints[playerObject.id] = position
+    console.log @players, @startingPoints
 
   startGame: ->
     (
       [x,y] = point
       (@map.getField x, y).platform.produce()
-    ) for point in @startPoints
+    ) for point in @startingPoints
 
     null
+
+  addHQ: ( HQ, position ) ->
+    [x,y] = position
+    @map.addPlatform HQ, x, y
 
   getDimensions: ->
     [@map.minWidth, @map.maxWidth]

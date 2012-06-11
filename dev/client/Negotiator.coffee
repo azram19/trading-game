@@ -2,6 +2,7 @@ class Negotiator
 
   constructor: ( @communicator ) ->
     _.extend @, Backbone.Events
+    @myPlayer = {}
     @game = {}
     @renderer = {}
 
@@ -51,6 +52,13 @@ class Negotiator
     initiate = new $.Deferred()
 
     @communicator.on 'game:state', @setGameState(gameLoaded)
+
+    @communicator.on 'new:player', ( playerObject, position, HQState ) =>
+      HQ = S.ObjectFactory.build S.Types.Entites.Platforms.HQ, @, playerObject
+      HQ.state = HQState
+      @game.addPlayer playerObject
+      @game.addHQ HQ, position
+
     @communicator.on 'all:players:ready', =>
       @game.startGame()
 
@@ -62,7 +70,7 @@ class Negotiator
       console.log 'UI has been loaded'
       @communicator.trigger 'set:user:ready', @user.id
     )
-    @initiateConnection(initiate)
+    @initiateConnection initiate
 
   initiateConnection: (dfd) ->
     getUser = new $.Deferred()
@@ -76,27 +84,27 @@ class Negotiator
     getGame.done (game) =>
       console.log '[Negotiator] game: ', game
       @gameInfo = game
-      @communicator.join @gameInfo.channel
+      @myPlayer = @gameInfo.players[@user.id].playerObject
+      @communicator.join @gameInfo.name
       @communicator.trigger 'get:game:state', @gameInfo.name
       dfd.resolveWith @
 
     @communicator.on 'user', ( user ) =>
       getUser.resolve user
 
-    @communicator.on 'user:game', ( game ) ->
+    @communicator.on 'user:game', (game) ->
       getGame.resolve game
 
 
   setGameState: (dfd) ->
-    (state, minWidth, maxWidth, nonUser) =>
-      console.log '[Negotiator] game state', state, minWidth, maxWidth, nonUser
+    (players, startingPoints, state, minWidth, maxWidth, nonUser) =>
+      console.log '[Negotiator] game state', players, startingPoints, state, minWidth, maxWidth, nonUser
+
       map = new S.Map @, minWidth, maxWidth, nonUser
       map.importGameState state
       @game = new S.GameManager @, map
-      player1 = S.ObjectFactory.build S.Types.Entities.Player
-      player2 = S.ObjectFactory.build S.Types.Entities.Player
-      @game.users = [player1, player2]
-      #@game.initialMapState [[2,2],[7,12]]
+      @game.players = players
+      @game.startingPoints = startingPoints
       dfd.resolveWith @
 
   startGame: ->

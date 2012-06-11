@@ -57,10 +57,12 @@ class Map
     @fields[y][x] = field
 
   addResource: ( resource, x, y ) ->
+    resource.behaviour.events = @eventBus
     resource.state.field = @fields[y][x]
     @fields[y][x].resource = resource
 
   addPlatform: ( platform, x, y ) ->
+    platform.behaviour.events = @eventBus
     platform.state.field = @fields[y][x]
     @fields[y][x].platform = platform
     #console.log x + " " + y + " add pl"
@@ -74,6 +76,7 @@ class Map
 
   #k - direction [0..5] clockwise from the top
   addChannel: ( channel, x, y, k ) ->
+    channel.behaviour.events = @eventBus
     @fields[y] ?= {}
     @fields[y][x].channels ?= {}
     channel.state.field = @fields[y][x]

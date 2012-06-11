@@ -9,10 +9,9 @@ S.GameManager = require '../common/engine/GameManager'
 class GameServer
 
   constructor: ->
-    @startingPoints = [[2,2],[6,12],[4,4],[8,8],[4,14],[7,10],[2,12],[7,3]]
     @games = {}
-    @instances = {}
-    @playersGames = {}
+    @playersGame = {}
+    @gameInstances = {}
     _.extend @, Backbone.Events
 
     @enforceAvailableGames()
@@ -37,21 +36,28 @@ class GameServer
     id = _.uniqueId()
     game =
       name: 'game-' + id
-      channel: 'channel-' + id
-      players: []
+      players: {}
       type: type
       typeData: S.Types.Games.Info[type]
 
+  getGames: ->
+    JSON.stringify @games
+
   getUserGame: ( userId ) ->
-    @playersGames[userId]
+    @playersGame[userId]
 
   getGameInstance: ( name ) ->
-    if not (@instances[name]?)
+    game = @games[name]
+    instance = @gameInstances[name]
+    if not (instance?)
+      minWidth = game.typeData.minWidth
+      maxWidth = game.typeData.maxWidth
       player = S.ObjectFactory.build S.Types.Entities.Player, 0
-      map = new S.Map @, 8, 15, player
+      map = new S.Map @, minWidth, maxWidth, player
       map.initialise()
-      @instances[name] = new S.GameManager @, map
-    @instances[name]
+      instance = new S.GameManager @, map
+      @gameInstances[name] = instance
+    @gameInstances[name]
 
   joinGame: ( name, user ) ->
     game = @games[name]
@@ -59,26 +65,27 @@ class GameServer
       maxPlayers = game.typeData.numberOfSides * game.typeData.playersOnASide
       numberPlayers = _.keys(game.players).length
       if numberPlayers < maxPlayers
+        console.log '[Game Server] user: ' + user + ' joined ' + name
+        playerObject = S.ObjectFactory.build S.Types.Entities.Player, user
+        position = game.typeData.startingPoints[numberPlayers]
+        instance = @getGameInstance name
         game.players[user] =
           ready: false
-        instance = @getGameInstance name
-        playerObject = S.ObjectFactory.build S.Types.Entities.Player, user
-        position = @startingPoints[numberPlayers]
-        HQ = instance.addPlayer playerObject, position
-        @playersGames[user] = @games[name]
-        console.log '[Game Server] user: ' + user + ' joined ' + name
-        @.trigger 'player:joined', game.channel, playerObject, position, HQ
+          playerObject: playerObject
+          position: position
+        @playersGame[user] = game
+        HQ = S.ObjectFactory.build S.Types.Entities.Platforms.HQ, @, playerObject
+        @.trigger 'player:joined', game.name, playerObject, position, HQ.state
         @.trigger 'update:lobby:game', @games[name]
-
-  getGames: ->
-    JSON.stringify @games
+        instance.addPlayer playerObject, position
+        instance.addHQ HQ, position
 
   setUserReady: ( userId ) ->
     game = @getUserGame userId
     maxPlayers = game.typeData.numberOfSides * game.typeData.playersOnASide
     game.players[userId].ready = true
     if _.keys(game.players).length is maxPlayers
-      if _.all _.values(game.players), _.identity
+      if _.all _.pluck( game.players, 'ready' ), _.identity
         @startGame game.name
 
   startGame: ( name ) ->
