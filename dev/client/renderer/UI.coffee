@@ -58,7 +58,10 @@ class UI extends S.Drawer
       overflow: 'hidden'
     ).first()
 
-    @scroller = new Scroller @scroll, {locking:false}
+    @scroller = new Scroller @scroll, {
+        locking:false
+        bouncing:false
+    }
     @scroller.setDimensions viewportWidth, viewportHeight, @canvasDimensions.x, @canvasDimensions.y
 
     @mousedown = false

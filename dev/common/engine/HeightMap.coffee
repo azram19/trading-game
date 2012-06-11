@@ -136,4 +136,7 @@ class HeightMap
       se: @get_cell(x+1, y+1)
     }
 
-window.S.HeightMap = HeightMap
+if module? and module.exports
+  exports = module.exports = HeightMap
+else
+  window.S.HeightMap = HeightMap

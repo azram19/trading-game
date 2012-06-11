@@ -5,11 +5,13 @@ if require?
   S.Field = require '../objects/Field'
   S.ObjectFactory = require '../config/ObjectFactory'
   S.Types = require '../config/Types'
+  S.HeightMap = require './HeightMap'
 else
   _ = window._
   S.Field = window.S.Field
   S.ObjectFactory = window.S.ObjectFactory
   S.Types = window.S.Types
+  S.HeightMap = window.S.HeightMap
 
 class Map
 
@@ -23,6 +25,14 @@ class Map
         for x in [0 ... @maxWidth - Math.abs(@diffRows - y)]
             @addField {}, x, y
 
+    #Configure the map
+    @flatteningFactor = 0.6
+    @groundLevel = 90
+
+    mapHeight = @np2 2*(2*@diffRows + 1)
+    mapWidth = @np2 2*(@maxWidth + 1)
+    @heightMapSize = Math.max mapHeight, mapWidth
+
     #generate fields
     initializeField = ( o, x, y ) =>
       @fields[y][x] = new S.Field(x, y)
@@ -30,33 +40,118 @@ class Map
 
     @iterateFields initializeField
 
+  determineTerrain: (x, y) ->
+    hy = y
+    hx = x + Math.abs( @diffRows-y )
+
+    height = @heightMap.get_cell hx, hy
+
+    if height < -5
+      [S.Types.Terrain.Deepwater]
+    else if height < -4
+      [S.Types.Terrain.Deepwater, S.Types.Terrain.Water]
+    else if height < 0
+      [S.Types.Terrain.Water]
+    else if height < 5
+      [S.Types.Terrain.Water, S.Types.Terrain.Sand]
+    else if height < 8
+      [S.Types.Terrain.Sand]
+    else if height < 12
+      [S.Types.Terrain.Sand, S.Types.Terrain.Grass]
+    else if height < 30
+      [S.Types.Terrain.Grass]
+    else if height < 40
+      [S.Types.Terrain.Grass, S.Types.Terrain.Rocks]
+    else
+      [S.Types.Terrain.Rocks]
+
+  scaleHeightMap: () ->
+    for x in [0...@heightMapSize]
+      for y in [0...@heightMapSize]
+        @heightMap.map[x][y] = @scaleHeight @heightMap.map[x][y]
+
+  scaleHeight: ( h ) ->
+    @flatteningFactor * ( h - @groundLevel)
+
+  np2: ( x ) ->
+    Math.pow( 2, Math.round( Math.log( x ) / Math.log( 2 ) ) )
+
   initialise: ->
+    #generate height map
+    @heightMap = new S.HeightMap @heightMapSize + 1
+    @heightMap.run()
+
+    #Scale it to be more flat
+    @scaleHeightMap()
+
+    #generate fields
+    initializeTerrain = ( o, x, y ) =>
+      @fields[y][x].terrain = @determineTerrain x, y
+      console.log @fields[y][x].terrain
+
+    @iterateFields initializeTerrain
+
     #generate resources
     initializeResource = ( o, x, y ) =>
-      chance = 0.42
+      chance = 0.72
       res = Math.random()
+
+      #Types of terrain where each resource can exist
+      resourcesTerrains = [
+        S.Types.Terrain.Sand,
+        S.Types.Terrain.Rocks,
+        S.Types.Terrain.Grass
+      ]
+
+      goldTerrains = [
+        S.Types.Terrain.Sand,
+        S.Types.Terrain.Rocks
+      ]
+
+      foodTerrains = [
+        S.Types.Terrain.Grass,
+        S.Types.Terrain.Water
+      ]
 
       if res < chance
         kind = ''
+        life = 0
+
         if res > chance / 2
-            kind = S.Types.Resources.Metal
+          if (_.intersection @fields[y][x].terrain, resourcesTerrains).length > 0
+            kind = S.Types.Resources.Resources
+            life = S.Types.Resources.Lifes[2]()
+        else if res > chance / 3
+          if (_.intersection @fields[y][x].terrain, goldTerrains).length > 0
+            kind = S.Types.Resources.Gold
+            life = S.Types.Resources.Lifes[0]()
         else
-            kind = S.Types.Resources.Tritium
-        resource = S.ObjectFactory.build kind, @eventBus, @nonUser
-        @addResource resource, x, y
+          if (_.intersection @fields[y][x].terrain, foodTerrains).length > 0
+            kind = S.Types.Resources.Food
+            life = S.Types.Resources.Lifes[1]()
+
+        if kind
+          resource = S.ObjectFactory.build kind, @eventBus, @nonUser
+          resource.state.life = life
+
+          @addResource resource, x, y
 
     @iterateFields initializeResource
 
   directionModificators: (x, y, dir) ->
-    if y < diffRows or (y is diffRows and dir < 3)
+    if y < @diffRows or (y is @diffRows and dir < 3)
       mod = @directionModUpper[dir]
-    else if y > diffRows or (y is diffRows and dir >= 3)
+    else if y > @diffRows or (y is @diffRows and dir >= 3)
       mod = @directionModLower[dir]
-    [x + mod.x, y + mod.y]
+    [x + mod[0], y + mod[1]]
 
   addField: ( field, x, y ) ->
     @fields[y] ?= {}
     @fields[y][x] = field
+
+  addTerrain: ( terrain, x, y ) ->
+    @fields[y] ?= {}
+    @fields[y][x].terrain = terrain
 
   addResource: ( resource, x, y ) ->
     resource.behaviour.events = @eventBus
@@ -84,9 +179,8 @@ class Map
     channel.state.field = @fields[y][x]
     channel.state.direction = k
     @fields[y][x].channels[k] = channel
-    [mX, mY] = @directionModificators x, y, k
-    nY = y + mY
-    nX = x + mX
+    [nX, nY] = @directionModificators x, y, k
+    console.log nX, nY
     nK = (k + 3) % 6
     @addReverseChannel channel, nX, nY, nK
     # Bind channel to routing table
@@ -108,6 +202,8 @@ class Map
 
   extractGameState: ->
     gameState = {}
+    gameState.heightMap = @heightMap.map
+
     @iterateFields (field, x, y) =>
       gameState[y] ?= {}
       channels = {}
@@ -125,10 +221,12 @@ class Map
       if field.resource.type?
         resource = field.resource.state
         resource.field = {}
+      terrain = field.terrain
       exportState =
         channels: channels
         platform: platform
         resource: resource
+        terrain: terrain
       gameState[y][x] = exportState
     gameState
 
@@ -140,8 +238,14 @@ class Map
     state
 
   importGameState: ( gameState ) ->
+    @heightMap = new S.HeightMap @heightMapSize+1
+
+    @heightMap.map = gameState.heightMap
+
     @iterateFields ( field, x, y ) =>
       field = gameState[y][x]
+
+      @addTerrain field.terrain, x, y
       #console.log x, y
       if field.platform.id?
         #console.log 'platform'

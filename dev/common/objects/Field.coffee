@@ -5,6 +5,7 @@ class Field
       @channels = {}
       @platform = {}
       @resource = {}
+      @terrain = []
       #@owner = {}
 
 if module? and module.exports

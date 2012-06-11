@@ -35,7 +35,14 @@ class Negotiator
       @buildChannel x, y, k, owner
       @communicator.trigger 'send:build:channel', x, y, k, owner
 
-    @on 'routing', (obj, routing) =>
+      [x2 ,y2] = @game.map.directionModificators(x, y, k)
+      t.generateRoad x, y, x2, y2
+
+      console.log "build road: ",x,y,x2,y2
+
+      @renderer.changeOwnership x, y, owner.id
+
+    @.on 'routing', (obj, routing) =>
       _.extend obj.platform.state.routing, routing
       routingValues = _.map routing, (route) ->
         ret =
@@ -135,16 +142,16 @@ class Negotiator
     #@renderer.setScroll width, height
 
   setupUI: ->
+    console.log 'game loaded'
     [minWidth, maxWidth] = @game.getDimensions()
     window.ui = @ui =  new S.UIClass @, minWidth, maxWidth
-    window.t = @terrain = new S.Terrain 'background', minWidth, maxWidth
+    window.t = @terrain = new S.Terrain @, 'background', minWidth, maxWidth
     @renderer = new S.Renderer @, minWidth, maxWidth, _.pluck(@game.players, 'id'), @myPlayer
     console.log 'renderer constructor triggered'
     $.when(@renderer.boardLoaded.promise()).done =>
       console.log 'renderer constructor finished'
       @renderer.setupBoard @game.map
-
-    #@terrain.draw 2 - not extremely fast, disabled for debugging
+      @terrain.draw() #2 not extremely fast, disabled for debugging
 
   buildPlatform: ( x, y, type, owner ) ->
     platform = S.ObjectFactory.build S.Types.Entities.Platforms.Normal, @, owner, type

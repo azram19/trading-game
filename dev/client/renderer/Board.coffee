@@ -34,11 +34,11 @@ class Drawer
         @canvasDimensions = {}
         @canvasDimensions.x =
             2*(@margin-@horIncrement) +
-            @maxRow * @distance
+            @maxRow * @distance + @margin
 
         @canvasDimensions.y =
-            2*(@margin+@size) +
-            (@diffRows * 2-1) * @verIncrement
+            (@margin+@size) +
+            (@diffRows * 2 + 1) * @verIncrement + @margin
 
     # Setups table of offsets according to direction
     setupOffsets: () ->
@@ -113,7 +113,7 @@ class BoardDrawer extends Drawer
         for i in [1..5]
             stage = @stages[i]
             @stage.updateCache()
-            @stage.update() 
+            @stage.update()
 
     buildPlatform: (x, y, type) ->
         point = @getPoint(x, y)
@@ -194,16 +194,17 @@ class BoardDrawer extends Drawer
     setBitmap: (point, type) ->
         b = @off2ST.getChildAt(type).clone()
         b.visible = true
-        b.x = point.x 
-        b.y = point.y 
+        b.x = point.x
+        b.y = point.y
         console.log b.x, b.y
         @platformsST.addChild b
 
     drawResource: (point, resource) ->
         g = new Graphics()
         switch resource
-            when S.Types.Resources.Metal then g.beginFill("#FFFFFF")
-            when S.Types.Resources.Tritium then g.beginFill("#FFFF00")
+            when S.Types.Resources.Gold then g.beginFill("#00FF00")
+            when S.Types.Resources.Food then g.beginFill("#0FFFF0")
+            when S.Types.Resources.Resource then g.beginFill("#FFFFFF")
         g.drawCircle(point.x, point.y, 6)
         shape = new Shape g
         #shape.visible = false
@@ -236,6 +237,7 @@ class BoardDrawer extends Drawer
         for j in [0 ... (2*@diffRows + 1)]
             for i in [0 ... @maxRow - Math.abs(@diffRows - j)]
                 point = @getPoint(i, j)
+                console.log i, j
                 @drawHex(point, boardState.getField(i, j))
                 for k in [0 .. 5]
                     if boardState.getChannel(i, j, k)?.state?
@@ -246,7 +248,7 @@ class BoardDrawer extends Drawer
         #@uiHandler.toogleCache true
 
     toogleCache: (status) ->
-        for i in [0..5] 
+        for i in [0..5]
             stage = @stages[i]
             if status
                 stage.cache(0,0, @width+5, @height+5)

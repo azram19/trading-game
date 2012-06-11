@@ -40,7 +40,7 @@ app.get '/lobby2', ( req, res ) ->
        o.playersRequried =
          o.typeData.numberOfSides *
          o.typeData.playersOnASide
- 
+
        o
     res.render 'lobby2',
       games: games
@@ -51,7 +51,6 @@ app.get '/game/:gameName/join', ( req, res ) ->
     player = req.user.id
     gameName = req.params.gameName
     app.gameServer.joinGame gameName, player
- 
     res.redirect '/game/' + gameName
   else
     res.redirect '/'
