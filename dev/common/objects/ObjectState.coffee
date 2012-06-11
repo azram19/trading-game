@@ -4,6 +4,8 @@ class ObjectState
     constructor: ->
         # Type of the object
         @type = 0
+        # FOV - distance in which fields are visible from this one
+        @fov = 1
         # Object owner
         @owner = {}
         # Unique object id

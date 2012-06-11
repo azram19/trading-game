@@ -33,6 +33,7 @@ class Negotiator
       @game.map.addPlatform platform, x, y
       platform.trigger 'produce'
       @renderer.buildPlatform x, y, platform
+      @renderer.changeOwnership x, y, owner.id
 
     @.on 'build:channel', (x, y, k, owner) =>
       channel = S.ObjectFactory.build S.Types.Entities.Channel, @, owner
@@ -54,12 +55,17 @@ class Negotiator
     @communicator.on 'game:state', @setGameState(gameLoaded)
 
     @communicator.on 'new:player', ( playerObject, position, HQState ) =>
-      HQ = S.ObjectFactory.build S.Types.Entites.Platforms.HQ, @, playerObject
+      console.log '[Negotiator] new player'
+      HQ = S.ObjectFactory.build S.Types.Entities.Platforms.HQ, @, playerObject
       HQ.state = HQState
       @game.addPlayer playerObject
       @game.addHQ HQ, position
+      [x,y] = position
+      @renderer.buildPlatform x, y, HQ
+      @renderer.changeOwnership x, y, playerObject.id
 
-    @communicator.on 'all:players:ready', =>
+    @communicator.on 'players:all:ready', =>
+      console.log '[Negotiator] all players loaded'
       @game.startGame()
 
     $.when(initiate.promise()).then( =>
@@ -118,7 +124,6 @@ class Negotiator
     [minWidth, maxWidth] = @game.getDimensions()
     window.ui = @ui =  new S.UIClass @, minWidth, maxWidth
     window.t = @terrain = new S.Terrain 'background', minWidth, maxWidth
-    console.log @game.players
     @renderer = new S.Renderer minWidth, maxWidth, _.pluck(@game.players, 'id')
     console.log 'renderer constructor triggered'
     $.when(@renderer.boardLoaded.promise()).done =>

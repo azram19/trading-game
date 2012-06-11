@@ -89,8 +89,8 @@ class GameServer
         @startGame game.name
 
   startGame: ( name ) ->
-    @.trigger 'all:ready', game.channel
-    instance = @getGameInstace name
+    @.trigger 'all:ready', name
+    instance = @getGameInstance name
     instance.startGame()
 
 module.exports = exports = GameServer

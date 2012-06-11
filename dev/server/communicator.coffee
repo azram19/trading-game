@@ -64,6 +64,7 @@ class Communicator
       @app.io.sockets.in(game).emit 'player:ready', userId
 
     app.gameServer.on 'player:joined', ( game, player, position, HQ ) =>
+      console.log '[Communicator] new player on ', game
       @app.io.sockets.in(game).emit 'new:player', player, position, HQ
 
     @sockets.on 'connection', ( socket ) =>
@@ -81,7 +82,6 @@ class Communicator
 
       socket.on 'get:user:game', ( userId ) =>
         game = @app.gameServer.getUserGame(userId)
-        console.log game
         socket.emit 'user:game', game
 
       socket.on 'get:game:state', ( name ) =>

@@ -10,6 +10,7 @@ Properties =
     platform:
         type: S.Types.Entities.Platforms.Normal
         id: 0
+        fov: 1
         name: 'Object'
         field: {}
         signals: []
@@ -22,6 +23,7 @@ Properties =
     channel:
         type: S.Types.Entities.Channel
         id: 0
+        fov: 1
         name: 'Channel'
         field: {}
         signals: []
@@ -35,6 +37,7 @@ Properties =
     HQ:
         type: S.Types.Entities.Platforms.HQ
         id: 0
+        fov: 2
         name: 'HQ'
         field: {}
         signals: []
@@ -56,6 +59,7 @@ Properties =
     resource:
         type: S.Types.Resources.Metal
         id: 0
+        fov: 0
         name: 'Resource'
         field: {}
         signals: []
