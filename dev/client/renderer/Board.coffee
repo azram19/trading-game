@@ -112,7 +112,6 @@ class BoardDrawer extends Drawer
     updateAll: () ->
         for i in [1..5]
             stage = @stages[i]
-            console.log stage, "chuj"
             stage.updateCache()
             stage.update() 
 
@@ -140,7 +139,7 @@ class BoardDrawer extends Drawer
     changeOwnership: (x, y, ownerid) ->
         point = @getPoint(x, y)
         @drawOwnership(point, ownerid)
-        @setFog(x, y, point, ownerid)
+        #@setFog(x, y, point, ownerid)
         @updateAll()
 
     drawFog: (point) ->
@@ -150,10 +149,10 @@ class BoardDrawer extends Drawer
         overlay = new Shape g
         overlay.x = point.x
         overlay.y = point.y
-        overlay.alpha = 0.2
+        overlay.alpha = 0.6
         @overlayST.addChild overlay
 
-    setFog: (x, y, point, ownerid) ->
+    setFog: (point, ownerid) ->
         if ownerid is @myPlayer.id or not (ownerid?)
             for i in [0..6]
                 fog = @overlayST.getObjectUnderPoint point.x + @offsetX[i], point.y + @offsetY[i]
@@ -175,14 +174,20 @@ class BoardDrawer extends Drawer
             g.beginStroke(@colors[_.indexOf(@players, ownerid)])
             .drawPolyStar(point.x, point.y, @size*0.95, 6, 0, 90)
             shape = new Shape g
-            shape.visible = false
+            #shape.visible = false
             @ownershipST.addChild shape
-            if ownerid is @myPlayer.id
-                @visibility.push [@getCoords(point), point]
+            #if ownerid is @myPlayer.id
+                #@setVisibility(point)
         else
             g.beginStroke("#616166")
             .drawPolyStar(point.x, point.y, @size, 6, 0, 90)
             @gridST.addChild new Shape g
+
+    setVisibility: (point) ->
+        array = []
+        for i in [0..6]
+            array.push @getDestination point, i
+        @visibility = _.union @visibility, array
 
     drawPlatform: (point, type) ->
         #g = new Graphics()
@@ -197,7 +202,7 @@ class BoardDrawer extends Drawer
         b.visible = true
         b.x = point.x
         b.y = point.y
-        console.log b.x, b.y
+        #console.log b.x, b.y
         @platformsST.addChild b
 
     drawResource: (point, resource) ->
@@ -208,7 +213,7 @@ class BoardDrawer extends Drawer
             when S.Types.Resources.Resource then g.beginFill("#FFFFFF")
         g.drawCircle(point.x, point.y, 6)
         shape = new Shape g
-        shape.visible = false
+        #shape.visible = false
         @resourcesST.addChild shape
 
     drawChannel: (point, direction) ->
@@ -220,11 +225,11 @@ class BoardDrawer extends Drawer
             .beginFill("#FFFF00")
             .lineTo(destination.x, destination.y)
         shape = new Shape g
-        shape.visible = false
+        #shape.visible = false
         @channelsST.addChild shape
 
     drawHex: (point, field) ->
-        @drawFog point
+        #@drawFog point
         @drawOwnership point
         if field.platform.type?
             @drawOwnership point, field.platform.state.owner.id
@@ -238,13 +243,12 @@ class BoardDrawer extends Drawer
         for j in [0 ... (2*@diffRows + 1)]
             for i in [0 ... @maxRow - Math.abs(@diffRows - j)]
                 point = @getPoint(i, j)
-                console.log i, j
                 @drawHex(point, boardState.getField(i, j))
                 for k in [0 .. 5]
                     if boardState.getChannel(i, j, k)?.state?
                         @drawChannel(point, k)
-        for coords in @visibility
-            @setFog coords[0].x, coords[0].y, coords[1]
+        #for point in @visibility
+            #@setFog point
         @toogleCache true
         #@uiHandler.toogleCache true
 
@@ -488,7 +492,6 @@ class Renderer
             @signalsST = new Stage canvasSignals
             @offST = new Stage canvasOff
             @addStage @signalsST
-            @addStage @offST
         ###
         if canvasUI?
             @UIST = new Stage canvasUI
@@ -498,7 +501,6 @@ class Renderer
         @loadImages imagesLoaded
         $.when(imagesLoaded.promise()).done =>
             console.log 'all Images have been loaded'
-            console.log @overlayST, "chuj2"
             @boardDR = new BoardDrawer eventBus, @off2ST, @ownershipST, @resourcesST, @gridST, @platformsST, @channelsST, @overlayST, minRow, maxRow, players, myPlayer
             @signalsDR = new SignalsDrawer @signalsST, @offST, minRow, maxRow
             @boardLoaded.resolve()
@@ -573,7 +575,7 @@ class Renderer
     # It clears all the stages and. To be discussed whether to clear Signals
     # stage
     setupBoard: (boardState) ->
-        #@clearAll()
+        @clearAll()
         @signalsDR.setupFPS()
         @signalsDR.setupOffSignals()
         @boardDR.setupBoard(boardState)
