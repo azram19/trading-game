@@ -75,8 +75,8 @@ class GameServer
           position: position
         @playersGame[user] = game
         HQ = S.ObjectFactory.build S.Types.Entities.Platforms.HQ, @, playerObject
-        @.trigger 'player:joined', game.name, playerObject, position, HQ.state
-        @.trigger 'update:lobby:game', @games[name]
+        @trigger 'player:joined', game.name, playerObject, position, HQ.state
+        @trigger 'update:lobby:game', @games[name]
         instance.addPlayer playerObject, position
         instance.addHQ HQ, position
 
@@ -89,8 +89,27 @@ class GameServer
         @startGame game.name
 
   startGame: ( name ) ->
-    @.trigger 'all:ready', name
+    @trigger 'all:ready', name
     instance = @getGameInstance name
     instance.startGame()
+
+  buildChannel: ( game, x, y, k, owner ) ->
+    instance = @gameInstances[game]
+    channel = S.ObjectFactory.build S.Types.Entities.Channel, @, owner
+    instance.map.addChannel channel, x, y, k
+    @trigger 'channel:built', game, x, y, k, owner
+
+  buildPlatform: ( game, x, y, type, owner ) ->
+    instance = @gameInstances[game]
+    platform = S.ObjectFactory.build S.Types.Entities.Platforms.Normal, @, owner, type
+    instance.map.addPlatform platform, x, y
+    platform.trigger 'produce'
+    @trigger 'platform:built', game, x, y, type, owner
+
+  setRouting: ( game, x, y, routing, owner ) ->
+    instance = @gameInstances[game]
+    field = game.map.getField x, y
+    _.extend field.platform.state.routing, routing
+    @trigger 'routing:changed', game, x, y, routing, owner
 
 module.exports = exports = GameServer

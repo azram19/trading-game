@@ -71,12 +71,12 @@ class Communicator
     if not socket? or socket
       @socket.removeListener events, callback
 
-  trigger: ( events ) =>
+  trigger: =>
     @com.trigger.apply @com, arguments
 
   #parse an event
-  parseClientEvent: ( event ) =>
-    console.log "Communicator: parse"
+  parseClientEvent: =>
+    console.log "Communicator: parse ", arguments
 
     if event is 'disconnect'
       @socket.disconnect()
@@ -84,9 +84,9 @@ class Communicator
       @passClientEvent.apply @, arguments
 
   #send an event to the server
-  passClientEvent: ( event, data, fn ) =>
+  passClientEvent: =>
     console.log "Communicator: pass"
-    @socket.emit event, data, fn
+    @socket.emit.apply @socket, arguments
 
   #join a channel on the server
   join: ( channel ) =>

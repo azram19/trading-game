@@ -511,7 +511,7 @@ class Renderer
             if k is @bitmaps.length
                 console.log 'image loaded event'
                 dfd.resolve()
-        
+
         loadBitmap = (src) =>
             img = new Image
             img.src = src
