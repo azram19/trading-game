@@ -214,7 +214,7 @@ class Terrain extends S.Drawer
 
   scaleHeight: (h) ->
     if h?
-      Math.floor h - 100
+      Math.floor (h - 100) * 0.4
     else
       null
 

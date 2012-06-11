@@ -13,9 +13,9 @@ $ ->
 
   if $('#canvasWrapper').length > 0
     negotiate = new S.Negotiator()
-    for y in [0..4]
-     for x in [0..4]
-      negotiate.renderer.moveSignal y, x, 2
+    #for y in [0..4]
+    # for x in [0..4]
+     # negotiate.trigger 'move:signal', [x,y], 2
     window.negotiate = negotiate
 
   null
