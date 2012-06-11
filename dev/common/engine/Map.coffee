@@ -16,13 +16,8 @@ class Map
   constructor: ( @eventBus, @minWidth, @maxWidth, @nonUser ) ->
     @fields = {}
     @diffRows = @maxWidth - @minWidth
-    @directionModificators =
-      0: [-1, -1]
-      1: [0, -1]
-      2: [1, 0]
-      3: [1, 1]
-      4: [0, 1]
-      5: [-1, 0]
+    @directionModUpper = [[-1, -1], [0, -1], [1, 0], [1, 1], [0, 1], [-1, 0]]
+    @directionModLower = [[0, -1], [1, -1], [1, 0], [0, 1], [-1, 1], [-1, 0]]
     #initialize an empty map
     for y in [0 ... (2*@diffRows + 1)]
         for x in [0 ... @maxWidth - Math.abs(@diffRows - y)]
@@ -51,6 +46,13 @@ class Map
         @addResource resource, x, y
 
     @iterateFields initializeResource
+
+  directionModificators: (x, y, dir) ->
+    if y < diffRows or (y is diffRows and dir < 3)
+      mod = @directionModUpper[dir]
+    else if y > diffRows or (y is diffRows and dir >= 3)
+      mod = @directionModLower[dir]
+    [x + mod.x, y + mod.y]
 
   addField: ( field, x, y ) ->
     @fields[y] ?= {}
@@ -82,7 +84,7 @@ class Map
     channel.state.field = @fields[y][x]
     channel.state.direction = k
     @fields[y][x].channels[k] = channel
-    [mX, mY] = @directionModificators[k]
+    [mX, mY] = @directionModificators x, y, k
     nY = y + mY
     nX = x + mX
     nK = (k + 3) % 6

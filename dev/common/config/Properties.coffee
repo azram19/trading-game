@@ -37,7 +37,7 @@ Properties =
     HQ:
         type: S.Types.Entities.Platforms.HQ
         id: 0
-        fov: 2
+        fov: 1
         name: 'HQ'
         field: {}
         signals: []
