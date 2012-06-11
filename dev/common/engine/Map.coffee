@@ -48,11 +48,11 @@ class Map
     @iterateFields initializeResource
 
   directionModificators: (x, y, dir) ->
-    if y < diffRows or (y is diffRows and dir < 3)
+    if y < @diffRows or (y is @diffRows and dir < 3)
       mod = @directionModUpper[dir]
-    else if y > diffRows or (y is diffRows and dir >= 3)
+    else if y > @diffRows or (y is @diffRows and dir >= 3)
       mod = @directionModLower[dir]
-    [x + mod.x, y + mod.y]
+    [x + mod[0], y + mod[1]]
 
   addField: ( field, x, y ) ->
     @fields[y] ?= {}
@@ -84,9 +84,7 @@ class Map
     channel.state.field = @fields[y][x]
     channel.state.direction = k
     @fields[y][x].channels[k] = channel
-    [mX, mY] = @directionModificators x, y, k
-    nY = y + mY
-    nX = x + mX
+    [nX, nY] = @directionModificators x, y, k
     nK = (k + 3) % 6
     @addReverseChannel channel, nX, nY, nK
     # Bind channel to routing table

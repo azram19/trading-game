@@ -112,8 +112,9 @@ class BoardDrawer extends Drawer
     updateAll: () ->
         for i in [1..5]
             stage = @stages[i]
-            @stage.updateCache()
-            @stage.update() 
+            console.log stage, "chuj"
+            stage.updateCache()
+            stage.update() 
 
     buildPlatform: (x, y, type) ->
         point = @getPoint(x, y)
@@ -174,7 +175,7 @@ class BoardDrawer extends Drawer
             g.beginStroke(@colors[_.indexOf(@players, ownerid)])
             .drawPolyStar(point.x, point.y, @size*0.95, 6, 0, 90)
             shape = new Shape g
-            #shape.visible = false
+            shape.visible = false
             @ownershipST.addChild shape
             if ownerid is @myPlayer.id
                 @visibility.push [@getCoords(point), point]
@@ -206,7 +207,7 @@ class BoardDrawer extends Drawer
             when S.Types.Resources.Tritium then g.beginFill("#FFFF00")
         g.drawCircle(point.x, point.y, 6)
         shape = new Shape g
-        #shape.visible = false
+        shape.visible = false
         @resourcesST.addChild shape
 
     drawChannel: (point, direction) ->
@@ -218,7 +219,7 @@ class BoardDrawer extends Drawer
             .beginFill("#FFFF00")
             .lineTo(destination.x, destination.y)
         shape = new Shape g
-        #shape.visible = false
+        shape.visible = false
         @channelsST.addChild shape
 
     drawHex: (point, field) ->
@@ -495,6 +496,7 @@ class Renderer
         @loadImages imagesLoaded
         $.when(imagesLoaded.promise()).done =>
             console.log 'all Images have been loaded'
+            console.log @overlayST, "chuj2"
             @boardDR = new BoardDrawer eventBus, @off2ST, @ownershipST, @resourcesST, @gridST, @platformsST, @channelsST, @overlayST, minRow, maxRow, players, myPlayer
             @signalsDR = new SignalsDrawer @signalsST, @offST, minRow, maxRow
             @boardLoaded.resolve()
