@@ -60,7 +60,7 @@ class UI extends S.Drawer
 
     @scroller = new Scroller @scroll, {
         locking:false
-        bouncing:false
+        bouncing:true
     }
     @scroller.setDimensions viewportWidth, viewportHeight, @canvasDimensions.x, @canvasDimensions.y
 

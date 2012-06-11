@@ -87,7 +87,6 @@ class Map
     #generate fields
     initializeTerrain = ( o, x, y ) =>
       @fields[y][x].terrain = @determineTerrain x, y
-      console.log @fields[y][x].terrain
 
     @iterateFields initializeTerrain
 
@@ -164,9 +163,7 @@ class Map
     @fields[y][x].platform = platform
     #console.log x + " " + y + " add pl"
     (
-      console.log channel
       nDir = (+dir + 3) % 6
-      console.log dir, nDir
       platform.state.routing[dir].object = channel
       channel.state.routing[nDir].object = platform
     ) for dir, channel of @fields[y][x].channels
@@ -180,7 +177,6 @@ class Map
     channel.state.direction = k
     @fields[y][x].channels[k] = channel
     [nX, nY] = @directionModificators x, y, k
-    console.log nX, nY
     nK = (k + 3) % 6
     @addReverseChannel channel, nX, nY, nK
     # Bind channel to routing table
