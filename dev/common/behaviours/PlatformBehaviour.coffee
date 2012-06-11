@@ -26,6 +26,7 @@ class PlatformBehaviour
             state.life -= signal.strength
             if state.life < 0
                 state.owner = signal.owner
+                #FIXME Reset life
                 @eventBus.trigger 'owner:platform', state.field.xy, state
 
     depleted: ( state ) ->

@@ -64,7 +64,18 @@ class Communicator
       @app.io.sockets.in(game).emit 'player:ready', userId
 
     app.gameServer.on 'player:joined', ( game, player, position, HQ ) =>
+      console.log '[Communicator] new player on ', game
       @app.io.sockets.in(game).emit 'new:player', player, position, HQ
+
+    app.gameServer.on 'platform:built', ( game, x, y, type, owner ) =>
+      @app.io.sockets.in(game).emit 'foreign:build:platform', x, y, type, owner
+
+    app.gameServer.on 'channel:built', ( game, x, y, k, owner ) =>
+      @app.io.sockets.in(game).emit 'foreign:build:channel', x, y, k, owner
+
+    app.gameServer.on 'routing:changed', ( game, x, y, routing, owner ) =>
+      console.log game
+      @app.io.sockets.in(game).emit 'foreign:routing', x, y, routing, owner
 
     @sockets.on 'connection', ( socket ) =>
       hs = socket.handshake
@@ -80,8 +91,7 @@ class Communicator
         socket.broadcast.to( client.getChannel() ).emit 'message:new', data
 
       socket.on 'get:user:game', ( userId ) =>
-        game = @app.gameServer.getUserGame(userId)
-        console.log game
+        game = @app.gameServer.getUserGame userId
         socket.emit 'user:game', game
 
       socket.on 'get:game:state', ( name ) =>
@@ -91,6 +101,19 @@ class Communicator
 
       socket.on 'set:user:ready', ( userId ) =>
         @app.gameServer.setUserReady userId
+
+      socket.on 'send:build:platform', ( x, y, type, owner ) =>
+        game = @app.gameServer.getUserGame owner.userId
+        @app.gameServer.buildPlatform game.name, x, y, type, owner
+
+      socket.on 'send:build:channel', ( x, y, k, owner ) =>
+        console.log 'new channel built'
+        game = @app.gameServer.getUserGame owner.userId
+        @app.gameServer.buildChannel game.name, x, y, k, owner
+
+      socket.on 'send:routing', ( x, y, routing, owner ) =>
+        game = @app.gameServer.getUserGame owner.userId
+        @app.gameServer.setRouting game.name, x, y, routing, owner
 
       #client want to join a channel
       socket.on 'join:channel', ( channel, fn ) =>

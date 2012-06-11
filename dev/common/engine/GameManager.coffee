@@ -22,7 +22,6 @@ class GameManager
   addPlayer: ( playerObject, position ) ->
     @players[playerObject.id] = playerObject
     @startingPoints[playerObject.id] = position
-    console.log @players, @startingPoints
 
   startGame: ->
     (

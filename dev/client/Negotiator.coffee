@@ -6,47 +6,47 @@ class Negotiator
     @game = {}
     @renderer = {}
 
-    @.on 'move:signal', (xy, dir) ->
+    @on 'move:signal', (xy, dir) ->
       #console.debug 'move:signal', xy, dir
       @renderer.moveSignal xy[0], xy[1], dir
 
-    @.on 'owner:channel', (xy, dir, owner) ->
+    @on 'owner:channel', (xy, dir, owner) ->
       #console.debug 'owner:channel', xy, dir, state.owner
       @renderer.changeOwnership xy[0], xy[1], owner
 
-    @.on 'owner:platform', (xy, state) ->
+    @on 'owner:platform', (xy, state) ->
       #console.debug 'owner:platform', xy, state
       @renderer.capturePlatform xy[0], xy[1], state
 
-    @.on 'player:lost', (player) ->
+    @on 'player:lost', (player) ->
       #console.debug 'lost', player
 
-    @.on 'resource:produce', (xy, amount, type) ->
+    @on 'resource:produce', (xy, amount, type) ->
       #console.debug xy, amount, type
 
-    @.on 'resource:receive', (xy, amount, type) ->
+    @on 'resource:receive', (xy, amount, type) ->
       #console.debug xy, amount, type
 
-    @.on 'build:platform', (x, y, type, owner) =>
-      console.debug 'build:platform', x, y, owner
-      platform = S.ObjectFactory.build S.Types.Entities.Platforms.Normal, @, owner, type
-      @game.map.addPlatform platform, x, y
-      platform.trigger 'produce'
-      @renderer.buildPlatform x, y, platform
+    @on 'build:platform', (x, y, type, owner) =>
+      @buildPlatform x, y, type, owner
+      @communicator.trigger 'send:build:platform', x, y, type, owner
 
-    @.on 'build:channel', (x, y, k, owner) =>
-      channel = S.ObjectFactory.build S.Types.Entities.Channel, @, owner
-      @game.map.addChannel channel, x, y, k
-      @renderer.buildChannel x, y, k, channel
+    @on 'build:channel', (x, y, k, owner) =>
+      @buildChannel x, y, k, owner
+      @communicator.trigger 'send:build:channel', x, y, k, owner
 
-      @renderer.changeOwnership x, y, owner.id
-
-    @.on 'routing', (obj, routing) =>
+    @on 'routing', (obj, routing) =>
       _.extend obj.platform.state.routing, routing
+      routingValues = _.map routing, (route) ->
+        ret =
+          in: route.in
+          out: route.out
+      console.log '[Negotiator] new routing: ', routingVaues
+      @communicator.trigger 'send:routing', obj.xy[0], obj.xy[1], routingValues, obj.platform.state.owner
 
-    @.on 'scroll', @setScroll
+    @on 'scroll', @setScroll
 
-    @.on 'scroll', @setViewport
+    @on 'scroll', @setViewport
 
     gameLoaded = new $.Deferred()
     initiate = new $.Deferred()
@@ -54,12 +54,31 @@ class Negotiator
     @communicator.on 'game:state', @setGameState(gameLoaded)
 
     @communicator.on 'new:player', ( playerObject, position, HQState ) =>
-      HQ = S.ObjectFactory.build S.Types.Entites.Platforms.HQ, @, playerObject
+      console.log '[Negotiator] new player'
+      HQ = S.ObjectFactory.build S.Types.Entities.Platforms.HQ, @, playerObject
       HQ.state = HQState
+      @renderer.addPlayer playerObject.id
       @game.addPlayer playerObject
       @game.addHQ HQ, position
+      [x,y] = position
+      @renderer.buildPlatform x, y, HQ
+      @renderer.changeOwnership x, y, playerObject.id
 
-    @communicator.on 'all:players:ready', =>
+    @communicator.on 'foreign:build:platform', (x, y, type, owner) =>
+      if owner.id isnt @myPlayer.id
+        @buildPlatform x, y, type, owner
+
+    @communicator.on 'foreign:build:channel', (x, y, k, owner) =>
+      if owner.id isnt @myPlayer.id
+        @buildChannel x, y, k, owner
+
+    @communicator.on 'foreign:routing', (x, y, routing, owner) =>
+      if owner.id isnt @myPlayer.id
+        field = @getField x, y
+        _.extend field.platform.state.routing, routing
+
+    @communicator.on 'players:all:ready', =>
+      console.log '[Negotiator] all players loaded'
       @game.startGame()
 
     $.when(initiate.promise()).then( =>
@@ -108,6 +127,7 @@ class Negotiator
       dfd.resolveWith @
 
   startGame: ->
+    @game.startGame()
   #setScroll: ( x, y ) ->
     #@renderer.setScroll x, y
 
@@ -118,14 +138,26 @@ class Negotiator
     [minWidth, maxWidth] = @game.getDimensions()
     window.ui = @ui =  new S.UIClass @, minWidth, maxWidth
     window.t = @terrain = new S.Terrain 'background', minWidth, maxWidth
-    console.log @game.players
-    @renderer = new S.Renderer minWidth, maxWidth, _.pluck(@game.players, 'id')
+    @renderer = new S.Renderer @, minWidth, maxWidth, _.pluck(@game.players, 'id'), @myPlayer
     console.log 'renderer constructor triggered'
     $.when(@renderer.boardLoaded.promise()).done =>
       console.log 'renderer constructor finished'
       @renderer.setupBoard @game.map
 
     #@terrain.draw 2 - not extremely fast, disabled for debugging
+
+  buildPlatform: ( x, y, type, owner ) ->
+    platform = S.ObjectFactory.build S.Types.Entities.Platforms.Normal, @, owner, type
+    @game.map.addPlatform platform, x, y
+    platform.trigger 'produce'
+    @renderer.buildPlatform x, y, platform
+    @renderer.changeOwnership x, y, owner.id
+
+  buildChannel: ( x, y, k, owner ) ->
+    channel = S.ObjectFactory.build S.Types.Entities.Channel, @, owner
+    @game.map.addChannel channel, x, y, k
+    @renderer.buildChannel x, y, k, channel
+    @renderer.changeOwnership x, y, owner.id
 
   getMenu: ( x, y ) ->
     field = @getField x, y

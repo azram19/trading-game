@@ -23,6 +23,14 @@ class Drawer
         @viewportHeight = 0
         @viewportWidth = 0
 
+        @directionModificators =
+          0: [-1, -1]
+          1: [0, -1]
+          2: [1, 0]
+          3: [1, 1]
+          4: [0, 1]
+          5: [-1, 0]
+
         @canvasDimensions = {}
         @canvasDimensions.x =
             2*(@margin-@horIncrement) +
@@ -34,8 +42,8 @@ class Drawer
 
     # Setups table of offsets according to direction
     setupOffsets: () ->
-        @offsetX = [-@horIncrement, @horIncrement, 2*@horIncrement, @horIncrement, -@horIncrement, -2*@horIncrement]
-        @offsetY = [-@verIncrement, -@verIncrement, 0, @verIncrement, @verIncrement, 0]
+        @offsetX = [-@horIncrement, @horIncrement, 2*@horIncrement, @horIncrement, -@horIncrement, -2*@horIncrement, 0]
+        @offsetY = [-@verIncrement, -@verIncrement, 0, @verIncrement, @verIncrement, 0, 0]
 
     # Setups table of tick sizes according to the direction
     setupTicks: () ->
@@ -73,8 +81,8 @@ class Drawer
     getDestination: (point, direction) ->
         new Point(point.x + @offsetX[direction], point.y + @offsetY[direction])
 
-    # Arguments: point with canvas coordinates (which is a center of particular hex)
-    # Returns board coordinates of particular point
+    # Arguments: point with canvas coordinates (which is a center of a particular hex)
+    # Returns board coordinates of a particular point
     getCoords: (point) ->
         y = (point.y - @margin) / @verIncrement
         offset = @margin + Math.abs(@diffRows-y)*@horIncrement
@@ -91,46 +99,73 @@ class Drawer
         Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2))
 
 class BoardDrawer extends Drawer
-    constructor: (@off2ST, @ownershipST, @resourcesST, @gridST, @platformsST, @channelsST, @overlayST, minRow, maxRow, @players) ->
+    constructor: (@eventBus, @off2ST, @ownershipST, @resourcesST, @gridST, @platformsST, @channelsST, @overlayST, minRow, maxRow, @players, @myPlayer) ->
         super minRow, maxRow
         @uiHandler = new UIHandler @overlayST, minRow, maxRow
         @colors = ["#274E7D", "#900020", "#FFA000", "#B80049", "#00A550", "#9999FF", "#367588", "#FFFFFF"]
-        @cacheStages = [@ownershipST, @resourcesST, @gridST, @platformsST, @channelsST, @overlayST]
+        @stages = [@gridST, @overlayST, @ownershipST, @resourcesST, @platformsST, @channelsST]
+        @visibility = []
+
+    addPlayer: (player) ->
+        @players.push player
+
+    updateAll: () ->
+        for i in [1..5]
+            stage = @stages[i]
+            @stage.updateCache()
+            @stage.update() 
 
     buildPlatform: (x, y, type) ->
         point = @getPoint(x, y)
         @drawPlatform(point, type)
-        @platformsST.updateCache()
-        @platformsST.update()
+        @updateAll()
 
     capturePlatform: (x, y, ownerid) ->
         point = @getPoint x, y
         @drawOwnership point, ownerid
-        @ownershipST.updateCache()
-        @ownershipST.update()
 
     buildChannel: (x, y, direction, ownerid) ->
         point = @getPoint(x, y)
         destination = @getDestination(point, direction)
         @drawChannel(point, direction)
         @drawOwnership(destination, ownerid)
-        @ownershipST.updateCache()
-        @channelsST.updateCache()
-        @channelsST.update()
-        @ownershipST.update()
 
     captureChannel: (x, y, direction, ownerid) ->
         point = @getPoint(x, y)
         destination = @getDestination(point, direction)
         @drawOwnership(destination, ownerid)
-        @ownershipST.updateCache()
-        @ownershipST.update()
+        @updateAll()
 
     changeOwnership: (x, y, ownerid) ->
         point = @getPoint(x, y)
         @drawOwnership(point, ownerid)
-        @ownershipST.updateCache()
-        @ownershipST.update()
+        @setFog(x, y, point, ownerid)
+        @updateAll()
+
+    drawFog: (point) ->
+        g = new Graphics()
+        g.beginFill("#000000")
+        g.drawPolyStar(0, 0, @size, 6, 0, 90)
+        overlay = new Shape g
+        overlay.x = point.x
+        overlay.y = point.y
+        overlay.alpha = 0.2
+        @overlayST.addChild overlay
+
+    setFog: (x, y, point, ownerid) ->
+        if ownerid is @myPlayer.id or not (ownerid?)
+            for i in [0..6]
+                fog = @overlayST.getObjectUnderPoint point.x + @offsetX[i], point.y + @offsetY[i]
+                if fog.visible
+                    fog.visible = false
+                    for j in [2..5]
+                        stage = @stages[j]
+                        x = point.x + @offsetX[i]
+                        y = point.y + @offsetY[i]
+                        obj = stage.getObjectUnderPoint x, y
+                        console.log x, y, obj
+                        if obj?
+                            obj.alpha = 1
 
     drawOwnership: (point, ownerid) ->
         g = new Graphics()
@@ -138,7 +173,11 @@ class BoardDrawer extends Drawer
         if ownerid?
             g.beginStroke(@colors[_.indexOf(@players, ownerid)])
             .drawPolyStar(point.x, point.y, @size*0.95, 6, 0, 90)
-            @ownershipST.addChild new Shape g
+            shape = new Shape g
+            #shape.visible = false
+            @ownershipST.addChild shape
+            if ownerid is @myPlayer.id
+                @visibility.push [@getCoords(point), point]
         else
             g.beginStroke("#616166")
             .drawPolyStar(point.x, point.y, @size, 6, 0, 90)
@@ -153,11 +192,11 @@ class BoardDrawer extends Drawer
         #@platformsST.addChild new Shape g
 
     setBitmap: (point, type) ->
-        console.log @off2ST
         b = @off2ST.getChildAt(type).clone()
         b.visible = true
-        b.x = point.x - 35
-        b.y = point.y - 40
+        b.x = point.x 
+        b.y = point.y 
+        console.log b.x, b.y
         @platformsST.addChild b
 
     drawResource: (point, resource) ->
@@ -166,7 +205,9 @@ class BoardDrawer extends Drawer
             when S.Types.Resources.Metal then g.beginFill("#FFFFFF")
             when S.Types.Resources.Tritium then g.beginFill("#FFFF00")
         g.drawCircle(point.x, point.y, 6)
-        @resourcesST.addChild new Shape g
+        shape = new Shape g
+        #shape.visible = false
+        @resourcesST.addChild shape
 
     drawChannel: (point, direction) ->
         destination = @getDestination(point, direction)
@@ -176,9 +217,12 @@ class BoardDrawer extends Drawer
             .beginStroke("#FFFF00")
             .beginFill("#FFFF00")
             .lineTo(destination.x, destination.y)
-        @channelsST.addChild new Shape g
+        shape = new Shape g
+        #shape.visible = false
+        @channelsST.addChild shape
 
     drawHex: (point, field) ->
+        @drawFog point
         @drawOwnership point
         if field.platform.type?
             @drawOwnership point, field.platform.state.owner.id
@@ -186,7 +230,7 @@ class BoardDrawer extends Drawer
             @drawResource point, field.resource.type()
         if field.platform.type?
             @drawPlatform point, field.platform.type()
-        @uiHandler.drawOverlay point
+        #@uiHandler.drawOverlay point
 
     setupBoard: (boardState) ->
         for j in [0 ... (2*@diffRows + 1)]
@@ -196,11 +240,14 @@ class BoardDrawer extends Drawer
                 for k in [0 .. 5]
                     if boardState.getChannel(i, j, k)?.state?
                         @drawChannel(point, k)
+        for coords in @visibility
+            @setFog coords[0].x, coords[0].y, coords[1]
         @toogleCache true
         #@uiHandler.toogleCache true
 
     toogleCache: (status) ->
-        for stage in @cacheStages
+        for i in [0..5] 
+            stage = @stages[i]
             if status
                 stage.cache(0,0, @width+5, @height+5)
             else
@@ -212,10 +259,10 @@ class UIHandler extends Drawer
         super minRow, maxRow
         @update = false
         #@stage.enableMouseOver(20)
-        @stage.onMouseOver = @mouseOverField
-        @stage.onMouseOut = @mouseOutField
+        #@stage.onMouseOver = @mouseOverField
+        #@stage.onMouseOut = @mouseOutField
         #@overlay = @drawOverlay(new Point 0, 0)
-        Ticker.addListener this
+        #Ticker.addListener this
         @k = 0
 
     drawOverlay: (point) ->
@@ -394,7 +441,7 @@ class BackgroundDrawer
         @stage.update()
 
 class Renderer
-    constructor: (minRow, maxRow, players) ->
+    constructor: (eventBus, minRow, maxRow, players, myPlayer) ->
         #canvasBackground = document.getElementById "background"
         canvasOwnership = document.getElementById "ownership"
         canvasResources = document.getElementById "resources"
@@ -448,7 +495,7 @@ class Renderer
         @loadImages imagesLoaded
         $.when(imagesLoaded.promise()).done =>
             console.log 'all Images have been loaded'
-            @boardDR = new BoardDrawer @off2ST, @ownershipST, @resourcesST, @gridST, @platformsST, @channelsST, @overlayST, minRow, maxRow, players
+            @boardDR = new BoardDrawer eventBus, @off2ST, @ownershipST, @resourcesST, @gridST, @platformsST, @channelsST, @overlayST, minRow, maxRow, players, myPlayer
             @signalsDR = new SignalsDrawer @signalsST, @offST, minRow, maxRow
             @boardLoaded.resolve()
 
@@ -457,12 +504,14 @@ class Renderer
         setImg = (event) =>
             bitmap = new Bitmap event.target
             bitmap.visible = false
+            bitmap.regX = 35
+            bitmap.regY = 40
             @off2ST.addChild bitmap
             k++
             if k is @bitmaps.length
                 console.log 'image loaded event'
                 dfd.resolve()
-        
+
         loadBitmap = (src) =>
             img = new Image
             img.src = src
@@ -470,6 +519,9 @@ class Renderer
 
         for src in @bitmaps
             loadBitmap src
+
+    addPlayer: (player) ->
+        @boardDR.addPlayer(player)
 
     addStage: (stage) ->
         @stages.push stage
