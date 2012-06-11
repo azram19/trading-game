@@ -57,7 +57,7 @@ Properties =
         path: []
 
     resource:
-        type: S.Types.Resources.Metal
+        type: S.Types.Resources.Food
         id: 0
         fov: 0
         name: 'Resource'

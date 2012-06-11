@@ -29,7 +29,7 @@ else #client
     S.ResourceBehaviour = window.S.ResourceBehaviour
 
 class ObjectFactory
-  
+
     # change those crazy clone, extend to _.defaults
     constructor: ->
         @builders = {}
@@ -70,21 +70,50 @@ class ObjectFactory
             #name = 'Signal' + id
             #signal = _.extend new Signal(strength, type, source), {'name': name, 'id': id}
 
-        @builders[S.Types.Resources.Metal] = (id, args) =>
+        @builders[S.Types.Resources.Food] = (id, args) =>
             events = args[0]
             owner = args[1]
-            name = 'Metal' + id
+            name = 'Food' + id
             state = _.extend new S.ObjectState(), _.clone(S.Properties.resource)
-            state = _.extend state, {'name': name, 'id': id, 'owner': owner, 'type': S.Types.Resources.Metal}
-            object = new S.GameObject new S.ResourceBehaviour(S.Types.Resources.Metal, events), state
 
-        @builders[S.Types.Resources.Tritium] = (id, args) =>
+            state = _.extend state, {
+                'name': name,
+                'id': id,
+                'owner': owner,
+                'type': S.Types.Resources.Food
+            }
+
+            object = new S.GameObject new S.ResourceBehaviour(S.Types.Resources.Food, events), state
+
+        @builders[S.Types.Resources.Gold] = (id, args) =>
             events = args[0]
             owner = args[1]
-            name = 'Tritium' + id
+            name = 'Gold' + id
             state = _.extend new S.ObjectState(), _.clone(S.Properties.resource)
-            state = _.extend state, {'name': name, 'id': id, 'owner': owner, 'type': S.Types.Resources.Tritium}
-            object = new S.GameObject new S.ResourceBehaviour(S.Types.Resources.Tritium, events), state
+
+            state = _.extend state, {
+                'name': name,
+                'id': id,
+                'owner': owner,
+                'type': S.Types.Resources.Gold
+            }
+
+            object = new S.GameObject new S.ResourceBehaviour(S.Types.Resources.Gold, events), state
+
+        @builders[S.Types.Resources.Resources] = (id, args) =>
+            events = args[0]
+            owner = args[1]
+            name = 'Resources' + id
+            state = _.extend new S.ObjectState(), _.clone(S.Properties.resource)
+
+            state = _.extend state, {
+                'name': name,
+                'id': id,
+                'owner': owner,
+                'type': S.Types.Resources.Resources
+            }
+
+            object = new S.GameObject new S.ResourceBehaviour(S.Types.Resources.Resources, events), state
 
         _.extend @builders, S.SignalFactory.builders
 
