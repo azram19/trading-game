@@ -457,23 +457,39 @@ class Terrain extends S.Drawer
   generateShadowMap: () ->
     shadowMap = []
 
-    sunVisibilityHeight = 0.10
+    sunVisibilityHeight = 0.5
 
-    for x in [0...@canvasDimensions.x]
+    for x in [0..@canvasDimensions.x]
       shadowMap[x] = []
-      for y in [0...@canvasDimensions.y]
+      for y in [0..@canvasDimensions.y]
+        ###
+        if x % 48 == 0 and y % 48 == 0
+          shadowMap[x][y] = [@heightMap.get_cell( Math.floor(x/48), Math.floor(y/48) ), 0]
+        else if x > 0 and y > 0
+          shadowMap[x][y] = shadowMap[x-1][y-1]
+        else if x > 0
+          shadowMap[x][y] = shadowMap[x-1][y]
+        else if y > 0
+          shadowMap[x][y] = shadowMap[x][y-1]
+        else 
+        ###
         shadowMap[x][y] = [0,0] #height, shadow
-
+        
+        
     console.log "[Terrain] shadow map initialized"
 
     #generate heights
     for x in [0...@canvasDimensions.x-1]
       for y in [0...@canvasDimensions.y-1]
-        shadowMap[x][y] = [@getHeight( x, y )*100, 0]
+        shadowMap[x][y] = [@getHeight( x, y ), 0]
+
+    for x in [0...@canvasDimensions.x-1]
+      for y in [1...@canvasDimensions.y-1]
+        [height1, shadow1] = shadowMap[x][y]
+        [height2, shadow2] = shadowMap[x][y-1]
+        shadowMap[x][y] = [(height1+height2)/2,shadow1]
 
     console.log "[Terrain] height map generated"
-
-    log = _.once ( d ) -> console.log d
 
     #generate shadows
     for x in [1...@canvasDimensions.x]
@@ -481,21 +497,19 @@ class Terrain extends S.Drawer
         [sourceHeight, s] = shadowMap[x][y]
         [shadowHeight, s2] = shadowMap[x-1][y+1]
 
-        if shadowHeight > sourceHeight
-          #Compute the diference in height of points
-          heightDiff = shadowHeight - sourceHeight
+        #if shadowHeight > sourceHeight
+        #Compute the diference in height of points
+        heightDiff = shadowHeight - sourceHeight
 
-          #Divide by the difference from which the sun is not visible
-          heightDiff /= sunVisibilityHeight
+        #Divide by the difference from which the sun is not visible
+        heightDiff /= sunVisibilityHeight
 
-          #Cap the difference to 1
-          #if heightDiff > 1
-          # heightDiff = 1
+        #Cap the difference to 1
+        #if heightDiff > 1
+        # heightDiff = 1
 
-          #Save the shadow in the map
-          shadowMap[x][y] = [sourceHeight, heightDiff]
-          if heightDiff > 0
-            log( [x,y,heightDiff] )
+        #Save the shadow in the map
+        shadowMap[x][y] = [sourceHeight, heightDiff]
 
     console.log "[Terrain] shadow map generated"
 
@@ -567,8 +581,8 @@ class Terrain extends S.Drawer
 
     z0 = @heightMap.get_cell xPos, yPos
     z1 = @heightMap.get_cell xPos + 1, yPos
-    z2 = @heightMap.get_cell xPos, yPos + 1
-    z3 = @heightMap.get_cell xPos + 1, yPos + 1
+    z2 = @heightMap.get_cell xPos, yPos - 1
+    z3 = @heightMap.get_cell xPos + 1, yPos - 1
 
     height = 0
     
@@ -635,9 +649,9 @@ class Terrain extends S.Drawer
           terrainData,
           x2,
           y2,
-          [Math.round(r - r * shadow),
-          Math.round(g - g * shadow),
-          Math.round(b - b * shadow),
+          [Math.round(r - Math.round(r * shadow)),
+          Math.round(g - Math.round(g * shadow)),
+          Math.round(b - Math.round(b * shadow)),
           a]
         )
 
