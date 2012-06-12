@@ -13,6 +13,7 @@ Types =
       Rocks: 4
       Deepwater: 5
       Grass: 6
+      Snow: 7
       Names: [
         "water"
         "sand"
@@ -20,6 +21,7 @@ Types =
         "rocks"
         "deepwater"
         "grass"
+        "snow"
       ]
     Resources:
         Gold: 6

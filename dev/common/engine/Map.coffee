@@ -26,11 +26,12 @@ class Map
             @addField {}, x, y
 
     #Configure the map
-    @flatteningFactor = 0.6
-    @groundLevel = 80
+    @flatteningFactor = 1
+    @smoothingPasses = 16
+    @groundLevel = 0
 
-    mapHeight = @np2 2*(2*@diffRows + 1)
-    mapWidth = @np2 2*(@maxWidth + 1)
+    mapHeight = @np2 16*(2*@diffRows + 1)
+    mapWidth = @np2 16*(@maxWidth + 1)
     @heightMapSize = Math.max mapHeight, mapWidth
 
     #generate fields
@@ -44,26 +45,28 @@ class Map
     hy = y
     hx = x + Math.abs( @diffRows-y )
 
-    height = @heightMap.get_cell hx, hy
+    height = @heightMap.get_cell 8*hx, 8*hy
 
-    if height < -5
+    if height < 40
       [S.Types.Terrain.Deepwater]
-    else if height < -4
+    else if height < 48
       [S.Types.Terrain.Deepwater, S.Types.Terrain.Water]
-    else if height < 0
+    else if height < 64
       [S.Types.Terrain.Water]
-    else if height < 5
+    else if height < 80
       [S.Types.Terrain.Water, S.Types.Terrain.Sand]
-    else if height < 8
+    else if height < 100
       [S.Types.Terrain.Sand]
-    else if height < 12
+    else if height < 120
       [S.Types.Terrain.Sand, S.Types.Terrain.Grass]
-    else if height < 30
+    else if height < 170
       [S.Types.Terrain.Grass]
-    else if height < 40
+    else if height < 180
       [S.Types.Terrain.Grass, S.Types.Terrain.Rocks]
-    else
+    else if height < 200
       [S.Types.Terrain.Rocks]
+    else
+      [S.Types.Terrain.Snow]
 
   scaleHeightMap: () ->
     for x in [0...@heightMapSize]
@@ -72,6 +75,64 @@ class Map
 
   scaleHeight: ( h ) ->
     @flatteningFactor * ( h - @groundLevel)
+
+  smoothenTheTerrain: ( n ) ->
+
+    for i in [0...n]
+      newHeightMap = []
+      for x in [0...@heightMapSize]
+        newHeightMap[x] = []
+
+      for x in [0...@heightMapSize]
+        for y in [0...@heightMapSize]
+          adjSec = 0
+          secTotal = 0
+
+          #to the left
+          if x-1 >= 0
+            adjSec++
+            secTotal += @heightMap.map[x-1][y]
+
+            #top
+            if y+1 < @heigtMapSize
+              adjSec++
+              secTotal += @heightMap.map[x-1][y+1]
+
+            #bototm
+            if y-1 >= 0
+              adjSec++
+              secTotal += @heightMap.map[x-1][y-1]
+
+          #to the right
+          if x+1 < @heightMapSize
+            adjSec++
+            secTotal += @heightMap.map[x+1][y]
+
+            #top
+            if y+1 < @heigtMapSize
+              adjSec++
+              secTotal += @heightMap.map[x+1][y+1]
+
+            #bototm
+            if y-1 >= 0
+              adjSec++
+              secTotal += @heightMap.map[x+1][y-1]
+
+          #top
+          if y+1 < @heigtMapSize
+            adjSec++
+            secTotal += @heightMap.map[x][y+1]
+
+          #bototm
+          if y-1 >= 0
+            adjSec++
+            secTotal += @heightMap.map[x][y-1]
+
+          newHeightMap[x][y] = (@heightMap.map[x][y] + secTotal/adjSec)/2
+
+      @heightMap.map = newHeightMap.slice 0 #copy the array
+
+    null
 
   np2: ( x ) ->
     Math.pow( 2, Math.round( Math.log( x ) / Math.log( 2 ) ) )
