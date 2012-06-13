@@ -64,12 +64,13 @@ class GameServer
     game = @games[name]
     instance = @gameInstances[name]
     if not (instance?)
+      console.log '[GameServer] game created - ', name
       minWidth = game.typeData.minWidth
       maxWidth = game.typeData.maxWidth
       player = S.ObjectFactory.build S.Types.Entities.Player, 0
       map = new S.Map @, minWidth, maxWidth, player
-      map.initialise()
       instance = new S.GameManager @, map
+      instance.map.initialise()
       @gameInstances[name] = instance
     @gameInstances[name]
 
@@ -114,9 +115,10 @@ class GameServer
     @trigger 'channel:built', game, x, y, k, owner
 
   buildPlatform: ( game, x, y, type, owner ) ->
-    instance = @gameInstances[game]
     platform = S.ObjectFactory.build S.Types.Entities.Platforms.Normal, @, owner, type
-    instance.map.addPlatform platform, x, y
+    @gameInstances[game].map.addPlatform platform, x, y
+    console.log '[GameServer] field to which we add platform', @gameInstances[game].map.getField(x,y)
+    console.log '[GameServer] field reference from platforms resource', platform.state.field.resource.state
     platform.trigger 'produce'
     @trigger 'platform:built', game, x, y, type, owner
 

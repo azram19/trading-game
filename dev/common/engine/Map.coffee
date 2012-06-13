@@ -215,12 +215,13 @@ class Map
     @fields[y][x].terrain = terrain
 
   addResource: ( resource, x, y ) ->
-    resource.behaviour.events = @eventBus
+    resource.behaviour.eventBus = @eventBus
     resource.state.field = @fields[y][x]
     @fields[y][x].resource = resource
+    console.log '[Map] checking resource field reference', _.isEmpty(resource.state.field)
 
   addPlatform: ( platform, x, y ) ->
-    platform.behaviour.events = @eventBus
+    platform.behaviour.eventBus = @eventBus
     platform.state.field = @fields[y][x]
     @fields[y][x].platform = platform
     #console.log x + " " + y + " add pl"
@@ -229,10 +230,11 @@ class Map
       platform.state.routing[dir].object = channel
       channel.state.routing[nDir].object = platform
     ) for dir, channel of @fields[y][x].channels
+    console.log '[Map] platform check after add', platform
 
   #k - direction [0..5] clockwise from the top
   addChannel: ( channel, x, y, k ) ->
-    channel.behaviour.events = @eventBus
+    channel.behaviour.eventBus = @eventBus
     @fields[y] ?= {}
     @fields[y][x].channels ?= {}
     channel.state.field = @fields[y][x]
@@ -279,11 +281,11 @@ class Map
         #console.log '[Map] channel dump after extraction', util.inspect(channels, false, 5)
       platform = {}
       if field.platform.type?
-        platform =  @clearRoutingObjects field.platform.state
+        platform =  @clearRoutingObjects _.clone(field.platform.state)
         platform.field = {}
       resource = {}
       if field.resource.type?
-        resource = field.resource.state
+        resource = _.clone field.resource.state
         resource.field = {}
       terrain = field.terrain
       exportState =
