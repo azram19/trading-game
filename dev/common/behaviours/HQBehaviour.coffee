@@ -33,7 +33,6 @@ class HQBehaviour
 
     accept: ( signal, state, callback ) ->
         callback signal
-        console.log signal
         if signal.owner.id is state.owner.id
             state.owner.addResource signal
             @eventBus.trigger 'resource:receive', state.field.xy, signal.strength, signal.type

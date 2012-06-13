@@ -34,7 +34,7 @@ class ResourceBehaviour
                 newSignal = S.SignalFactory.build S.Types.Entities.Signal, @eventBus, state.extraction, @resourceType, state.field.platform
                 newSignal.path.push state.field.xy
                 @eventBus.trigger 'resource:produce', state.field.xy, state.extraction, @resourceType
-
+                console.log newSignal, "signal"
                 #can the platform accept the signal
                 acceptable = state.field.platform.requestAccept newSignal
 
@@ -42,7 +42,7 @@ class ResourceBehaviour
                     #send the signal
                     state.life -= state.extraction
                     state.signals.push newSignal
-
+                    console.log "acceptable"
                     state.field.platform.trigger "accept", newSignal, (signal) ->
                         state.signals = _.without state.signals, signal
 

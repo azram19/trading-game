@@ -124,7 +124,7 @@ class GameServer
 
   setRouting: ( game, x, y, routing, owner ) ->
     instance = @gameInstances[game]
-    field = game.map.getField x, y
+    field = instance.map.getField x, y
     _.extend field.platform.state.routing, routing
     @trigger 'routing:changed', game, x, y, routing, owner
 

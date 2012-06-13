@@ -227,6 +227,7 @@ class Map
     #console.log x + " " + y + " add pl"
     (
       nDir = (+dir + 3) % 6
+      console.log channel, platform, "setting Routing"
       platform.state.routing[dir].object = channel
       channel.state.routing[nDir].object = platform
     ) for dir, channel of @fields[y][x].channels
@@ -272,7 +273,7 @@ class Map
           if not (_.isEmpty channel)
             channels[direction] = channel.state
           else
-            channels[direction] = null
+            channels[direction] = {}
         #console.log '[Map] channel states', util.inspect(channels, false, 5)
         (
           channels[dir] = @clearRoutingObjects channel
@@ -340,7 +341,7 @@ class Map
     @iterateFields print
 
   getChannel: (x, y, k) ->
-    field = @getField y, x
+    field = @getField x, y
     if field?
       return field.channels[k]
     else

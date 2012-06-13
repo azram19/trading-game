@@ -54,7 +54,7 @@ class UI extends S.Drawer
     ).first()
 
     @scroller = new Scroller @scroll, {
-        locking:true
+        locking:false
         bouncing:true
         animating:true
     }

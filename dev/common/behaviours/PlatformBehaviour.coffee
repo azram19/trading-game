@@ -1,3 +1,9 @@
+S = {}
+if require?
+  _ = require 'underscore'
+else
+  _ = window._
+
 class PlatformBehaviour
 
     constructor: ( @eventBus ) ->
@@ -7,9 +13,11 @@ class PlatformBehaviour
 
     requestAccept: ( signal, state ) ->
         if signal.owner.id is state.owner.id
-            availableRoutes = _.filter state.routing, (route, direction) ->
-                route.in && route.object is signal.source
-            availableRoutes.length > 0 and state.capacity + 1 <= state.signals.length
+            availableRoutes = _.filter state.routing, (route) ->
+                route.in or route.object is signal.source
+            availableRoutes.length > 0 and state.capacity + 1 >= state.signals.length
+        else
+            true
 
     produce: ( state ) ->
         if state.field.resource.type?
@@ -20,8 +28,10 @@ class PlatformBehaviour
         if signal.owner.id is state.owner.id
             signal.source = state.field.platform
             signal.path.push state.field.platform
-            _.delay state.signals.push, state.delay, signal
-            @route state
+            addSignal = (signal) =>
+                state.signals.push signal
+                @route state
+            _.delay addSignal, state.delay, signal
         else
             state.life -= signal.strength
             if state.life < 0
@@ -33,11 +43,11 @@ class PlatformBehaviour
 
 
     route: ( state ) ->
+        console.log "signal is being routed"
         availableRoutes = []
-        _.each state.routing (route, direction) -> if route.out 
+        _.each state.routing, (route, direction) -> if route.out and route.object? 
             availableRoutes.push [route, direction]
-
-        _.each state.signals, (signal) ->
+        _.each state.signals, (signal) =>
             destNum = Math.ceil(Math.random()*100)%availableRoutes.length
             destination = availableRoutes[destNum]
 
