@@ -33,12 +33,18 @@ class PlatformBehaviour
 
 
     route: ( state ) ->
-        availableRoutes = _.filter state.routing, (route, direction) ->
-            route.out
+        availableRoutes = []
+        _.each state.routing (route, direction) -> if route.out 
+            availableRoutes.push [route, direction]
 
         _.each state.signals, (signal) ->
             destNum = Math.ceil(Math.random()*100)%availableRoutes.length
-            availableRoutes[destNum].object.trigger 'accept', signal, (signal) ->
+            destination = availableRoutes[destNum]
+
+            if destination[0].object.requestAccept signal
+              @eventBus.trigger 'move:signal', state.field.xy, destination[1]
+
+              destination[0].object.trigger 'accept', signal, (signal) ->
                 state.signals = _.without state.signals, signal
 
 if module? and module.exports

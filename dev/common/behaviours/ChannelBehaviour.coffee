@@ -34,17 +34,18 @@ class ChannelBehaviour
                 @eventBus.trigger 'owner:channel', state.field.xy, state.direction, state
 
     route: ( state ) ->
-       _.each state.signals, (signal, index) ->
-           availableRoutes = _.filter state.routing, (route, direction) ->
-                route? and route.object.state.id isnt signal.source.state.id
+      availableRoutes = []
+      _.each state.signals, (signal, index) ->
+        _.each state.routing (route, direction) -> if route? and route.object.state.id isnt signal.source.state.id 
+          availableRoutes.push [route, direction]
 
-           destination = availableRoutes[0].object
+        destination = availableRoutes[0]
 
-           if destination.requestAccept signal
-              @eventBus.trigger 'move:signal', state.field.xy, destNum
+        if destination[0].object.requestAccept signal
+          @eventBus.trigger 'move:signal', state.field.xy, destination[1]
 
-              destination.trigger 'accept', signal, (signal) ->
-                state.signals = _.without state.signals, signal
+          destination.trigger 'accept', signal, (signal) ->
+            state.signals = _.without state.signals, signal
 
 if module? and module.exports
   exports = module.exports = ChannelBehaviour
