@@ -6,6 +6,7 @@ if require?
   S.ObjectFactory = require '../config/ObjectFactory'
   S.Types = require '../config/Types'
   S.HeightMap = require './HeightMap'
+  util = require 'util'
 else
   _ = window._
   S.Field = window.S.Field
@@ -265,11 +266,17 @@ class Map
       gameState[y] ?= {}
       channels = {}
       if _.keys(field.channels).length > 0
-        channels = _.pluck field.channels, 'state'
+        _.each field.channels, (channel, direction) ->
+          if not (_.isEmpty channel)
+            channels[direction] = channel.state
+          else
+            channels[direction] = null
+        #console.log '[Map] channel states', util.inspect(channels, false, 5)
         (
-          channel = @clearRoutingObjects channel
-          channel.field = {}
-        ) for channel in channels
+          channels[dir] = @clearRoutingObjects channel
+          channels[dir].field = {}
+        ) for dir, channel of channels
+        #console.log '[Map] channel dump after extraction', util.inspect(channels, false, 5)
       platform = {}
       if field.platform.type?
         platform =  @clearRoutingObjects field.platform.state
@@ -292,7 +299,6 @@ class Map
       (
         state.routing[dest].object = {}
       ) for dest, route of state.routing
-    console.log state
     state
 
   importGameState: ( gameState ) ->
@@ -317,7 +323,7 @@ class Map
       (
         newChannel = S.ObjectFactory.build channel.type, @eventBus, {}
         newChannel.state = _.extend newChannel.state, channel
-        @addChannel newChannel, x, y, direction
+        @addChannel newChannel, x, y, (+direction)
       ) for direction, channel of field.channels
     null
 

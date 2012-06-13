@@ -34,6 +34,7 @@ class Negotiator
     @on 'build:channel', (x, y, k, owner) =>
       @communicator.trigger 'send:build:channel', x, y, k, owner
       @buildChannel x, y, k, owner
+      console.log @game.map
 
     @.on 'routing', (obj, routing) =>
       _.extend obj.platform.state.routing, routing
@@ -125,11 +126,13 @@ class Negotiator
     (players, startingPoints, state, minWidth, maxWidth, nonUser) =>
       console.log '[Negotiator] game state', players, startingPoints, state, minWidth, maxWidth, nonUser
 
+      console.log state
       map = new S.Map @, minWidth, maxWidth, nonUser
       map.importGameState state
       @game = new S.GameManager @, map
       @game.players = players
       @game.startingPoints = startingPoints
+      console.log map
       dfd.resolveWith @
 
   startGame: ->
