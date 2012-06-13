@@ -117,8 +117,6 @@ class GameServer
   buildPlatform: ( game, x, y, type, owner ) ->
     platform = S.ObjectFactory.build S.Types.Entities.Platforms.Normal, @, owner, type
     @gameInstances[game].map.addPlatform platform, x, y
-    console.log '[GameServer] field to which we add platform', @gameInstances[game].map.getField(x,y)
-    console.log '[GameServer] field reference from platforms resource', platform.state.field.resource.state
     platform.trigger 'produce'
     @trigger 'platform:built', game, x, y, type, owner
 
