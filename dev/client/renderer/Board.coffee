@@ -444,7 +444,7 @@ class SignalsDrawer extends Drawer
                 return sig
         null
 
-    createSignal: (y, x, direction) ->
+    createSignal: (x, y, direction) ->
         point = @getPoint(x, y)
         @drawSignal(point, direction)
         @stage.update()
