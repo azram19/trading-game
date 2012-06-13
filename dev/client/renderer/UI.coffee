@@ -10,12 +10,7 @@ class UI extends S.Drawer
 
     @setScroller()
 
-    @canvasContainer.find( 'canvas' ).each ( i, el ) =>
-      ctx = el.getContext '2d'
-      ctx.canvas.width  = @canvasDimensions.x
-      ctx.canvas.height = @canvasDimensions.y
-
-    @scrollX= 0
+    @scrollX = 0
     @scrollY = 0
 
     $(canvas).bind "contextmenu", @handleClick
@@ -59,8 +54,9 @@ class UI extends S.Drawer
     ).first()
 
     @scroller = new Scroller @scroll, {
-        locking:false
-        bouncing:true
+        locking:true
+        bouncing:false
+        animating:false
     }
     @scroller.setDimensions viewportWidth, viewportHeight, @canvasDimensions.x, @canvasDimensions.y
 
@@ -68,35 +64,46 @@ class UI extends S.Drawer
 
     @events.trigger 'resize', viewportWidth, viewportHeight
 
-    @canvasContainer.get()[0].addEventListener("mousedown", (e) =>
-        @scroller.doTouchStart([{
+    scrollerDown = ( e ) =>
+      @scroller.doTouchStart([{
             pageX: e.pageX
             pageY: e.pageY
         }], e.timeStamp)
 
-        @mousedown = true
-    , false)
+      @mousedown = true
 
-    document.addEventListener("mousemove", (e) =>
-        if not @mousedown
+    scrollerMove = ( e ) =>
+      if not @mousedown
             return
 
-        @scroller.doTouchMove([{
-            pageX: e.pageX
-            pageY: e.pageY
-        }], e.timeStamp)
+      @scroller.doTouchMove([{
+          pageX: e.pageX
+          pageY: e.pageY
+      }], e.timeStamp)
 
-        @mousedown = true
-    , false)
+      @mousedown = true
 
-    document.addEventListener("mouseup", (e) =>
-        if not @mousedown
-          return
+    scrollerUp = ( e ) =>
+      if not @mousedown
+        return
 
-        @scroller.doTouchEnd(e.timeStamp)
+      @scroller.doTouchEnd(e.timeStamp)
 
-        @mousedown = false
-    , false)
+      @mousedown = false
+
+
+    scrollerDownThr = _.throttle scrollerDown, 50
+    scrollerMoveThr = _.throttle scrollerMove, 100
+    scrollerUpThr = _.throttle scrollerUp, 50
+
+
+
+    @canvasContainer.get()[0].addEventListener("mousedown", scrollerDown , false)
+
+    @canvasContainer.get()[0].addEventListener("mousemove", scrollerMove, false)
+
+    @canvasContainer.get()[0].addEventListener("mouseup", scrollerUp, false)
+
 
   scroll: (x, y) =>
     @scrollX = x

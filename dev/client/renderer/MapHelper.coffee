@@ -7,6 +7,9 @@ class MapHelper extends S.Drawer
 
     super @minRow, @maxRow
 
+    @cwidth = @canvasDimensions.x
+    @cheight = @canvasDimensions.y
+
     @colours =
       positive: "rgba(0,255,0,0.4)"
       negative: "rgba(255,0,0,0.4)"
@@ -19,8 +22,9 @@ class MapHelper extends S.Drawer
     @overlay = new Shape()
     @overlay.graphics
       .beginFill( "rgba(0,0,0,0.4)" )
-      .drawRect( 0, 0, @canvasDimensions.x, @canvasDimensions.y )
+      .drawRect( 0, 0, @cwidth, @cheight )
       .endFill()
+    #@overlay.cache 0, 0, @cwidth, @cheight
 
     @stage.addChild @overlay
 
@@ -249,6 +253,7 @@ class MapHelper extends S.Drawer
       hex = h
     else
       hex = new Shape()
+      #hex.cache 0, 0, @size, @size
 
     g = hex.graphics
     g.clear()
@@ -273,6 +278,7 @@ class MapHelper extends S.Drawer
       triangle = tr
     else
       triangle = new Shape()
+      #triangle.cache 0, 0, @size, @size
 
     g = triangle.graphics
     g.clear()
@@ -307,6 +313,7 @@ class MapHelper extends S.Drawer
       halfHex = hh
     else
       halfHex = new Shape()
+      #halfHex.cache 0, 0, @size, @size
 
     g = halfHex.graphics
     g.clear()

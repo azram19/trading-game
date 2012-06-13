@@ -55,7 +55,7 @@ class RadialMenu
     @expandTime = 500
     @compactTime = 500
     @hideTime = 200
-    @showTime = 100
+    @showTime = 50
 
     @priority = 100
 

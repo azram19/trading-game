@@ -35,13 +35,6 @@ class Negotiator
       @buildChannel x, y, k, owner
       @communicator.trigger 'send:build:channel', x, y, k, owner
 
-      [x2 ,y2] = @game.map.directionModificators(x, y, k)
-      t.generateRoad x, y, x2, y2
-
-      console.log "build road: ",x,y,x2,y2
-
-      @renderer.changeOwnership x2, y2, owner.id
-
     @.on 'routing', (obj, routing) =>
       _.extend obj.platform.state.routing, routing
       routingValues = _.map routing, (route) ->
@@ -182,6 +175,9 @@ class Negotiator
     @game.map.addChannel channel, x, y, k
     @renderer.buildChannel x, y, k, channel
     @renderer.changeOwnership x, y, owner.id
+    [x2 ,y2] = @game.map.directionModificators(x, y, k)
+    @terrain.generateRoad x, y, x2, y2
+    @renderer.changeOwnership x2, y2, owner.id
 
   getMenu: ( x, y ) ->
     field = @getField x, y
