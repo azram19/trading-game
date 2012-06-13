@@ -11,7 +11,15 @@ class HQBehaviour
     constructor: ( @eventBus ) ->
 
     actionMenu: ( state ) ->
-      menu = ['build:channel', 'routing']
+      possibleRoutes = []
+      _.each state.routing, (route, direction) ->
+        if not _.isEmpty(route.object)
+          possibleRoutes.push (+direction)
+
+      [x, y] = state.field.xy
+      possibleChannels = @eventBus.getPossibleChannels x, y
+
+      menu = [['build:channel', 'routing'], [possibleChannels, possibleRoutes]]
 
     requestAccept: ( signal, state ) ->
         if signal.owner is state.owner

@@ -1,15 +1,21 @@
 S = {}
 if require?
   S.Types = require '../config/Types'
+  _ = require 'underscore'
 else
   S.Types = window.Types
+  _ = window._
 
 class ChannelBehaviour
 
     constructor: ( @eventBus ) ->
 
     actionMenu: ( state ) ->
-      menu = ['routing']
+      possibleRoutes = []
+      _.each state.routing, (route, direction) ->
+        if not _.isEmpty(route.object)
+          possibleRoutes.push (+direction)
+      menu = [['routing'], [possibleRoutes]]
 
     requestAccept: ( signal, state ) ->
         if signal.owner.id is state.owner.id
@@ -36,7 +42,7 @@ class ChannelBehaviour
     route: ( state ) ->
       availableRoutes = []
       _.each state.signals, (signal, index) ->
-        _.each state.routing (route, direction) -> if route? and route.object.state.id isnt signal.source.state.id 
+        _.each state.routing (route, direction) -> if route? and route.object.state.id isnt signal.source.state.id
           availableRoutes.push [route, direction]
 
         destination = availableRoutes[0]
