@@ -48,17 +48,17 @@ class Map
     height = @heightMap.get_cell 8*hx, 8*hy
 
     if height < 40
-      [S.Types.Terrain.Deepwater]
+      [S.Types.Terrain.Sand]# [S.Types.Terrain.Deepwater]
     else if height < 48
-      [S.Types.Terrain.Deepwater, S.Types.Terrain.Water]
+      [S.Types.Terrain.Sand]# [S.Types.Terrain.Deepwater, S.Types.Terrain.Water]
     else if height < 64
-      [S.Types.Terrain.Water]
+      [S.Types.Terrain.Sand] #[S.Types.Terrain.Water]
     else if height < 80
-      [S.Types.Terrain.Water, S.Types.Terrain.Sand]
+      [S.Types.Terrain.Sand] #[S.Types.Terrain.Water, S.Types.Terrain.Sand]
     else if height < 100
-      [S.Types.Terrain.Sand]
+      [S.Types.Terrain.Grass]# [S.Types.Terrain.Sand]
     else if height < 120
-      [S.Types.Terrain.Sand, S.Types.Terrain.Grass]
+      [S.Types.Terrain.Grass] #[S.Types.Terrain.Sand, S.Types.Terrain.Grass]
     else if height < 170
       [S.Types.Terrain.Grass]
     else if height < 180
@@ -179,8 +179,8 @@ class Map
 
         if res > chance / 2
           if (_.intersection @fields[y][x].terrain, resourcesTerrains).length > 0
-            kind = S.Types.Resources.Resources
-            life = S.Types.Resources.Lifes[2]()
+            kind = S.Types.Resources.Gold
+            life = S.Types.Resources.Lifes[0]()
         else if res > chance / 3
           if (_.intersection @fields[y][x].terrain, goldTerrains).length > 0
             kind = S.Types.Resources.Gold
