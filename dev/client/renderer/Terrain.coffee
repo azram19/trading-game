@@ -664,7 +664,7 @@ class Terrain extends S.Drawer
     @waterStage.update()
 
   moveWater: () =>
-    damping = 0.9
+    damping = 0.6
 
     cwidth  = @canvasDimensions.x
     cheight = @canvasDimensions.y

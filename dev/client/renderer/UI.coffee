@@ -55,8 +55,8 @@ class UI extends S.Drawer
 
     @scroller = new Scroller @scroll, {
         locking:true
-        bouncing:false
-        animating:false
+        bouncing:true
+        animating:true
     }
     @scroller.setDimensions viewportWidth, viewportHeight, @canvasDimensions.x, @canvasDimensions.y
 
@@ -92,9 +92,9 @@ class UI extends S.Drawer
       @mousedown = false
 
 
-    scrollerDownThr = _.throttle scrollerDown, 50
-    scrollerMoveThr = _.throttle scrollerMove, 100
-    scrollerUpThr = _.throttle scrollerUp, 50
+    #scrollerDownThr = _.throttle scrollerDown, 50
+    #scrollerMoveThr = _.throttle scrollerMove, 100
+    #scrollerUpThr = _.throttle scrollerUp, 50
 
 
 
@@ -110,7 +110,6 @@ class UI extends S.Drawer
     @scrollY = y
 
     @events.trigger 'scroll', x, y
-
 
     @canvasContainer.find( 'canvas' ).not( '.noScroll' ).each(
       (i,el) ->
