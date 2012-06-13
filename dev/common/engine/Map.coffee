@@ -270,7 +270,7 @@ class Map
           if not (_.isEmpty channel)
             channels[direction] = channel.state
           else
-            channels[direction] = null
+            channels[direction] = {}
         #console.log '[Map] channel states', util.inspect(channels, false, 5)
         (
           channels[dir] = @clearRoutingObjects channel

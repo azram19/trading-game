@@ -28,15 +28,14 @@ class Negotiator
       #console.debug xy, amount, type
 
     @on 'build:platform', (x, y, type, owner) =>
-      @communicator.trigger 'send:build:platform', x, y, type, owner
       @buildPlatform x, y, type, owner
+      @communicator.trigger 'send:build:platform', x, y, type, owner
 
     @on 'build:channel', (x, y, k, owner) =>
-      @communicator.trigger 'send:build:channel', x, y, k, owner
       @buildChannel x, y, k, owner
-      console.log @game.map
+      @communicator.trigger 'send:build:channel', x, y, k, owner
 
-    @.on 'routing', (obj, routing) =>
+    @on 'routing', (obj, routing) =>
       _.extend obj.platform.state.routing, routing
       routingValues = _.map routing, (route) ->
         ret =
@@ -49,10 +48,7 @@ class Negotiator
 
     @on 'scroll', @setViewport
 
-    gameLoaded = new $.Deferred()
-    initiate = new $.Deferred()
 
-    @communicator.on 'game:state', @setGameState(gameLoaded)
 
     @communicator.on 'new:player', ( playerObject, position, HQState ) =>
       console.log '[Negotiator] new player'
@@ -88,14 +84,13 @@ class Negotiator
       console.log '[Negotiator] all players loaded'
       @startGame()
 
-    $.when(initiate.promise()).then( =>
-      #console.log 'user and game info loaded'
-    )
+    initiate = new $.Deferred()
 
-    $.when(gameLoaded.promise()).done(@setupUI).then( =>
+    $.when(initiate.promise()).done(@setupUI).then( =>
       #console.log 'UI has been loaded'
       @communicator.trigger 'set:user:ready', @user.id
     )
+
     @initiateConnection initiate
 
   initiateConnection: (dfd) ->
@@ -113,13 +108,14 @@ class Negotiator
       @myPlayer = @gameInfo.players[@user.id].playerObject
       @communicator.join @gameInfo.name
       @communicator.trigger 'get:game:state', @gameInfo.name
-      dfd.resolveWith @
 
     @communicator.on 'user', ( user ) =>
       getUser.resolve user
 
     @communicator.on 'user:game', (game) ->
       getGame.resolve game
+
+    @communicator.on 'game:state', @setGameState(dfd)
 
 
   setGameState: (dfd) ->
