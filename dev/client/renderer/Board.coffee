@@ -337,7 +337,7 @@ class BoardDrawer extends Drawer
                 @drawHex(point, i, j, boardState.getField(i, j))
                 for k in [0 .. 5]
                     if boardState.getChannel(i, j, k)?.state?
-                        @addElement x, y, @drawChannel(point, k)
+                        @addElement i, j, @drawChannel(point, k)
         if @fogON
             @toogleFog true
         @toogleCache true

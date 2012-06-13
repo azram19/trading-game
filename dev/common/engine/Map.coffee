@@ -290,8 +290,9 @@ class Map
   clearRoutingObjects: (state) ->
     if state?
       (
-       route.object = {}
-      ) for route in state.routing
+        state.routing[dest].object = {}
+      ) for dest, route of state.routing
+    console.log state
     state
 
   importGameState: ( gameState ) ->
