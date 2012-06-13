@@ -9,6 +9,14 @@ Types =
       Platforms:
         HQ: 4
         Normal: 5
+      Names: [
+        ''
+        'Channel'
+        'Signal'
+        'Player'
+        'HQ'
+        'Normal'
+      ]
     Terrain:
       Water: 1
       Sand: 2
@@ -18,13 +26,13 @@ Types =
       Grass: 6
       Snow: 7
       Names: [
-        "water"
-        "sand"
-        "dirt"
-        "rocks"
-        "deepwater"
-        "grass"
-        "snow"
+        "Water"
+        "Sand"
+        "Dirt"
+        "Rocks"
+        "Deepwater"
+        "Grass"
+        "Snow"
       ]
     Resources:
         Gold: 6

@@ -3,7 +3,8 @@ class PlatformBehaviour
     constructor: ( @eventBus ) ->
 
     actionMenu: ( state ) ->
-      menu = ['build:channel', 'routing']
+        myName = S.Types.Entities.Names[state.type]
+        menu = ['build:channel', 'routing', '/!platforminfo', "/:#{ myName }"]
 
     requestAccept: ( signal, state ) ->
         if signal.owner.id is state.owner.id
@@ -34,7 +35,7 @@ class PlatformBehaviour
 
     route: ( state ) ->
         availableRoutes = []
-        _.each state.routing (route, direction) -> if route.out 
+        _.each state.routing (route, direction) -> if route.out
             availableRoutes.push [route, direction]
 
         _.each state.signals, (signal) ->
