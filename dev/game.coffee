@@ -59,10 +59,13 @@ app.get '/game/:gameName', ( req, res ) ->
   if app.requireAuth and req.loggedIn
     userId = req.user.id
     game =  app.gameServer.getUserGame userId
+    [x, y] = app.gameServer.getUIDimensions game.name
     if game.name isnt req.params.gameName
       res.redirect '/game/' + game.name
     else
-     res.render 'board'
+     res.render 'board',
+       x: x
+       y: y
   else
     res.redirect '/'
 

@@ -1,4 +1,7 @@
 Types =
+    UI:
+      Size: 45
+      Margin: 150
     Entities:
       Channel: 1
       Signal: 2
@@ -38,9 +41,9 @@ Types =
             100
         ]
         Lifes: [
-            () -> (Math.random() * 1000 % 760) + 100
-            () -> (Math.random() * 2000 % 1260) + 300
-            () -> (Math.random() * 1000 % 560) + 400
+            -> (Math.random() * 1000 % 760) + 100
+            -> (Math.random() * 2000 % 1260) + 300
+            -> (Math.random() * 1000 % 560) + 400
         ]
     Events:
       Routing:
@@ -59,10 +62,6 @@ Types =
         Number4: 2
         Number5: 3
         Number6: 4
-      Team:
-        Side2: 5
-        Side3: 6
-        Side4: 7
       Info:
         0:
           name: 'Deathmatch'
@@ -92,21 +91,6 @@ Types =
           numberOfSides: 6
           playersOnASide: 1
           teams: false
-        5:
-          name: 'Team Match'
-          numberOfSides: 2
-          playersOnASide: 2
-          teams: true
-        6:
-          name: 'Team Match'
-          numberOfSides: 2
-          playersOnASide: 3
-          teams: true
-        7:
-          name: 'Team Match'
-          numberOfSides: 2
-          playersOnASide: 4
-          teams: true
 
 if module? and module.exports
   exports = module.exports = Types

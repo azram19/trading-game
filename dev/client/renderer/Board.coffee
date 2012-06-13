@@ -169,7 +169,7 @@ class BoardDrawer extends Drawer
         for i in [1..5]
             stage = @stages[i]
             stage.updateCache()
-            stage.update()
+            stage.update() 
 
 #--------------------#
 
@@ -226,7 +226,7 @@ class BoardDrawer extends Drawer
             g.setStrokeStyle(4)
              .beginStroke(@colors[_.indexOf(@players, ownerid)])
              .drawPolyStar(0, 0, @size*0.93, 6, 0, 90)
-            new Shape g
+            new Shape g 
         owner = draw(ownerid)
         if @fogON
             owner.visible = false
@@ -296,7 +296,7 @@ class BoardDrawer extends Drawer
             array.push @modifyCoords point.x, point.y, i
         if status
             for p in (_.difference array, @visibility)
-                @setFog p, false
+                @setFog p, false 
             @visibility = _.union @visibility, array
             @ownership.push point
         else

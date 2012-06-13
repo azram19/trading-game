@@ -46,6 +46,20 @@ class GameServer
   getUserGame: ( userId ) ->
     @playersGame[userId]
 
+  getUIDimensions: ( name ) ->
+    game = @games[name]
+    margin = S.Types.UI.Margin
+    size = S.Types.UI.Size
+    maxRow = game.typeData.maxWidth
+    horIncrement = Math.ceil Math.sqrt(3)*S.Types.UI.Size/2
+    verIncrement = Math.ceil 3*S.Types.UI.Size/2
+    diffRows = game.typeData.maxWidth - game.typeData.minWidth
+    distance = 2*horIncrement
+ 
+    x = 2*(margin-horIncrement) + maxRow * distance + margin
+    y = (margin+size) + (diffRows * 2 + 1) * verIncrement + margin
+    [x, y]
+
   getGameInstance: ( name ) ->
     game = @games[name]
     instance = @gameInstances[name]
