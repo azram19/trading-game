@@ -108,7 +108,6 @@ class Communicator
         @app.gameServer.buildPlatform game.name, x, y, type, owner
 
       socket.on 'send:build:channel', ( x, y, k, owner ) =>
-        console.log 'new channel built'
         game = @app.gameServer.getUserGame owner.userId
         @app.gameServer.buildChannel game.name, x, y, k, owner
 

@@ -28,12 +28,12 @@ class Negotiator
       #console.debug xy, amount, type
 
     @on 'build:platform', (x, y, type, owner) =>
-      @buildPlatform x, y, type, owner
       @communicator.trigger 'send:build:platform', x, y, type, owner
+      @buildPlatform x, y, type, owner
 
     @on 'build:channel', (x, y, k, owner) =>
-      @buildChannel x, y, k, owner
       @communicator.trigger 'send:build:channel', x, y, k, owner
+      @buildChannel x, y, k, owner
 
     @.on 'routing', (obj, routing) =>
       _.extend obj.platform.state.routing, routing
