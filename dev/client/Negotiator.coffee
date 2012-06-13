@@ -40,7 +40,7 @@ class Negotiator
 
       console.log "build road: ",x,y,x2,y2
 
-      @renderer.changeOwnership x, y, owner.id
+      @renderer.changeOwnership x2, y2, owner.id
 
     @.on 'routing', (obj, routing) =>
       _.extend obj.platform.state.routing, routing

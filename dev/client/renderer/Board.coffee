@@ -23,13 +23,10 @@ class Drawer
         @viewportHeight = 0
         @viewportWidth = 0
 
-        @directionModificators =
-          0: [-1, -1]
-          1: [0, -1]
-          2: [1, 0]
-          3: [1, 1]
-          4: [0, 1]
-          5: [-1, 0]
+        @directionModUpper = [[-1, -1], [0, -1], [1, 0], [1, 1], [0, 1], [-1, 0],[0, 0]]
+        @directionModLower = [[0, -1], [1, -1], [1, 0], [0, 1], [-1, 1], [-1, 0],[0, 0]]
+
+        @invisibleTerrain = {}
 
         @canvasDimensions = {}
         @canvasDimensions.x =
@@ -51,6 +48,13 @@ class Drawer
             @ticksX[i] = @offsetX[i]/@div
             @ticksY[i] = @offsetY[i]/@div
         true
+
+    modifyCoords: (x, y, dir) ->
+        if y < @diffRows or (y is @diffRows and dir < 3)
+            mod = @directionModUpper[dir]
+        else if y > @diffRows or (y is @diffRows and dir >= 3)
+            mod = @directionModLower[dir]
+        new Point x + mod[0], y + mod[1]
 
     setViewport: (width, height) ->
         @viewportHeight = height
@@ -99,12 +103,64 @@ class Drawer
         Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2))
 
 class BoardDrawer extends Drawer
-    constructor: (@eventBus, @off2ST, @ownershipST, @resourcesST, @gridST, @platformsST, @channelsST, @overlayST, minRow, maxRow, @players, @myPlayer) ->
+    constructor: (@bitmapsST, @stages, minRow, maxRow, @players, @myPlayer) ->
         super minRow, maxRow
-        @uiHandler = new UIHandler @overlayST, minRow, maxRow
         @colors = ["#274E7D", "#900020", "#FFA000", "#B80049", "#00A550", "#9999FF", "#367588", "#FFFFFF"]
-        @stages = [@gridST, @overlayST, @ownershipST, @resourcesST, @platformsST, @channelsST]
+        @gridST = @stages[0]
+        @fogST = @stages[1]
+        @ownershipST = @stages[2]
+        @resourcesST = @stages[3]
+        @platformsST = @stages[4]
+        @channelsST = @stages[5]
+
         @visibility = []
+        @ownership = []
+
+        @elements = {}
+        @fog = {}
+
+        @bitmaps = []
+        @shapes = []
+
+        @setShapes()
+        @invisibleTerrain = @fogST
+#------------FOG SWITCH-------------#
+        @fogON = true
+#------------FOG SWITCH-------------#
+
+#--------------------#
+    setShapes: () ->
+        drawFog = () =>
+            g1 = new Graphics()
+            g1.beginFill("#000000")
+             .drawPolyStar(0, 0, @size, 6, 0, 90)
+            fog = new Shape g1
+            fog.alpha = 0.6
+            fog.regX = @horIncrement
+            fog.regY = @size
+            @shapes[0] = fog
+            @shapes[0].cache(-@horIncrement, -@size, (@distance), (@size)*2)
+        drawGrid = () =>
+            g2 = new Graphics()
+            g2.setStrokeStyle(3)
+             .beginStroke("#616166")
+             .drawPolyStar(0, 0, @size, 6, 0, 90)
+            grid = new Shape g2
+            grid.regX = @horIncrement
+            grid.regY = @size
+            @shapes[1] = grid
+            @shapes[1].cache(-@horIncrement, -@size, (@distance), (@size)*2)
+        drawFog()
+        drawGrid()
+
+    addElement: (x, y, e) ->
+        @elements[x] ?= []
+        @elements[x][y] ?= []
+        @elements[x][y].push e
+
+    addFog: (x, y, e) ->
+        @fog[x] ?= []
+        @fog[x][y] = e
 
     addPlayer: (player) ->
         @players.push player
@@ -115,106 +171,102 @@ class BoardDrawer extends Drawer
             stage.updateCache()
             stage.update() 
 
+#--------------------#
+
     buildPlatform: (x, y, type) ->
         point = @getPoint(x, y)
-        @drawPlatform(point, type)
-        @updateAll()
-
-    capturePlatform: (x, y, ownerid) ->
-        point = @getPoint x, y
-        @drawOwnership point, ownerid
+        @addElement x, y, @drawPlatform(point, type)
+        @platformsST.updateCache()
+        @platformsST.update()
 
     buildChannel: (x, y, direction, ownerid) ->
         point = @getPoint(x, y)
         destination = @getDestination(point, direction)
-        @drawChannel(point, direction)
-        @drawOwnership(destination, ownerid)
+        @addElement x, y, @drawChannel(point, direction)
+        @channelsST.updateCache()
+        @channelsST.update()
 
-    captureChannel: (x, y, direction, ownerid) ->
+    captureOwnership: (x, y, ownerid, targetid) ->
         point = @getPoint(x, y)
-        destination = @getDestination(point, direction)
-        @drawOwnership(destination, ownerid)
+        @drawOwnership(point, ownerid)
+        if @fogON
+            if ownerid is @myPlayer.id
+                @setVisibility point, true
+            else if targetid is @myPlayer.id
+                @setVisibility point, false
         @updateAll()
 
     changeOwnership: (x, y, ownerid) ->
         point = @getPoint(x, y)
-        @drawOwnership(point, ownerid)
-        #@setFog(x, y, point, ownerid)
+        @addElement x, y, @drawOwnership(point, ownerid)
+        if @fogON
+            if ownerid is @myPlayer.id
+                @setVisibility (new Point x, y), true
         @updateAll()
 
-    drawFog: (point) ->
-        g = new Graphics()
-        g.beginFill("#000000")
-        g.drawPolyStar(0, 0, @size, 6, 0, 90)
-        overlay = new Shape g
-        overlay.x = point.x
-        overlay.y = point.y
-        overlay.alpha = 0.6
-        @overlayST.addChild overlay
+#--------------------#
 
-    setFog: (point, ownerid) ->
-        if ownerid is @myPlayer.id or not (ownerid?)
-            for i in [0..6]
-                fog = @overlayST.getObjectUnderPoint point.x + @offsetX[i], point.y + @offsetY[i]
-                if fog.visible
-                    fog.visible = false
-                    for j in [2..5]
-                        stage = @stages[j]
-                        x = point.x + @offsetX[i]
-                        y = point.y + @offsetY[i]
-                        obj = stage.getObjectUnderPoint x, y
-                        console.log x, y, obj
-                        if obj?
-                            obj.alpha = 1
+    drawFog: (point) ->
+        fog = @shapes[0].clone()
+        fog.x = point.x
+        fog.y = point.y
+        @fogST.addChild fog
+        fog
+
+    drawGrid: (point) ->
+        border = @shapes[1].clone()
+        border.x = point.x
+        border.y = point.y
+        @gridST.addChild border
+        border
 
     drawOwnership: (point, ownerid) ->
-        g = new Graphics()
-        g.setStrokeStyle(3)
-        if ownerid?
-            g.beginStroke(@colors[_.indexOf(@players, ownerid)])
-            .drawPolyStar(point.x, point.y, @size*0.95, 6, 0, 90)
-            shape = new Shape g
-            #shape.visible = false
-            @ownershipST.addChild shape
-            #if ownerid is @myPlayer.id
-                #@setVisibility(point)
-        else
-            g.beginStroke("#616166")
-            .drawPolyStar(point.x, point.y, @size, 6, 0, 90)
-            @gridST.addChild new Shape g
-
-    setVisibility: (point) ->
-        array = []
-        for i in [0..6]
-            array.push @getDestination point, i
-        @visibility = _.union @visibility, array
+        draw = (ownerid) =>
+            g = new Graphics()
+            g.setStrokeStyle(4)
+             .beginStroke(@colors[_.indexOf(@players, ownerid)])
+             .drawPolyStar(0, 0, @size*0.93, 6, 0, 90)
+            new Shape g 
+        owner = draw(ownerid)
+        if @fogON
+            owner.visible = false
+        owner.x = point.x
+        owner.y = point.y
+        @ownershipST.addChild owner
+        owner
 
     drawPlatform: (point, type) ->
-        #g = new Graphics()
-        switch type
-            when S.Types.Entities.Platforms.HQ then @setBitmap(point, 0)#g.beginFill("#C5B356")
-            when S.Types.Entities.Platforms.Normal then @setBitmap(point, 1)#g.beginFill("#A6B4B0")
-        #g.drawPolyStar(point.x, point.y, 2*@size/3, 6, 0, 90)
-        #@platformsST.addChild new Shape g
+        draw = (type) =>
+            switch type
+                when S.Types.Entities.Platforms.HQ then bitmap = @bitmapsST.getChildAt(2).clone()
+                when S.Types.Entities.Platforms.Normal then bitmap = @bitmapsST.getChildAt(4).clone()
+            bitmap
+        bitmap = draw(type)
+        if @fogON
+            bitmap.visible = false
+        else
+            bitmap.visible = true
+        bitmap.x = point.x
+        bitmap.y = point.y
+        @platformsST.addChild bitmap
+        bitmap
 
-    setBitmap: (point, type) ->
-        b = @off2ST.getChildAt(type).clone()
-        b.visible = true
-        b.x = point.x
-        b.y = point.y
-        #console.log b.x, b.y
-        @platformsST.addChild b
-
-    drawResource: (point, resource) ->
-        g = new Graphics()
-        switch resource
-            when S.Types.Resources.Gold then g.beginFill("#FF0000")
-            when S.Types.Resources.Food then g.beginFill("#0FFFF0")
-            when S.Types.Resources.Resource then g.beginFill("#FFFFFF")
-        g.drawCircle(point.x, point.y, 6)
-        shape = new Shape g
-        #shape.visible = false
-        @resourcesST.addChild shape
+    drawResource: (point, type) ->
+        draw = (type) =>
+            switch type
+                when S.Types.Resources.Gold then resource = @bitmapsST.getChildAt(1).clone()
+                when S.Types.Resources.Food then resource = @bitmapsST.getChildAt(0).clone()
+                when S.Types.Resources.Resources then resource = @bitmapsST.getChildAt(3).clone()
+            resource
+        resource = draw(type)
+        if @fogON
+            resource.visible = false
+        else
+            resource.visible = true
+        resource.x = point.x
+        resource.y = point.y
+        @resourcesST.addChild resource
+        resource
 
     drawChannel: (point, direction) ->
         destination = @getDestination(point, direction)
@@ -224,33 +276,77 @@ class BoardDrawer extends Drawer
             .beginStroke("#FFFF00")
             .beginFill("#FFFF00")
             .lineTo(destination.x, destination.y)
-        shape = new Shape g
-        #shape.visible = false
-        @channelsST.addChild shape
+        channel = new Shape g
+        if @fogON
+            channel.visible = false
+        @channelsST.addChild channel
+        channel
+#--------------------#
 
-    drawHex: (point, field) ->
-        #@drawFog point
-        @drawOwnership point
+    setFog: (point, status) ->
+        if @fog[point.x]?[point.y]?
+            @fog[point.x][point.y].visible = status
+            if @elements[point.x]?[point.y]?
+                for elem in @elements[point.x][point.y]
+                    elem.visible = not status
+
+    setVisibility: (point, status) ->
+        array = []
+        for i in [0..6]
+            array.push @modifyCoords point.x, point.y, i
+        if status
+            for p in (_.difference array, @visibility)
+                @setFog p, false 
+            @visibility = _.union @visibility, array
+            @ownership.push point
+        else
+            @ownership = _.without @ownership, point
+            @visibility = @getVisibility @ownership
+            for p in (_.difference array, @visibility)
+                @setFog p, true
+
+    getVisibility: (ownership) ->
+        visibility = []
+        for point in ownership
+            array = []
+            for i in [0..6]
+                array.push @modifyCoords point.x, point.y, i
+            visibility = _.union @visibility, array
+        visibility
+
+#--------------------#
+
+    drawHex: (point, x, y, field) ->
+        if @fogON
+            @addFog x, y, @drawFog point
+        @drawGrid point
         if field.platform.type?
-            @drawOwnership point, field.platform.state.owner.id
+            ownerid = field.platform.state.owner.id
+            @addElement x, y, @drawOwnership point, ownerid
+            if ownerid is @myPlayer.id
+                @ownership.push new Point x, y
         if field.resource.behaviour?
-            @drawResource point, field.resource.type()
+            @addElement x, y, @drawResource point, field.resource.type()
         if field.platform.type?
-            @drawPlatform point, field.platform.type()
-        #@uiHandler.drawOverlay point
+            @addElement x, y, @drawPlatform point, field.platform.type()
 
     setupBoard: (boardState) ->
         for j in [0 ... (2*@diffRows + 1)]
             for i in [0 ... @maxRow - Math.abs(@diffRows - j)]
                 point = @getPoint(i, j)
-                @drawHex(point, boardState.getField(i, j))
+                @drawHex(point, i, j, boardState.getField(i, j))
                 for k in [0 .. 5]
                     if boardState.getChannel(i, j, k)?.state?
-                        @drawChannel(point, k)
-        #for point in @visibility
-            #@setFog point
+                        @addElement x, y, @drawChannel(point, k)
+        if @fogON
+            @toogleFog true
         @toogleCache true
-        #@uiHandler.toogleCache true
+
+    toogleFog: (status) ->
+        if status
+            @visibility = @getVisibility @ownership
+            for point in @visibility
+                @setFog point, false
 
     toogleCache: (status) ->
         for i in [0..5]
@@ -261,78 +357,7 @@ class BoardDrawer extends Drawer
                 stage.uncache()
         true
 
-class UIHandler extends Drawer
-    constructor: (@stage, minRow, maxRow) ->
-        super minRow, maxRow
-        @update = false
-        #@stage.enableMouseOver(20)
-        #@stage.onMouseOver = @mouseOverField
-        #@stage.onMouseOut = @mouseOutField
-        #@overlay = @drawOverlay(new Point 0, 0)
-        #Ticker.addListener this
-        @k = 0
-
-    drawOverlay: (point) ->
-        g = new Graphics()
-        g.beginFill("#FFFF00")
-        g.drawPolyStar(0, 0, @size, 6, 0, 90)
-        overlay = new Shape g
-        overlay.x = point.x
-        overlay.y = point.y
-        overlay.alpha = 0.01
-        @stage.addChild overlay
-
-    mouseOverField: (event) =>
-        console.log event
-        x = event.stageX
-        y = event.stageY
-        if x?
-            fieldCoords = @getCoords(x,y)
-            point = @getPoint(fieldCoords.x, fieldCoords.y)
-            @overlay.x = point.x
-            @overlay.y = point.y
-            @overlay.alpha = 0.2
-            @update = true
-        #event.target.alpha = 0.2
-        #event.target.updateCache()
-        #@update = true
-
-    fun: () ->
-        x = @stage.mouseX
-        y = @stage.mouseY
-        if x?
-            fieldCoords = @getCoords(new Point(x,y))
-            point = @getPoint(fieldCoords.x, fieldCoords.y)
-            @overlay.x = point.x
-            @overlay.y = point.y
-            @overlay.alpha = 0.2
-            console.log @overlay
-            @update = true
-            @k++
-        if @k is 5
-            Ticker.setPaused true
-
-    mouseOutField: (event) =>
-        console.log "out"
-        event.target.alpha = 0.01
-        event.target.updateCache()
-        @update = true
-
-    tick: () ->
-        #@fun()
-        if(@update)
-            @update = false
-            @stage.update()
-
-    toogleCache: (status) ->
-        length = @stage.getNumChildren() - 1
-        for i in [0..length]
-            shape = @stage.getChildAt i
-            if status
-                shape.cache(-@horIncrement, -@size, (@distance), (@size)*2)
-            else
-                shape.uncache()
-        true
+#--------------------#
 
 class OffSignals
     signalRadius: 8
@@ -427,110 +452,92 @@ class SignalsDrawer extends Drawer
     tick: () ->
         for signal in @stage.children
             if signal.isSignal and signal.isVisible
-                if @getDistance(signal.k * signal.tickSizeX, signal.k * signal.tickSizeY) >= @distance
-                    signal.visible = false
+                if not @fogON or not @invisibleTerrain.hitTest signal.x, signal.y
+                    signal.visible = true
+                    if @getDistance(signal.k * signal.tickSizeX, signal.k * signal.tickSizeY) >= @distance
+                        signal.visible = false
+                    else
+                        signal.x += signal.tickSizeX
+                        signal.y += signal.tickSizeY
+                        signal.k += 1
                 else
-                    signal.x += signal.tickSizeX
-                    signal.y += signal.tickSizeY
-                    signal.k += 1
+                    signal.visible = false
         @fpsLabel.text = Math.round(Ticker.getMeasuredFPS())+" fps"
-        @stage.update()
-
-class BackgroundDrawer
-    constructor: (@stage) ->
-        img = new Image
-        #img.src = "address"
-        #img.onload = @setBg
-
-    setBg: (event) =>
-        bg = new Bitmap event.target
-        @stage.addChild bg
         @stage.update()
 
 class Renderer
     constructor: (eventBus, minRow, maxRow, players, myPlayer) ->
-        #canvasBackground = document.getElementById "background"
         canvasOwnership = document.getElementById "ownership"
         canvasResources = document.getElementById "resources"
         canvasPlatforms = document.getElementById "platforms"
         canvasGrid = document.getElementById "grid"
         canvasChannels = document.getElementById "channels"
-        canvasOverlay = document.getElementById "overlay"
+        canvasFog = document.getElementById "fog"
         canvasSignals = document.getElementById "signals"
         canvasOff = document.getElementById "off"
-        canvasOff2 = document.getElementById "off2"
-        #canvasUI = document.getElementById "UI"
-        @stages = []
-        @bitmaps = ["/img/hq.png", "/img/platform.png"]
+        canvasBitmaps = document.getElementById "bitmaps"
+        @bitmaps = ["/img/deer.png", "/img/gold.png", "/img/hq.png", "/img/iron.png", "/img/platform.png"]
         @boardLoaded = $.Deferred()
-        ###
-        if canvasBackground?
-            @backgroundST = new Stage canvasBackground
-            @backgroundDR = new BackgroundDrawer @backgroundST
-            @addStage @backgroundST
-        ###
+
         if canvasOwnership?
             @ownershipST = new Stage canvasOwnership
-            @addStage @ownershipST
         if canvasResources?
             @resourcesST = new Stage canvasResources
-            @addStage @resourcesST
         if canvasPlatforms?
             @platformsST = new Stage canvasPlatforms
-            @off2ST = new Stage canvasOff2
-            @addStage @platformsST
+            @bitmapsST = new Stage canvasBitmaps
         if canvasGrid?
             @gridST = new Stage canvasGrid
-            @addStage @gridST
         if canvasChannels?
             @channelsST = new Stage canvasChannels
-            @addStage @channelsST
-        if canvasOverlay?
-            @overlayST = new Stage canvasOverlay
-            @addStage @overlayST
+        if canvasFog?
+            @fogST = new Stage canvasFog
         if canvasSignals?
             @signalsST = new Stage canvasSignals
             @offST = new Stage canvasOff
-            @addStage @signalsST
-        ###
-        if canvasUI?
-            @UIST = new Stage canvasUI
-            @addStage @UIST
-        ###
+
+        @stages = [@gridST, @fogST, @ownershipST, @resourcesST, @platformsST, @channelsST, @signalsST]
+
         imagesLoaded = $.Deferred()
         @loadImages imagesLoaded
         $.when(imagesLoaded.promise()).done =>
             console.log '[Renderer] all Images have been loaded'
-            @boardDR = new BoardDrawer eventBus, @off2ST, @ownershipST, @resourcesST, @gridST, @platformsST, @channelsST, @overlayST, minRow, maxRow, players, myPlayer
+            boardStages = [@gridST, @fogST, @ownershipST, @resourcesST, @platformsST, @channelsST]
+            @boardDR = new BoardDrawer @bitmapsST, boardStages, minRow, maxRow, players, myPlayer
             @signalsDR = new SignalsDrawer @signalsST, @offST, minRow, maxRow
             @boardLoaded.resolve()
 
     loadImages: (dfd) ->
-        k = 0
+        count = 0
+
+        compare = (a, b) =>
+            if a.image.src >= b.image.src
+                1
+            else if a.image.src < b.image.src
+                -1
+            
         setImg = (event) =>
             bitmap = new Bitmap event.target
             bitmap.visible = false
             bitmap.regX = 35
             bitmap.regY = 40
-            @off2ST.addChild bitmap
-            k++
-            if k is @bitmaps.length
-                console.log '[Renderer] image loaded event'
+            @bitmapsST.addChild bitmap
+            count++
+            if count is @bitmaps.length
+                @bitmapsST.sortChildren compare
+                console.log '[Renderer] image loaded event', count
                 dfd.resolve()
 
-        loadBitmap = (src) =>
+        loadBitmap = (bitmap) =>
             img = new Image
-            img.src = src
+            img.src = bitmap
             img.onload = setImg
 
-        for src in @bitmaps
-            loadBitmap src
+        for bitmap in @bitmaps
+            loadBitmap bitmap
 
     addPlayer: (player) ->
         @boardDR.addPlayer(player)
-
-    addStage: (stage) ->
-        @stages.push stage
 
     clearAll: () ->
         for stage in @stages
@@ -541,6 +548,9 @@ class Renderer
         for stage in @stages
             stage.update()
         true
+    #Doesnt work so far
+    switchFog: (status) ->
+        @boardDR.fogON = status
 
 #---------------------Interface----------------------#
 
@@ -550,7 +560,6 @@ class Renderer
 
     # builds a channel at field (x,y) in given direction
     buildChannel: (x, y, direction, channel) ->
-        console.log channel
         @boardDR.buildChannel(x, y, direction, channel.state.owner.id)
 
     # builds a platform at field (x,y) given a field object, which helps
@@ -562,14 +571,15 @@ class Renderer
     # channel is the object at (x,y), helps to find the ownership
     # direction indicates the field which will be captured with the channel
     captureChannel: (x, y, direction, state) ->
-        @boardDR.captureChannel(x, y, direction, state.owner.id)
+        @boardDR.captureOwnership(x, y, state.owner.id)
 
     # captures a platform at (x,y), field is a field object at (x,y)
     capturePlatform: (x, y, state) ->
-        @boardDR.capturePlatform(x, y, state.owner.id)
+        @boardDR.captureOwnership(x, y, state.owner.id)
 
-    changeOwnership: (x, y, owner) ->
-        @boardDR.capturePlatform(x, y, owner.id)
+    # changes ownership of the field at x, y
+    changeOwnership: (x, y, ownerid) ->
+        @boardDR.changeOwnership(x, y, ownerid)
 
     # Resets all the canvases, using the current boardState
     # It clears all the stages and. To be discussed whether to clear Signals
