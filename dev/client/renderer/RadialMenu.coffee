@@ -21,6 +21,7 @@ class RadialMenu
     @negative_action = 'No'
 
     @actionHelper = null
+    @displayHelper = null
 
     ###
     Get the context and stage we will be drawing to. Only for the root it will be the actuall context, for every other element it will get
@@ -137,6 +138,9 @@ class RadialMenu
     @rootElement = root
 
     child.setRoot root for child in @children
+
+  setDisplayHelper: ( displayHelper ) ->
+    @displayHelper = displayHelper
 
   setActionHelper: ( actionHelper ) ->
     @actionHelper = actionHelper
@@ -261,6 +265,10 @@ class RadialMenu
 
   destroy: () ->
     child.destroy() for child in @children
+
+
+    if @displayHelper
+      @displayHelper.hide()
 
     @hideText()
     @button.visible = false
@@ -585,6 +593,9 @@ class RadialMenu
             @parent.displayText @
           else
             @parent.undisplayText @
+      else if @displayHelper
+        @displayHelper.show()
+
     else
       if @children.length < 1
         if @desc.length == 0
@@ -658,48 +669,3 @@ class RadialMenu
       @stage.update()
 
 window.S.RadialMenu = RadialMenu
-
-$ ->
-  canvas = document.getElementById "radial"
-  if canvas?
-    #window.Mouse = new MouseClass canvas
-
-    window.r = r = new S.RadialMenu null, canvas, 250, 250, "piesek", "", true
-
-
-
-    rd5 = '<p>"No more, Queequeg," said I, shuddering; "that will do;" for I knew the inferences without his further hinting them. I had seen a sailor who had visited that very island, and he told me that it was the custom, when a great battle had been gained there, to barbecue all the slain in the yard or garden of the victor; and then, one by one, they were placed in great wooden trenchers, and garnished round like a pilau, with breadfruit and cocoanuts; and with some parsley in their mouths, were sent round with the victors compliments to all his friends, just as though these presents were so many Christmas turkeys.</p>'
-    rd6 = "<p>Her power of repulsion for the planet was so great that it had carried her far into space, where she can be seen today, by the aid of powerful telescopes, hurtling through the heavens ten thousand miles from Mars; a tiny satellite that will thus encircle Barsoom to the end of time.</p>"
-    rd7 = '<p>"It was in the summer of 2013 that the Plague came. I was twenty-seven  years old, and well do I remember it. Wireless despatches&mdash;"</p>
-
-      <p>Hare-Lip spat loudly his disgust, and Granser hastened to make amends.</p>"'
-    rd8 = "<p>Her power of repulsion for the planet was so great that it had carried her far into space, where she can be seen today, by the aid of powerful telescopes, hurtling through the heavens ten thousand miles from Mars; a tiny satellite that will thus encircle Barsoom to the end of time.</p>"
-    rd9 = "<p>Her power of repulsion for the planet was so great that it had carried her far into space, where she can be seen today, by the aid of powerful telescopes, hurtling through the heavens ten thousand miles from Mars; a tiny satellite that will thus encircle Barsoom to the end of time.</p>"
-
-    r2 = new RadialMenu null, canvas, 0, 0, "kotek", rd5
-    r3 = new RadialMenu null, canvas, 0, 0, "malpka", rd5
-    r4 = new RadialMenu null, canvas, 0, 0, "ptaszek", rd5
-    r0 = new RadialMenu null, canvas, 0, 0, "dziubek", rd5
-
-    r5 = new RadialMenu null, canvas, 0, 0, "gawron", rd5
-    r6 = new RadialMenu null, canvas, 0, 0, "slon", rd6
-    r7 = new RadialMenu null, canvas, 0, 0, "dzwon", rd7
-    r8 = new RadialMenu null, canvas, 0, 0, "dzwon1", rd8
-    r9 = new RadialMenu null, canvas, 0, 0, "dzwon2", rd9
-
-    r.addChild r2
-    r.addChild r3
-    r.addChild r4
-    r.addChild r0
-
-    r4.addChild r5
-    r4.addChild r6
-    r4.addChild r7
-    r4.addChild r8
-    r4.addChild r9
-
-    Ticker.setFPS 60
-
-    r.drawIt()
-    r.show()
-

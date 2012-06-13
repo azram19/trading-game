@@ -11,7 +11,8 @@ class HQBehaviour
     constructor: ( @eventBus ) ->
 
     actionMenu: ( state ) ->
-      menu = ['build:channel', 'routing']
+        myName = S.Types.Entities.Names[state.type]
+        menu = ['build:channel', 'routing']
 
     requestAccept: ( signal, state ) ->
         if signal.owner is state.owner
@@ -26,6 +27,8 @@ class HQBehaviour
             state.field.resource.trigger 'produce'
         production = =>
                 (
+                    if not state.field.platform.state.owner
+                        console.log ["Missing owner - HQ"], state.field
                     state.owner.addResource(S.SignalFactory.build S.Types.Entities.Signal, @eventBus, state.extraction, S.Types.Resources[res], state.field.platform)
                     @eventBus.trigger 'resource:produce', state.field.xy, state.extraction, S.Types.Resources[res]
                 ) for res in S.Types.Resources.Names

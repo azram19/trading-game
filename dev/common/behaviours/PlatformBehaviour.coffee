@@ -9,7 +9,8 @@ class PlatformBehaviour
     constructor: ( @eventBus ) ->
 
     actionMenu: ( state ) ->
-      menu = ['build:channel', 'routing']
+        myName = S.Types.Entities.Names[state.type]
+        menu = ['build:channel', 'routing', '/!platforminfo', "/:#{ myName }"]
 
     requestAccept: ( signal, state ) ->
         if signal.owner.id is state.owner.id

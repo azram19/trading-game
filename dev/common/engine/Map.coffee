@@ -218,7 +218,6 @@ class Map
     resource.behaviour.eventBus = @eventBus
     resource.state.field = @fields[y][x]
     @fields[y][x].resource = resource
-    console.log '[Map] checking resource field reference', _.isEmpty(resource.state.field)
 
   addPlatform: ( platform, x, y ) ->
     platform.behaviour.eventBus = @eventBus
@@ -231,7 +230,6 @@ class Map
       platform.state.routing[dir].object = channel
       channel.state.routing[nDir].object = platform
     ) for dir, channel of @fields[y][x].channels
-    console.log '[Map] platform check after add', platform
 
   #k - direction [0..5] clockwise from the top
   addChannel: ( channel, x, y, k ) ->
@@ -249,7 +247,7 @@ class Map
       if @fields[y][x].platform.type?
         nK = (k + 3) % 6
         @fields[y][x].platform.state.routing[k].object = channel
-        channel.state.routing[nK].object = @fields[y][k].platform
+        channel.state.routing[nK].object = @fields[y][x].platform
 
     routingAddChannel x, y, k
     routingAddChannel nX, nY, nK

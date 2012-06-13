@@ -14,27 +14,27 @@ class Terrain extends S.Drawer
     @blendMasks = {}
 
     @typesOfTerrain = [
-      'dirt',
-      'grass',
-      'water',
-      'deepwater',
-      'sand',
-      'rocks',
-      'forest',
-      'snow'
+      'Dirt',
+      'Grass',
+      'Water',
+      'Deepwater',
+      'Sand',
+      'Rocks',
+      'Forest',
+      'Snow'
     ]
 
     #colours are in hsl :P
     @Config =
       colours:
-        dirt: [24, 32, 30]
-        sand: [35, 40, 69]
-        water: [180, 51, 38]
-        deepwater: [193, 94, 28]
-        rocks: [60,1,49]
-        grass: [57, 42, 44]
-        forest: [84, 27, 25]
-        snow: [180,16,96]
+        Dirt: [24, 32, 30]
+        Sand: [35, 40, 69]
+        Water: [180, 51, 38]
+        Deepwater: [193, 94, 28]
+        Rocks: [60,1,49]
+        Grass: [57, 42, 44]
+        Forest: [84, 27, 25]
+        Snow: [180,16,96]
       modifiers:
         h: 1
         s: 10
@@ -371,13 +371,13 @@ class Terrain extends S.Drawer
   drawRoad: ( roadImage, i, j, i2, j2 ) ->
     steps = 16
 
-    h = 0.9
-    range = 40
+    h = 1
+    range = 20
 
     [ht,st,lt] = @Config.colours[@getTerrain(i,j)]
     colourt = "hsl(#{ ht },#{ st }%,#{ lt }%)"
 
-    [h,s,l] = @Config.colours.dirt
+    [h,s,l] = @Config.colours.Dirt
     colourr = "hsl(#{ h },#{ s }%,#{ l }%)"
 
     cr = (net.brehaut.Color colourr)
@@ -405,13 +405,42 @@ class Terrain extends S.Drawer
 
     oldCoords = [[p1.x, p1.y],[p2.x, p2.y]]
 
+    gradientY = (p2.y-p1.y)/(p2.x-p1.x)
+    gradientX = (p2.x-p1.x)/(p2.y-p1.y)
+
     oldCoords = @midpointMisplacement steps, h, range, oldCoords
 
+    drawByX = gradientX > gradientY
+    console.log gradientY, gradientX, drawByX
+
+    #@drawCircle roadImage, p1.x, p1.y, 8, rgbcr, rgbct
+    #@drawCircle roadImage, p2.x, p2.y, 8, rgbcr, rgbct
+
     for i in [0...oldCoords.length-1]
-      @drawRoadSegment roadImage, rgbcr, rgbct, oldCoords[i], oldCoords[i+1]
+      @drawRoadSegment roadImage, rgbcr, rgbct, oldCoords[i], oldCoords[i+1], drawByX
 
+  drawCircle: ( image, x, y, radius, [r1, g1, b1], [r2, g2, b2]) ->
+    sqR = radius*radius
 
-  drawRoadSegment: (roadImage, [r1,g1,b1], [r2,g2,b2], [x1,y1], [x2,y2]) ->
+    mr = -1 * radius
+
+    for i in [mr...radius]
+      for j in [mr...radius]
+
+        if sqI + sqJ <= sqR
+          alpha = 0.3
+
+          r = Math.round( r1 * (1 - alpha) + r2 * alpha)
+          g = Math.round( g1 * (1 - alpha) + g2 * alpha)
+          b = Math.round( b1 * (1 - alpha) + b2 * alpha)
+
+          @setPixel image, i+x, j+y, [
+            r,
+            g,
+            b,
+            Math.round((1-alpha)*255)]
+
+  drawRoadSegment: (roadImage, [r1,g1,b1], [r2,g2,b2], [x1,y1], [x2,y2], drawItByX ) ->
     width = 15
     cY = Math.round y1 - width/2
     cX = Math.round x1 - width/2
@@ -423,28 +452,6 @@ class Terrain extends S.Drawer
     x2 = Math.round x2 - width/2
     y1 = Math.round y1 - width/2
     y2 = Math.round y2 - width/2
-
-    drawWithCircle = =>
-      for cX in [x1..x2]
-
-        c = width/2
-
-        for i in [0...width]
-          for j in [0...width]
-            if (c-j)^2 + (c-i)^2 <= c*c
-              alpha = 0.1
-
-              r = Math.round( r1 * (1 - alpha) + r2 * alpha)
-              g = Math.round( g1 * (1 - alpha) + g2 * alpha)
-              b = Math.round( b1 * (1 - alpha) + b2 * alpha)
-
-              @setPixel roadImage, cX, Math.round(cY), [
-                r,
-                g,
-                b,
-                Math.round((1-alpha)*255)]
-
-        cY += gradientY
 
     drawByX = =>
       for cX in [x1..x2]
@@ -472,6 +479,7 @@ class Terrain extends S.Drawer
         offX = Math.round width/2
 
         for i in [0...width]
+
           alpha = (Math.pow(Math.round(Math.abs(i-offX)/width),2)*2 + Math.random())/4
 
           r = Math.round( r1 * (1 - alpha) + r2 * alpha)
@@ -483,17 +491,14 @@ class Terrain extends S.Drawer
             g,
             b,
             Math.round((1-alpha)*255)]
-
         cX += gradientX
 
-    ###
-    if gradientX < gradientY
-      drawByY()
-    else
-    ###
 
-    drawByX()
-    #drawWithCircle();
+    if drawItByX
+      drawByX()
+    else
+      drawByY()
+
 
     null
 
@@ -536,7 +541,7 @@ class Terrain extends S.Drawer
 
       for i in [0...@bitmapWidth]
         for j in [0...@bitmapHeight]
-          @drawPoint bitmap, i, j, @Config.colours.deepwater, 1
+          @drawPoint bitmap, i, j, @Config.colours.Deepwater, 1
 
       @Config.modifiers.s = oldL
       @waterBitmap = @createBitmapObjFromBitmap bitmap, @bitmapWidth, @bitmapHeight
@@ -566,7 +571,7 @@ class Terrain extends S.Drawer
     shadowMap = []
     heightMap = []
 
-    sunVisibilityHeight = 3
+    sunVisibilityHeight = 4
 
     for x in [0..@canvasDimensions.x]
       shadowMap[x] = []
@@ -586,7 +591,7 @@ class Terrain extends S.Drawer
         [r,g,b,a] = @getPixel terrainData, x, y
 
         if a > 0
-          heightMap[x][y] = @getHeight( x, y )
+          heightMap[x][y] = @getHeight( x, y ) + 10
 
 
     console.log "[Terrain] height map generated"
@@ -613,31 +618,7 @@ class Terrain extends S.Drawer
 
   #Interpolates height in a given point starting from left bottom corner
   getHeight: (x, y) ->
-    return @billinearInterpolation(x,y)
-
-    xPos = Math.floor x/@heightScale
-    yPos = Math.floor y/@heightScale
-
-    z0 = @heightMap.get_cell xPos, yPos
-    z1 = @heightMap.get_cell xPos + 1, yPos
-    z2 = @heightMap.get_cell xPos, yPos - 1
-    z3 = @heightMap.get_cell xPos + 1, yPos - 1
-
-    height = 0
-
-    sqX = (x / @heightScale) - xPos
-    sqY = (y / @heightScale) - yPos
-
-    if sqX + sqY < 1
-      height = z0
-      height += (z1-z0) * sqX
-      height += (z2-z0) * sqY
-    else
-      height = z3
-      height += (z1 - z3) * (1.0 - sqY)
-      height += (z2 - z3) * (1.0 - sqX)
-
-    height
+    @billinearInterpolation(x,y)
 
   project: ( x, y, z ) ->
     x2 = Math.round(x + z/4)
@@ -768,6 +749,7 @@ class Terrain extends S.Drawer
         if a == 0
           continue;
 
+        #[x2,y2] = @project x, y, @getHeight(x, y)
         [x2,y2] = [x,y]
 
         shadow = @shadowMap[x][y]
@@ -845,7 +827,7 @@ class Terrain extends S.Drawer
   t: 0
 
   drawField: ( image, i, j, type, n=1 ) ->
-    if type is 'water'
+    if type is 'Water'
       return
 
     colour = @Config.colours[type]

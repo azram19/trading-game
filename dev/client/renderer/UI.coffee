@@ -132,6 +132,24 @@ class UI extends S.Drawer
     if not menuStructure?
       return
 
+    menuDesc = _.find menuStructure, ( menu ) ->
+      menu.search "/:*" == 0
+
+    menuDesc =
+      if menuDesc?
+        menuDesc.substring 2
+      else
+        ''
+
+    menuSpDisplay = _.find menuStructure, ( menu ) ->
+      menu.search "/!*" == 0
+
+    menuSpDispay =
+      if menuSpDisplay?
+        menuSpDisplay.substring 2
+      else
+        null
+
     menu = new S.RadialMenu @events, @stage.canvas, p.x, p.y, "", "", true, obj
 
     eventsStructure = S.Types.Events
@@ -146,6 +164,13 @@ class UI extends S.Drawer
     ) for submenuName in submenuNames
 
     menu.setActionHelper @menuHelper
+
+    ###
+    if menuSpDisplay?
+      displayHelper = new S.MenuDisplayHelper @, menuSpDispay, menu, i, j, p.x, p.y
+      menu.setDisplayHelper displayHelper
+    ###
+
     menu.setObj obj
     menu.setRoot menu
 
