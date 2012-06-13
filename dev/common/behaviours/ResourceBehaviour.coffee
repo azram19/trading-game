@@ -31,6 +31,8 @@ class ResourceBehaviour
                     clearInterval @PID
             else
                 #we have enough resources, mining...
+                if not state.field.platform.state.owner
+                  console.log ["Missing owner - Res"], state.field
                 newSignal = S.SignalFactory.build S.Types.Entities.Signal, @eventBus, state.extraction, @resourceType, state.field.platform
                 newSignal.path.push state.field.xy
                 @eventBus.trigger 'resource:produce', state.field.xy, state.extraction, @resourceType

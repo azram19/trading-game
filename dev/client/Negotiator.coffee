@@ -184,6 +184,7 @@ class Negotiator
 
   getMenu: ( x, y ) ->
     field = @getField x, y
+
     if field?
       if field.platform.actionMenu?
         field.platform.actionMenu()
