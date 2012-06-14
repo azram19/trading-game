@@ -111,13 +111,16 @@ class UI extends S.Drawer
 
     @events.trigger 'scroll', x, y
 
-    @canvasContainer.find( 'canvas' ).not( '.noScroll' ).each(
+    @canvasContainer.find( 'canvas, .scrollIt' ).not( '.noScroll' ).each(
       (i,el) ->
         $el = $ el
 
+        top = -y
+        left = -x
+
         $el.css(
-          top: -y
-          left: -x
+          top: top
+          left: left
         )
     )
 
@@ -125,27 +128,30 @@ class UI extends S.Drawer
   createMenu: (i, j) ->
     p = @getPoint i, j
 
-    menuStructure = @events.getMenu i, j
-    console.debug menuStructure
+    menuInfo = @events.getMenu i, j
     obj = @events.getField i, j
 
-    if not menuStructure?
+    if not menuInfo?
       return
 
+    [menuStructure, menuValidFields] = menuInfo
+
     menuDesc = _.find menuStructure, ( menu ) ->
-      menu.search "/:*" == 0
+      menu.search( "/:*" ) == 0
 
     menuDesc =
       if menuDesc?
+        menuStructure = _.without menuStructure, menuDesc
         menuDesc.substring 2
       else
-        ''
+        null
 
     menuSpDisplay = _.find menuStructure, ( menu ) ->
-      menu.search "/!*" == 0
+      menu.search( "/!*" ) == 0
 
-    menuSpDispay =
+    menuSpDisplay =
       if menuSpDisplay?
+        menuStructure = _.without menuStructure, menuSpDisplay
         menuSpDisplay.substring 2
       else
         null
@@ -158,18 +164,19 @@ class UI extends S.Drawer
     ( subMenu = @buildMenu submenuName,
         eventsStructure,
         @getWithoutPrefix( submenuName, menuStructure ),
-        submenuName
+        submenuName,
+        menuStructure,
+        menuValidFields
 
       menu.addChild subMenu
-    ) for submenuName in submenuNames
+    ) for submenuName, i in submenuNames
 
     menu.setActionHelper @menuHelper
 
-    ###
     if menuSpDisplay?
-      displayHelper = new S.MenuDisplayHelper @, menuSpDispay, menu, i, j, p.x, p.y
+      console.log menuSpDisplay
+      displayHelper = new S.MenuDisplayHelper( @events, menuSpDisplay, menu, i, j, p.x, p.y )
       menu.setDisplayHelper displayHelper
-    ###
 
     menu.setObj obj
     menu.setRoot menu
@@ -178,7 +185,7 @@ class UI extends S.Drawer
 
   #name of the event element, eventsStructure - Types.Events sub object
   #eventsStructure [a:b:c] ...
-  buildMenu: ( name, eventsStructure, menuStructure, fullname ) =>
+  buildMenu: ( name, eventsStructure, menuStructure, fullname, fullStructure, validFields ) =>
 
     stName = name[0].toUpperCase() + name[1..]
 
@@ -195,7 +202,9 @@ class UI extends S.Drawer
     if desc.length > 0 or not submenuNames.length
       m = new S.RadialMenu @events, @stage.canvas, 0, 0, title, desc
       m.setEvent fullname
-      console.log fullname
+
+      index = _.indexOf fullStructure, fullname
+      m.setValidFields validFields[index]
 
       m
     else
@@ -205,7 +214,9 @@ class UI extends S.Drawer
         subMenu = @buildMenu submenuName,
           eventsStructure,
           @getWithoutPrefix( submenuName, menuStructure ),
-          fullname + ':' + submenuName
+          fullname + ':' + submenuName,
+          fullStructure,
+          validFields
 
         m.addChild subMenu
       ) for submenuName in submenuNames

@@ -6,6 +6,7 @@ Promise = require "promised-io/promise"
 parseCookie = require('connect').utils.parseCookie
 util = require 'util'
 crypto = require 'crypto'
+
 ###
 Stores information about all connected clients, and handles actual
 message passing to and between clients.
@@ -84,14 +85,21 @@ class Communicator
       client = new ComClient socket
       @clients[client.getId()] = client
       client.joinChannel 'lobby'
+      accessToken = ''
 
       if hs.session.auth?
-        app.Mongoose.model('User').findOne id: hs.session.auth.userId, (err, docs) ->
-          socket.emit 'user', docs
+        if hs.session.auth.facebook?
+          accessToken = hs.session.auth.facebook.accessToken
+        else
+          accessToken = hs.session.auth.google.accessToken
+        app.Mongoose.model('User').findOne id: hs.session.auth.userId, (err, docs) =>
+          Promise.when( app.getUserImgSrc( docs ) ).then ( imgSrc ) =>
+            docs.imgsrc = imgSrc
+            socket.emit 'user', docs
 
       socket.on 'fetch:friends', ( user ) =>
         Promise
-          .when( app.fetchFriends( user ) )
+          .when( app.fetchFriends( user, accessToken ) )
           .then ( friends ) ->
             socket.emit 'friends:load', friends
 

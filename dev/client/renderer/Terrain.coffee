@@ -13,6 +13,8 @@ class Terrain extends S.Drawer
     @shadowMap = []
     @blendMasks = {}
 
+    @readyDefer = new $.Deferred()
+
     @typesOfTerrain = [
       'Dirt',
       'Grass',
@@ -64,11 +66,23 @@ class Terrain extends S.Drawer
     @stage.addChild @hitHexMap
     @stage.update()
 
+  isReady: () =>
+    @readyDefer.promise()
+
   createBitmapCanvas: (width = @bitmapWidth, height = @bitmapHeight) =>
     can = $( "<canvas width=#{ width } height=#{ height } />" )
         .appendTo( 'body' ).hide()
 
     can[0]
+
+  setupBoard: ( boardState ) ->
+    for j in [0 ... (2*@diffRows + 1)]
+      for i in [0 ... @maxRow - Math.abs(@diffRows - j)]
+        for k in [0..2]
+          if boardState.getChannel(i, j, k)?.state?
+            [i2, j2] = @events.game.map.directionModificators i, j, k
+
+            @events.terrain.generateRoad i, j, i2, j2
 
   randomTerrain: () ->
     index = Math.floor((Math.random() * 100) % @typesOfTerrain.length)
@@ -823,6 +837,8 @@ class Terrain extends S.Drawer
     @generateSurroundingWater()
 
     @stage.update()
+
+    @readyDefer.resolve()
 
   t: 0
 

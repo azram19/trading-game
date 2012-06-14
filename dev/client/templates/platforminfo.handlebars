@@ -1,10 +1,24 @@
-<div class='menu-display platforminfo'>
+<div class='platforminfo'>
   <h3>{{platform.platformName}}</h3>
   <div class='resourceinfo'>
     <ul>
+      {{#each resources}}
       <li>
-        <h4>Gold</h4>
+        <h4>{{this.name}}</h4>
+        <div>
+          <span>Extraction</span><span>{{this.extraction}}/s</span>
+        </div>
+        <div>
+          <span>Size</span><span>{{this.size}}</span>
+        </div>
       </li>
+      {{/each}}
+    </ul>
+  </div>
+  <div class='general'>
+    <ul>
+      <li><h4>Life</h4>{{platform.life}}</li>
+      <li><h4>Capacity</h4>{{platform.space}}/{{platform.maxSpace}}</li>
     </ul>
   </div>
 </div>

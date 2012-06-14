@@ -78,37 +78,40 @@ module.exports = ( app, express ) ->
           defer.resolve src
 
         request.get( url, extractImgSrc )
-    else 
+    else
       defer.resolve ''
 
     defer.promise
 
-  app.fetchFriends = ( user ) ->
+  app.fetchFriends = ( user, accessToken ) ->
     defer = new Promise.Deferred()
 
     handleFacebookFriends = ( error, response, friends ) ->
+      friends = JSON.parse friends
       if error or response.statusCode != 200
         console.error "[Mongoose][Fb] Cannot query graph for friends"
-        console.log err
-        defer.reject err
+        console.log error
+        defer.reject error
       else
-        friendsIds = ( friend.id ) for friend in friends.data
+        friendsIds = ( friend.id  for friend in friends.data )
         userModel = app.Mongoose.model 'User'
-        
+
         handleFriends = ( err, friends ) ->
           if err?
             console.error "[Mongoose] Cannot fetch friends"
             console.log err
             defer.reject err
-          else if friends?
-            friendsPromises = ( app.getUserImgSrc( userData ) ) for friend in friends
+          else if friends.length > 0
+            friendsPromises = ( app.getUserImgSrc( friend ) ) for friend in friends
             friendsGroup = Promise.all friendsPromises
             friendsGroup.then ( arrayOfImgSrcs ) ->
               (
                 friends[i].imgsrc = img
               ) for img, i in arrayOfImgSrcs
-              
+
               defer.resolve friends
+          else
+              defer.resolve []
 
         userModel
           .where( 'id' )
@@ -119,7 +122,7 @@ module.exports = ( app, express ) ->
     handleGooglePlusFriends = ( friends ) ->
 
     if user.type is 'facebook'
-      request.get "https:/graph.facebook.com/#{ user.id }/friends?access_token=#{ app.everyauth.facebook.accessToken }",
+      request.get "https://graph.facebook.com/#{ user.id }/friends?access_token=#{ accessToken }",
         handleFacebookFriends
     else
       defer.resolve []
@@ -150,7 +153,7 @@ module.exports = ( app, express ) ->
   app.saveChatMessage = ( message ) ->
     defer = new Promise.Deferred()
     chatModel = app.Mongoose.model 'Chat'
-    
+
     msg = new chatModel()
     _.extend msg, message
 
@@ -173,9 +176,8 @@ module.exports = ( app, express ) ->
         promise.fail err
 
       if doc?
-        #Promise.when( app.getUserImgSrc( userData ) ).then ( imgSrc ) =>
-         # doc.imgsrc = imgSrc
-        promise.fulfill doc
+          promise.fulfill doc
+
       else
         newUser = new userModel()
         newUser = _.extend newUser, userData
@@ -185,8 +187,6 @@ module.exports = ( app, express ) ->
             console.log err
             promise.fail err
           else
-            #Promise.when( app.getUserImgSrc( userData ) ).then ( imgSrc ) =>
-            #userData.imgsrc = imgSrc
             promise.fulfill userData
 
   #Everyauth - Facebook
@@ -201,7 +201,7 @@ module.exports = ( app, express ) ->
         userName: fbUserMetadata.username
         id: fbUserMetadata.id
         type: 'facebook'
-      
+
       app.fetchUserWithPromise userData, userPromise
       userPromise
     )
@@ -226,7 +226,10 @@ module.exports = ( app, express ) ->
 
   app.everyauth.everymodule.moduleTimeout -1
   app.everyauth.everymodule.findUserById (userId, callback) ->
-    app.Mongoose.model('User').findOne id: userId, callback
+    app.Mongoose.model('User').findOne id: userId, (err, docs) =>
+      Promise.when( app.getUserImgSrc( docs ) ).then ( imgSrc ) =>
+        docs.imgsrc = imgSrc
+        callback err, docs
 
   #generic config
   app.configure ->

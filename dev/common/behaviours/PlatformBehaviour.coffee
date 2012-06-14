@@ -31,8 +31,9 @@ class PlatformBehaviour
         if signal.owner?.id is state.owner.id or S.Types.Resources.Gold <= signal.type <= S.Types.Resources.Resources
             addSignal = (signal) =>
                 state.signals++
-                console.log "[PlatformBehaviour]: new signal.source", signal.source
+                console.log "[PlatformBehaviour]: old signal.source", signal.source
                 signal.source = state
+                console.log "[PlatformBehaviour]: new signal.source", signal.source
                 signal.owner = state.owner
                 @route state, signal
             _.delay addSignal, state.delay, signal

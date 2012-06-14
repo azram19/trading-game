@@ -3,55 +3,74 @@ class MenuDisplayHelper
     @data = {}
 
     @build =
-      '!platforminfo' : () ->
-        @data.platformName = S.Types.Entities.Names[field.platform.state.type]
+      'platforminfo' : () ->
+        field = @events.getField @i, @j
+        platformSt = field.platform.state
+
+        @data.platformName = S.Types.Entities.Names[platformSt.type]
+
+
+        @data.resources = []
+
+        if field.resource.type? and platformSt.type != S.Types.Entities.Platforms.HQ
+          resource = field.resource
+          res =
+              size: Math.floor resource.life
+              extraction: Math.round( (resource.extraction * 1000) / resource.delay )
+              name: S.Types.Resources.Names[resource.type-6]
+
+          @data.resources.push res
+        else if platformSt.type == S.Types.Entities.Platforms.HQ
+          res =
+              size: "Infinity"
+              extraction: Math.round( (platformSt.extraction * 1000) / platformSt.delay )
+              name: "Food"
+
+          @data.resources.push res
+
+          res =
+              size: "Infinity"
+              extraction: Math.round( (platformSt.extraction * 1000) / platformSt.delay )
+              name: "Gold"
+
+          @data.resources.push res
+
+        @data.life = platformSt.life
+        @data.space = platformSt.capacity - platformSt.signals
+        @data.maxSpace = platformSt.capacity
+
+        @data.platform = @data
 
         @template = Handlebars.templates.platforminfo
         @html = $('<div/>')
 
 
-    @build[@type].call @
+    if @build[@type]?
+      @build[@type].call @
 
   show: () ->
-    field = @events.getField @i, @j
-
-    state = {}
-
-    if field.resource.state?
-      state.resource =
-        _.clone field.resource.state
-      state.resource.field = {}
-      state.resource.routing = {}
-
-    #if @data.platformName == 'HQ'
-
-    state.platform = _.clone field.platform.state
-    state.platform.field = {}
-    state.platform.routing = {}
-    state.platform.signals = {}
-
-    state.platform.platformName = @data.platformName
-
     @html.remove()
-    @html = $ template( state )
+    @html = $ @template @data
 
     scrollX = @events.ui.scrollX
     scrollY = @events.ui.scrollY
 
     @html.hide()
-    @html.appendToBody()
+    @html.appendTo '#canvasWrapper .scrollIt'
 
 
     width = @html.width()
+    height = @html.height()
 
     p = @menu.button.parent.localToGlobal @x, @y
-    x = p.x - scrollX - width - 20
-    y = p.y - scrollY - 40
+    x = p.x - width - 60
+    y = p.y - height/2
 
     @html.css
       position: 'absolute'
       top: y
       left: x
+      'z-index': 500
 
     @html.show()
 

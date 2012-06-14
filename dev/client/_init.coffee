@@ -7,7 +7,7 @@ $ ->
       communicator: communicator
       collection: messages
       el : $('#main.lobby2')[0]
- 
+
     lobby.render()
 
   if $('#canvasWrapper').length > 0

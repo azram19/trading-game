@@ -90,7 +90,7 @@ class LobbyView extends Backbone.View
         group -= m
 
         #create new group and add user
-        groups[group] = 
+        groups[group] =
           class: group
           users: []
 
@@ -110,13 +110,13 @@ class LobbyView extends Backbone.View
 
   handleChat: ( messages ) =>
     console.log "[Lobby] chat ", messages
-    
+
     if messages.length? and messages.length > 0
-      msgs = (( 
+      msgs = ((
         msg.author = msg.sender.name
         msg.sender = msg.sender._id
         msg)for msg in messages)
-      
+
       @collection.reset msgs
 
   handleNewGame: ( data ) =>
@@ -154,8 +154,8 @@ class LobbyView extends Backbone.View
       if minute < 10
         minute = "0#{ minute }"
 
-      time = "#{ hour }:#{ minute }" 
-      
+      time = "#{ hour }:#{ minute }"
+
       #clean textarea value
       textarea.val ''
 
