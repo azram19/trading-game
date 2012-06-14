@@ -37,7 +37,6 @@ app.get '/lobby2', ( req, res ) ->
          o.typeData.playersOnASide
 
        o
-    
     res.render 'lobby2',
       games: games
 

@@ -68,7 +68,7 @@ class GameServer
       minWidth = game.typeData.minWidth
       maxWidth = game.typeData.maxWidth
       player = S.ObjectFactory.build S.Types.Entities.Player, 0
-      map = new S.Map @, minWidth, maxWidth, player
+      map = new S.Map @, minWidth, maxWidth, player, game.typeData.startingPoints
       instance = new S.GameManager @, map
       instance.map.initialise()
       @gameInstances[name] = instance

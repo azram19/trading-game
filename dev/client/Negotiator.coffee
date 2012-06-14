@@ -128,7 +128,7 @@ class Negotiator
     (players, startingPoints, state, minWidth, maxWidth, nonUser) =>
       console.log '[Negotiator] game state', players, startingPoints, state, minWidth, maxWidth, nonUser
 
-      map = new S.Map @, minWidth, maxWidth, nonUser
+      map = new S.Map @, minWidth, maxWidth, nonUser, @gameInfo.typeData.startingPoints
       map.importGameState state
       @game = new S.GameManager @, map
       for id, player of players
