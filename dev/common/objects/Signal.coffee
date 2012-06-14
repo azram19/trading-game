@@ -13,15 +13,12 @@ class Signal
     # Most recent source of the signal
     source: {}
     # Type of signal in case we\'re carrying resources
-    type: ""
-    # Whole path signal has travelled since creation
-    path: []
+    type: 0
     # Player who generated the channel
     owner: {}
 
     constructor: ( @events, @strength, @type, @source ) ->
         @owner = @source.owner
-        @path = []
 
 if module? and module.exports
   exports = module.exports = Signal

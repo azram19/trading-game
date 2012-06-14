@@ -29,8 +29,6 @@ class PlatformBehaviour
     accept: ( signal, state, callback ) ->
         callback signal
         if signal.owner.id is state.owner.id
-            signal.source = state
-            signal.path.push state
             addSignal = (signal) =>
                 state.signals.push signal
                 @route state
@@ -47,11 +45,12 @@ class PlatformBehaviour
 
     route: ( state ) ->
         availableRoutes = []
-        _.each state.routing, (route, direction) -> if route.out and route.object.type? 
+        _.each state.routing, (route, direction) -> if route.out and route.object.type?
             availableRoutes.push [route, direction]
         _.each state.signals, (signal) =>
             destNum = Math.ceil(Math.random()*100)%availableRoutes.length
             destination = availableRoutes[destNum]
+            signal.source = state
 
             if destination[0].object.requestAccept signal
               @eventBus.trigger 'move:signal', state.field.xy, destination[1]

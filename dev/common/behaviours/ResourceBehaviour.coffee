@@ -36,7 +36,6 @@ class ResourceBehaviour
                 if not state.field.platform.state.owner
                   console.log ["Missing owner - Res"], state.field
                 newSignal = S.SignalFactory.build S.Types.Entities.Signal, @eventBus, state.extraction, @resourceType, state.field.platform.state
-                newSignal.path.push state
                 @eventBus.trigger 'resource:produce', state.field.xy, state.extraction, @resourceType
                 console.log newSignal, "signal"
                 #can the platform accept the signal
