@@ -57,32 +57,56 @@ class LobbyView extends Backbone.View
   handleFriends: ( friends  ) =>
     console.log "[Lobby] friends", friends
 
-    if friends.length > 0
-      maxScore = friends[0].highscore
-      if maxScore < 1000
-        maxScore = 1000
+    friends.push @user
+    friends = _.sortBy friends, ( o ) -> o.highscore
 
-      minScore = 0
-      scale = (maxScore + minScore) / 10
+    maxScore = friends[0].highscore
+    if maxScore < 1000
+      maxScore = 1000
 
-      now = maxScore
-      groups = {}
-      group = 10
+    minScore = 0
+    scale = (maxScore + minScore) / 10
 
-      groups[10] = []
+    now = maxScore
+    groups = {}
+    group = 10
 
-      (
-        #prepare object
-        f.firstname = f.name.split(' ')[0]
+    groups[10] =
+      class: 10
+      users: []
 
-        if f.higscore > now - scale
-          #add user to a group
-          groups[group].push f
-        else
-          #create new group and add user
-      ) for f in friends
+    (
+      #prepare object
+      f.firstname = f.name.split(' ')[0]
 
+      if f.highscore > now - scale
+        #add user to a group if it is not already full
+        if groups[group].users.length < 3
+          groups[group].users.push f
+      else
+        #fix the group index
+        m = Math.floor (now - f.fighscore)/scale
+        now = now - m*scale
+        group -= m
 
+        #create new group and add user
+        groups[group] = 
+          class: group
+          users: []
+
+        groups[group].users.push f
+    ) for f in friends
+
+    if groups[10].users.length == 0
+      delete groups[10]
+
+    scoreTemplate = Handlebars.templates.highscoreTicker
+    html = scoreTemplate groups: groups
+
+    console.log html, maxScore, groups
+
+    $( ".ranking ul" ).html html
+    $( ".userScore" ).html maxScore
 
   handleChat: ( messages ) =>
     console.log "[Lobby] chat ", messages

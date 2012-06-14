@@ -27,7 +27,7 @@ module.exports = ( app, express ) ->
   ObjectId = Schema.ObjectId
   app.Mongoose.connect app.mongoURL
   app.Mongoose.connection.on 'open', ->
-      console.log 'connected to MongoLab'
+      console.log '[Mongoose] connected to MongoLab'
 
   app.userSchema = new Schema
         name: String
@@ -201,7 +201,6 @@ module.exports = ( app, express ) ->
         userName: fbUserMetadata.username
         id: fbUserMetadata.id
         type: 'facebook'
-        imgsrc: ''
       
       app.fetchUserWithPromise userData, userPromise
       userPromise
@@ -219,7 +218,6 @@ module.exports = ( app, express ) ->
         userName: googleUser.id
         id: googleUser.id
         type: 'google+'
-        imgsrc: ''
 
       app.fetchUserWithPromise userData, userPromise
       userPromise
