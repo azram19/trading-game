@@ -9,6 +9,10 @@ MemoryStore = express.session.MemoryStore
 Communicator = require './server/communicator'
 GameServer = require './server/GameServer'
 
+Promise = require "promised-io/promise"
+
+request = require 'request'
+
 app.Mongoose = require 'mongoose'
 
 app.sessionStore = new MemoryStore()
@@ -33,6 +37,7 @@ app.get '/lobby2', ( req, res ) ->
          o.typeData.playersOnASide
 
        o
+    
     res.render 'lobby2',
       games: games
 

@@ -1,3 +1,5 @@
+Promise = require "promised-io/promise"
+
 module.exports = ( app, express ) ->
   config = @
 
@@ -54,11 +56,85 @@ module.exports = ( app, express ) ->
         sender:
             type: Schema.ObjectId
             ref: 'User'
-        time: Date
-        contet: String
+        time: String
+        content: String
         channel: String
 
   app.Mongoose.model 'Chat', app.chatSchema
+
+  app.fetchFriends = ( user ) ->
+    defer = new Promise.Deferred()
+
+    handleFacebookFriends = ( error, response, friends ) ->
+      if error or response.statusCode != 200
+        console.error "[Mongoose][Fb] Cannot query graph for friends"
+        console.log err
+        defer.reject err
+      else
+        friendsIds = ( friend.id ) for friend in friends.data
+        userModel = app.Mongoose.model 'User'
+        
+        handleFriends = ( err, friends ) ->
+          if err?
+            console.error "[Mongoose] Cannot fetch friends"
+            console.log err
+            defer.reject err
+          else if friends?
+            defer.resolve friends
+
+        userModel
+          .where( 'id' )
+          .in( friendsIds )
+          .asc( 'highscore' )
+          .run handleFriends
+
+    handleGooglePlusFriends = ( friends ) ->
+
+    if user.type is 'facebook'
+      request.get "https:/graph.facebook.com/#{ user.id }/friends?access_token=#{ app.everyauth.facebook.accessToken }",
+        handleFacebookFriends
+    else
+      defer.resolve []
+
+    defer.promise
+
+  app.fetchChat = ( channel ) ->
+    defer = new Promise.Deferred()
+    chatModel = app.Mongoose.model 'Chat'
+
+    handleData = ( err, docs ) =>
+      if err?
+        console.error 'Cannot fetch chat data from DB'
+        console.log err
+        defer.reject err
+
+      if docs?
+        defer.resolve docs
+
+    chatModel
+      .find( channel: channel, handleData )
+      .sort( id: -1 )
+      .limit( 10 )
+      .populate( 'sender' )
+
+    defer.promise
+
+  app.saveChatMessage = ( message ) ->
+    defer = new Promise.Deferred()
+    chatModel = app.Mongoose.model 'Chat'
+    
+    msg = new chatModel()
+    _.extend msg, message
+    
+    msg.save ( err ) ->
+      if err?
+        console.log '[Mongoose] Cannot save message to DB'
+        console.log err
+        defer.reject err
+      else
+        defer.resolve msg
+
+    defer.promise
 
   app.fetchUserWithPromise = (userData, promise) ->
     userModel = app.Mongoose.model 'User'

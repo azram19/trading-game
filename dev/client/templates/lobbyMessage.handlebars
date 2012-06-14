@@ -1,7 +1,6 @@
-<li>
-  <p>{{message.message}}</p>
-  <div>
-    <span class='name'>{{user.name}}</span>
-    <span class='time'>{{message.time}}</span>
-  </div>
-</li>
+  <li>
+  	<div>
+      <span class='time'>[{{this.time}}]</span> <span class='name'>{{this.author}}</span>:
+    </div>
+    <p>{{this.content}}</p>
+  </li>

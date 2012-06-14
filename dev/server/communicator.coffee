@@ -2,6 +2,7 @@ Session = require( 'connect' ).middleware.session.Session
 ComClient = require './communicationClient'
 _ = require( 'underscore' )._
 Backbone = require( 'backbone' )
+Promise = require "promised-io/promise"
 parseCookie = require('connect').utils.parseCookie
 util = require 'util'
 crypto = require 'crypto'
@@ -88,7 +89,20 @@ class Communicator
         app.Mongoose.model('User').findOne id: hs.session.auth.userId, (err, docs) ->
           socket.emit 'user', docs
 
-      socket.on 'message:add', ( data ) ->
+      socket.on 'fetch:friends', ( user ) =>
+        Promise
+          .when( app.fetchFriends( user ) )
+          .then ( friends ) ->
+            socket.emit 'friends:load', friends
+
+      socket.on 'fetch:messages', ( channel ) =>
+        Promise
+          .when( app.fetchChat( channel ) )
+          .then ( messages ) ->
+            socket.emit 'chat:load', messages
+
+      socket.on 'message:add', ( data ) =>
+        @app.saveChatMessage data
         socket.broadcast.to( client.getChannel() ).emit 'message:new', data
 
       socket.on 'get:user:game', ( userId ) =>
@@ -182,38 +196,7 @@ class Communicator
 
     ping client for client in clients
 
-  ###
-  1 =
-    clientIds : [] - receivers
-    sourceId: int - sender
-    emit : bool
-    volatile: bool
-    channel: string
-    room: string
-    event: string
-    data: {} or string - string for send
-    fn: () ->
-  ###
-  send: ( event, desc, data ) =>
-    send = ( clientId ) ->
-      socket = getClientById().getSocket()
-
-      #set volatile flag if on
-      if data.volatile
-        socket = socket.volatile
-
-      #sent data
-      if emit or not send?
-        socket.emit data.event, data.data, data.fn
-      else
-        socket.send data.data
-
-    send clientId for clientId in clientIds
-
   start: =>
     self = @
-
-  getClientById: ( id ) =>
-    #TODO
 
 module.exports = exports = Communicator

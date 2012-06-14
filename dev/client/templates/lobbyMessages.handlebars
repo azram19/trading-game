@@ -1,9 +1,8 @@
 {{#each messages}}
   <li>
-    <p>{{this.message}}</p>
-    <div>
-      <span class='name'>{{this.author}}</span>
-      <span class='time'>{{this.time}}</span>
+  	<div>
+      <span class='time'>[{{this.time}}]</span> <span class='name'>{{this.author}}</span>:
     </div>
+    <p>{{this.content}}</p>
   </li>
 {{/each}}
