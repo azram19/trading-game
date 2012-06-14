@@ -11,7 +11,11 @@ class ChannelBehaviour
     constructor: ( @eventBus ) ->
 
     actionMenu: ( state ) ->
-      menu = ['routing']
+      possibleRoutes = []
+      _.each state.routing, (route, direction) ->
+        if not _.isEmpty(route.object)
+          possibleRoutes.push (+direction)
+      menu = [['routing'], [possibleRoutes]]
 
     requestAccept: ( signal, state ) ->
         if signal.owner.id is state.owner.id
