@@ -377,6 +377,9 @@ class MapHelper extends S.Drawer
     if @currentHelper?
       @currentHelper.highlight.call @, i, j
 
+  help: ( event, caller ) =>
+    @parseAndPrepareEvent event, caller
+
   parseAndPrepareEvent: ( event, caller ) =>
     console.log "map:helper:" + event
 
@@ -393,6 +396,8 @@ class MapHelper extends S.Drawer
 
 
     if obj?
+      @currentDeferr = new $.Deferred()
+
       @currentHelper = obj
       @i = caller.obj.xy[0]
       @j = caller.obj.xy[1]
@@ -403,6 +408,8 @@ class MapHelper extends S.Drawer
       @showOverlay()
       @currentHelper.show.call @, @i, @j
 
+      @currentDeferr.promise()
+
   clickField: ( i, j, k ) =>
     if @currentHelper?
       @currentHelper.click.call @, i, j, k
@@ -410,13 +417,19 @@ class MapHelper extends S.Drawer
   accept: ( i, j, k ) =>
     args = @currentHelper.generateArguments.call @, @i, @j, i, j, k
 
-    @currentMenu.trigger "menu:helper:" + @currentEvent, args
+    console.log "[Map helper] ", args
+
+    args = [@currentEvent].concat args
+
+    console.log "[Map helper] more args ", args
+
+    @currentDeferr.resolveWith @currentMenu, args
 
     @clean()
     @close()
 
   cancel: () =>
-    @currentMenu.trigger "menu:helper:cancel"
+    @currentDeferr.rejectWith @currentMenu, @currentEvent
 
     @clean()
     @close()

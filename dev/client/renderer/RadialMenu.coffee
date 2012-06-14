@@ -48,9 +48,9 @@ class RadialMenu
     ###
     @length = 0
 
-    @length_base = 100
+    @length_base = 70
     @expand_length = @length_base
-    @compact_length = @length_base * 0.5
+    @compact_length = 50
 
     #Constants
     @expandTime = 500
@@ -149,15 +149,15 @@ class RadialMenu
 
   action: () =>
     if @actionHelper?
-      @.on "menu:helper:" + @event, ( helperArgs ) =>
-        @.off "menu:helper:" + @event
+      helperPromise = @actionHelper.help @event, @
 
-        myArgs = [@event]
-        eventArgs = myArgs.concat helperArgs
+      $.when( helperPromise ).done () ->
+        @executeAction.apply @, arguments
 
-        @executeAction.apply @, eventArgs
-
-    @actionHelper.trigger @event, @
+      $.when( helperPromise ).fail () ->
+        null
+    else
+      @executeAction.call @, @event
 
     @rootElement.hide @rootElement.destroy
 
