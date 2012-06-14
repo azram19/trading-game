@@ -226,7 +226,6 @@ class Map
     #console.log x + " " + y + " add pl"
     (
       nDir = (+dir + 3) % 6
-      console.log channel, platform, "setting Routing"
       platform.state.routing[dir].object = channel
       channel.state.routing[nDir].object = platform
     ) for dir, channel of @fields[y][x].channels

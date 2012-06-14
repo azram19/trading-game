@@ -37,7 +37,8 @@ class ObjectFactory
             events = args[0]
             owner = args[1]
             name = 'Platform' + id
-            state = _.extend new S.ObjectState(), _.clone(S.Properties.platform)
+            st = new S.ObjectState()
+            state = _.extend st, @deepClone(S.Properties.platform, true)
             state = _.extend state, {'name': name, 'id': id, 'owner': owner, 'type': S.Types.Entities.Platforms.Normal}
             object = new S.GameObject new S.PlatformBehaviour(events), state
 
@@ -45,7 +46,8 @@ class ObjectFactory
             events = args[0]
             owner = args[1]
             name = 'HQ' + id
-            state = _.extend new S.ObjectState(), _.clone(S.Properties.HQ)
+            st = new S.ObjectState()
+            state = _.extend st, @deepClone(S.Properties.HQ, true)
             state = _.extend state, {'name': name, 'id': id, 'owner': owner}
             object = new S.GameObject new S.HQBehaviour(events), state
 
@@ -53,14 +55,15 @@ class ObjectFactory
             events = args[0]
             owner = args[1]
             name = 'Channel' + id
-            state = _.extend new S.ObjectState(), _.clone(S.Properties.channel)
+            st = new S.ObjectState()
+            state = _.extend st, @deepClone(S.Properties.channel, true)
             state = _.extend state, {'name': name, 'id': id, 'owner': owner}
-            console.log "BUILDING: state", state 
             object = new S.GameObject new S.ChannelBehaviour(events), state
 
         @builders[S.Types.Entities.Player] = (id, args) =>
             userId = args[0]
-            player = _.extend new S.Player(), _.clone( S.Properties.player )
+            st = new S.Player()
+            player = _.extend st, @deepClone( S.Properties.player, true )
             name = 'Player_' + id
             _.extend player, {'name': name, 'id': id, 'userId': userId}
 
@@ -75,7 +78,8 @@ class ObjectFactory
             events = args[0]
             owner = args[1]
             name = 'Food' + id
-            state = _.extend new S.ObjectState(), _.clone(S.Properties.resource)
+            st = new S.ObjectState()
+            state = _.extend st, @deepClone(S.Properties.resource, true)
 
             state = _.extend state, {
                 'name': name,
@@ -90,7 +94,8 @@ class ObjectFactory
             events = args[0]
             owner = args[1]
             name = 'Gold' + id
-            state = _.extend new S.ObjectState(), _.clone(S.Properties.resource)
+            st = new S.ObjectState()
+            state = _.extend st, @deepClone(S.Properties.resource, true)
 
             state = _.extend state, {
                 'name': name,
@@ -105,7 +110,8 @@ class ObjectFactory
             events = args[0]
             owner = args[1]
             name = 'Resources' + id
-            state = _.extend new S.ObjectState(), _.clone(S.Properties.resource)
+            st = new S.ObjectState()
+            state = _.extend st, @deepClone(S.Properties.resource, true)
 
             state = _.extend state, {
                 'name': name,
@@ -127,6 +133,22 @@ class ObjectFactory
         uid = _.uniqueId()
         @builders[kind](uid, args)
 
+    deepClone: (obj, deep) ->
+      return obj  if not _.isObject(obj) or _.isFunction(obj)
+      return new Date(obj.getTime())  if _.isDate(obj)
+      return new RegExp(obj.source, obj.toString().replace(/.*\//, ""))  if _.isRegExp(obj)
+      isArr = (_.isArray(obj) or _.isArguments(obj))
+      if deep
+        func = (memo, value, key) =>
+          if isArr
+            memo.push @deepClone(value, true)
+          else
+            memo[key] = @deepClone(value, true)
+          memo
+
+        _.reduce obj, func, (if isArr then [] else {})
+      else
+        (if isArr then slice.call(obj) else _.extend({}, obj))
 
 if module? and module.exports
   exports = module.exports = new ObjectFactory()

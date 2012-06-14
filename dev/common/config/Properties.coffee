@@ -13,9 +13,9 @@ Properties =
         fov: 1
         name: 'Object'
         field: {}
-        signals: []
+        signals: 0
         routing: {}
-        delay: 1000
+        delay: 3000
         extraction: 20
         capacity: 10
         life: 100
@@ -26,9 +26,9 @@ Properties =
         fov: 1
         name: 'Channel'
         field: {}
-        signals: []
+        signals: 0
         routing: {}
-        delay: 1000
+        delay: 3000
         extraction: 20
         capacity: 10
         life: 100
@@ -40,9 +40,9 @@ Properties =
         fov: 1
         name: 'HQ'
         field: {}
-        signals: []
+        signals: 0
         routing: {}
-        delay: 1000
+        delay: 3000
         extraction: 20
         capacity: 10
         life: 100
@@ -62,9 +62,9 @@ Properties =
         fov: 0
         name: 'Resource'
         field: {}
-        signals: []
+        signals: 0
         routing: {}
-        delay: 1000
+        delay: 3000
         extraction: 20
         capacity: 10
         life: 100
@@ -81,8 +81,25 @@ defaultRoute =
     in: true
     out: true
 
+deepClone =  (obj, deep) ->
+      return obj  if not _.isObject(obj) or _.isFunction(obj)
+      return new Date(obj.getTime())  if _.isDate(obj)
+      return new RegExp(obj.source, obj.toString().replace(/.*\//, ""))  if _.isRegExp(obj)
+      isArr = (_.isArray(obj) or _.isArguments(obj))
+      if deep
+        func = (memo, value, key) ->
+          if isArr
+            memo.push deepClone(value, true)
+          else
+            memo[key] = deepClone(value, true)
+          memo
+
+        _.reduce obj, func, (if isArr then [] else {})
+      else
+        (if isArr then slice.call(obj) else _.extend({}, obj))
+
 ( (
-    Properties[field].routing[i] = _.clone defaultRoute
+    Properties[field].routing[i] = deepClone defaultRoute, true
 ) for i in [0..5] ) for field in ['channel', 'HQ', 'platform']
 
 if module? and module.exports

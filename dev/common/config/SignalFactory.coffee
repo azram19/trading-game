@@ -18,7 +18,8 @@ class SignalFactory
             type = args[2]
             source = args[3]
             name = 'Signal' + id
-            signal = _.extend new S.Signal(events, strength, type, source), {'name': name, 'id': id}
+            st = new S.Signal(events, strength, type, source)
+            signal = _.extend st, {'name': name, 'id': id}
 
     build: ( kind, args... ) ->
         if not kind

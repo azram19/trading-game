@@ -173,9 +173,9 @@ module.exports = ( app, express ) ->
         promise.fail err
 
       if doc?
-        Promise.when( app.getUserImgSrc( userData ) ).then ( imgSrc ) =>
-          doc.imgsrc = imgSrc
-          promise.fulfill doc
+        #Promise.when( app.getUserImgSrc( userData ) ).then ( imgSrc ) =>
+         # doc.imgsrc = imgSrc
+        promise.fulfill doc
       else
         newUser = new userModel()
         newUser = _.extend newUser, userData
@@ -185,9 +185,9 @@ module.exports = ( app, express ) ->
             console.log err
             promise.fail err
           else
-            Promise.when( app.getUserImgSrc( userData ) ).then ( imgSrc ) =>
-              userData.imgsrc = imgSrc
-              promise.fulfill userData
+            #Promise.when( app.getUserImgSrc( userData ) ).then ( imgSrc ) =>
+            #userData.imgsrc = imgSrc
+            promise.fulfill userData
 
   #Everyauth - Facebook
   app.everyauth.facebook

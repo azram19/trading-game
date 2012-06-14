@@ -17,8 +17,8 @@ class PlatformBehaviour
     requestAccept: ( signal, state ) ->
         if signal.owner.id is state.owner.id
             availableRoutes = _.filter state.routing, (route) ->
-                route.in or route.object is signal.source
-            availableRoutes.length > 0 and state.capacity >= state.signals.length
+                route.in and route.object?.state?.id is signal.source.id
+            availableRoutes.length > 0 and state.capacity >= state.signals
         else
             true
 
@@ -28,10 +28,13 @@ class PlatformBehaviour
 
     accept: ( signal, state, callback ) ->
         callback signal
-        if signal.owner.id is state.owner.id
+        if signal.owner?.id is state.owner.id or S.Types.Resources.Gold <= signal.type <= S.Types.Resources.Resources
             addSignal = (signal) =>
-                state.signals.push signal
-                @route state
+                state.signals++
+                console.log "[PlatformBehaviour]: new signal.source", signal.source
+                signal.source = state
+                signal.owner = state.owner
+                @route state, signal
             _.delay addSignal, state.delay, signal
         else
             state.life -= signal.strength
@@ -43,20 +46,19 @@ class PlatformBehaviour
     depleted: ( state ) ->
 
 
-    route: ( state ) ->
+    route: ( state, signal ) ->
         availableRoutes = []
-        _.each state.routing, (route, direction) -> if route.out and route.object.type?
-            availableRoutes.push [route, direction]
-        _.each state.signals, (signal) =>
-            destNum = Math.ceil(Math.random()*100)%availableRoutes.length
-            destination = availableRoutes[destNum]
-            signal.source = state
+        _.each state.routing, (route, direction) -> if route.out and route.object.type? 
+            availableRoutes.push [route, direction]   
 
-            if destination[0].object.requestAccept signal
-              @eventBus.trigger 'move:signal', state.field.xy, destination[1]
+        destNum = Math.ceil(Math.random()*100)%availableRoutes.length
+        destination = availableRoutes[destNum]
 
-              destination[0].object.trigger 'accept', signal, (signal) ->
-                state.signals = _.without state.signals, signal
+        if destination[0].object.requestAccept signal
+          @eventBus.trigger 'move:signal', state.field.xy, destination[1]
+
+          destination[0].object.trigger 'accept', signal, (signal) ->
+            state.signals--
 
 if module? and module.exports
   exports = module.exports = PlatformBehaviour

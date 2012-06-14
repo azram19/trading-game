@@ -16,8 +16,8 @@ class ChannelBehaviour
     requestAccept: ( signal, state ) ->
         if signal.owner.id is state.owner.id
             availableRoutes = _.filter state.routing, (route) ->
-                route.in or route.object.id is signal.source.id
-            availableRoutes.length > 0 and state.capacity >= state.signals.length
+                route.in and route.object?.state?.id is signal.source.id
+            availableRoutes.length > 0 and state.capacity >= state.signals
         else
             true
 
@@ -28,8 +28,12 @@ class ChannelBehaviour
         callback signal
         if signal.owner.id is signal.owner.id
             addSignal = (signal) =>
-                state.signals.push signal
-                @route state
+                state.signals++
+                console.log "[ChannelBehaviour]: old signal.source", signal.source
+                signal.source = state
+                console.log "[ChannelBehaviour]: new signal.source", signal.source
+                signal.owner = state.owner
+                @route state, signal
             _.delay addSignal, state.delay, signal
         else
             state.life -= signal.strength
@@ -37,22 +41,20 @@ class ChannelBehaviour
                 state.owner = signal.owner
                 @eventBus.trigger 'owner:channel', state.field.xy, state.direction, state
 
-    route: ( state ) ->
+    route: ( state, signal ) ->
       availableRoutes = []
-      _.each state.signals, (signal, index) =>
-        _.each state.routing, (route, direction) -> if route.object.type? and route.object.id isnt signal.source.id
+      _.each state.routing, (route, direction) -> 
+       #console.log "[ChannelBehaviour]: channel", route.object?.state?.id, signal.source.id, direction
+        if route.object.type? and route.object?.state?.id isnt signal.source.id
           availableRoutes.push [route, direction]
+      
+      destination = availableRoutes[0]
+      if destination[0].object.requestAccept signal
+        if destination[0].object.type is S.Types.Entities.Channel
+          @eventBus.trigger 'move:signal', state.field.xy, destination[1]
 
-        console.log availableRoutes
-        destination = availableRoutes[0]
-        signal.source = state
-        if destination[0].object.requestAccept signal
-          console.log '[ChannelBehaviour] signal source is of type', signal.source.type
-          if signal.source.type is S.Types.Entities.Channel
-            @eventBus.trigger 'move:signal', state.field.xy, destination[1]
-
-          destination[0].object.trigger 'accept', signal, (signal) ->
-            state.signals = _.without state.signals, signal
+        destination[0].object.trigger 'accept', signal, (signal) ->
+          state.signals--
 
 if module? and module.exports
   exports = module.exports = ChannelBehaviour

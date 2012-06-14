@@ -15,6 +15,7 @@ class HQBehaviour
         menu = ['build:channel', 'routing']
 
     requestAccept: ( signal, state ) ->
+        console.log "[HQBehaviour]: I got request"
         true
 
     produce: ( state ) ->
@@ -24,7 +25,7 @@ class HQBehaviour
                 (
                     if not state.field.platform.state.owner
                         console.log ["Missing owner - HQ"], state.field
-                    state.owner.addResource(S.SignalFactory.build S.Types.Entities.Signal, @eventBus, state.extraction, S.Types.Resources[res], state)
+                    state.owner.addResource(S.SignalFactory.build S.Types.Entities.Signal, @eventBus, state.extraction, S.Types.Resources[res], state.field.platform)
                     @eventBus.trigger 'resource:produce', state.field.xy, state.extraction, S.Types.Resources[res]
                 ) for res in S.Types.Resources.Names
         setInterval production, state.delay
@@ -32,6 +33,7 @@ class HQBehaviour
     accept: ( signal, state, callback ) ->
         callback signal
         if signal.owner.id is state.owner.id
+            console.log "[HQBehaviour]: I accept a signal"
             state.owner.addResource signal
             @eventBus.trigger 'resource:receive', state.field.xy, signal.strength, signal.type
         else
@@ -39,7 +41,7 @@ class HQBehaviour
             if state.life <= 0
                 @eventBus.trigger 'player:lost', state.owner
 
-    route: ( state ) ->
+    route: ( state, signal ) ->
 
 if module? and module.exports
   exports = module.exports = HQBehaviour
