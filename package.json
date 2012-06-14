@@ -20,6 +20,7 @@
     "everyauth" : "0.2.32",
     "docco" : "0.3.0",
     "mongoose" : "2.5.10",
-    "promised-io" : "0.3.0"
+    "promised-io" : "0.3.0",
+    "request" : "2.9.202"
   }
 }
