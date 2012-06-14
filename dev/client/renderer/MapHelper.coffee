@@ -231,8 +231,13 @@ class MapHelper extends S.Drawer
     tr.onMouseOver = null
     tr.onMouseOut = null
 
-    text = new Text "Execute"
-    text.y = 20
+    p = @getPoint io+3, jo
+    text = new Text 'Execute', 'bold 24px', '#fff'
+    text.textAlign = 'center'
+    text.textBaseline = 'middle'
+    text.y = p.y
+    text.x = p.x
+    text.onClick = @cancle
 
     c.addChild tr
     c.addChild text
@@ -247,8 +252,13 @@ class MapHelper extends S.Drawer
     tr.onMouseOver = null
     tr.onMouseOut = null
 
-    text = new Text "Cancel"
-    text.y = 20
+    p = @getPoint io+4, jo
+    text = new Text "Cancel", 'bold 24px', '#fff'
+    text.textAlign = 'center'
+    text.textBaseline = 'middle'
+    text.y = p.y
+    text.x = p.x
+    text.onClick = @cancle
 
     c.addChild tr
     c.addChild text
