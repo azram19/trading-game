@@ -57,6 +57,33 @@ class LobbyView extends Backbone.View
   handleFriends: ( friends  ) =>
     console.log "[Lobby] friends", friends
 
+    if friends.length > 0
+      maxScore = friends[0].highscore
+      if maxScore < 1000
+        maxScore = 1000
+
+      minScore = 0
+      scale = (maxScore + minScore) / 10
+
+      now = maxScore
+      groups = {}
+      group = 10
+
+      groups[10] = []
+
+      (
+        #prepare object
+        f.firstname = f.name.split(' ')[0]
+
+        if f.higscore > now - scale
+          #add user to a group
+          groups[group].push f
+        else
+          #create new group and add user
+      ) for f in friends
+
+
+
   handleChat: ( messages ) =>
     console.log "[Lobby] chat ", messages
     

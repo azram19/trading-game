@@ -1,4 +1,5 @@
 Promise = require "promised-io/promise"
+request = require 'request'
 
 module.exports = ( app, express ) ->
   config = @
@@ -10,6 +11,7 @@ module.exports = ( app, express ) ->
   app.googleAppId = '1045311658397.apps.googleusercontent.com'
   app.googleAppSecret = 'Wy21_PuUibbG-tIgaLXTOX8E'
   app.googleScope = 'https://www.googleapis.com/auth/plus.me https://www.googleapis.com/auth/userinfo.profile'
+  app.googleApiKey = 'AIzaSyBQkgPKmh1xpBs2hYQPRUo8rgcMPgZMYlc'
 
   app.sessionSecret = 'veryFuckingSecret'
   app.sessionKey = 'express.sid'
@@ -36,6 +38,7 @@ module.exports = ( app, express ) ->
             unique: true
         type: String
         highscore: Number
+        imgsrc: String
 
   app.Mongoose.model 'User', app.userSchema
 
@@ -62,6 +65,24 @@ module.exports = ( app, express ) ->
 
   app.Mongoose.model 'Chat', app.chatSchema
 
+  app.getUserImgSrc = ( user ) ->
+    defer = new Promise.Deferred()
+
+    if user.type?
+      if user.type is 'facebook'
+        defer.resolve "https://graph.facebook.com/#{ user.id }/picture"
+      else
+        url = "https://www.googleapis.com/plus/v1/people/#{ user.id }?fields=image(url)&key=#{ app.googleApiKey }"
+        extractImgSrc = ( error, response, dataObj ) ->
+          src = JSON.parse( dataObj ).image.url
+          defer.resolve src
+
+        request.get( url, extractImgSrc )
+    else 
+      defer.resolve ''
+
+    defer.promise
+
   app.fetchFriends = ( user ) ->
     defer = new Promise.Deferred()
 
@@ -80,12 +101,19 @@ module.exports = ( app, express ) ->
             console.log err
             defer.reject err
           else if friends?
-            defer.resolve friends
+            friendsPromises = ( app.getUserImgSrc( userData ) ) for friend in friends
+            friendsGroup = Promise.all friendsPromises
+            friendsGroup.then ( arrayOfImgSrcs ) ->
+              (
+                friends[i].imgsrc = img
+              ) for img, i in arrayOfImgSrcs
+              
+              defer.resolve friends
 
         userModel
           .where( 'id' )
           .in( friendsIds )
-          .asc( 'highscore' )
+          .desc( 'highscore' )
           .run handleFriends
 
     handleGooglePlusFriends = ( friends ) ->
@@ -125,7 +153,7 @@ module.exports = ( app, express ) ->
     
     msg = new chatModel()
     _.extend msg, message
-    
+
     msg.save ( err ) ->
       if err?
         console.log '[Mongoose] Cannot save message to DB'
@@ -145,7 +173,9 @@ module.exports = ( app, express ) ->
         promise.fail err
 
       if doc?
-        promise.fulfill doc
+        Promise.when( app.getUserImgSrc( userData ) ).then ( imgSrc ) =>
+          doc.imgsrc = imgSrc
+          promise.fulfill doc
       else
         newUser = new userModel()
         newUser = _.extend newUser, userData
@@ -155,7 +185,9 @@ module.exports = ( app, express ) ->
             console.log err
             promise.fail err
           else
-            promise.fulfill doc
+            Promise.when( app.getUserImgSrc( userData ) ).then ( imgSrc ) =>
+              userData.imgsrc = imgSrc
+              promise.fulfill userData
 
   #Everyauth - Facebook
   app.everyauth.facebook
@@ -169,6 +201,8 @@ module.exports = ( app, express ) ->
         userName: fbUserMetadata.username
         id: fbUserMetadata.id
         type: 'facebook'
+        imgsrc: ''
+      
       app.fetchUserWithPromise userData, userPromise
       userPromise
     )
@@ -185,6 +219,8 @@ module.exports = ( app, express ) ->
         userName: googleUser.id
         id: googleUser.id
         type: 'google+'
+        imgsrc: ''
+
       app.fetchUserWithPromise userData, userPromise
       userPromise
     )
