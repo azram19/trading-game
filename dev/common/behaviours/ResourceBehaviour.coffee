@@ -24,6 +24,8 @@ class ResourceBehaviour
 
     produce: ( state ) ->
         production = =>
+            console.log "[Resource:produce]"
+            console.log state.life
             #check if we have engough resources to extract
             if state.life < state.extraction
                 #resource depleted
@@ -33,8 +35,8 @@ class ResourceBehaviour
                 #we have enough resources, mining...
                 if not state.field.platform.state.owner
                   console.log ["Missing owner - Res"], state.field
-                newSignal = S.SignalFactory.build S.Types.Entities.Signal, @eventBus, state.extraction, @resourceType, state.field.platform
-                newSignal.path.push state.field.xy
+                newSignal = S.SignalFactory.build S.Types.Entities.Signal, @eventBus, state.extraction, @resourceType, state.field.platform.state
+                newSignal.path.push state
                 @eventBus.trigger 'resource:produce', state.field.xy, state.extraction, @resourceType
                 console.log newSignal, "signal"
                 #can the platform accept the signal
@@ -44,7 +46,6 @@ class ResourceBehaviour
                     #send the signal
                     state.life -= state.extraction
                     state.signals.push newSignal
-                    console.log "acceptable"
                     state.field.platform.trigger "accept", newSignal, (signal) ->
                         state.signals = _.without state.signals, signal
 

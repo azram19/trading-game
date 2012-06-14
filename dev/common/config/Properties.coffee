@@ -77,7 +77,7 @@ Properties =
 ) for i in [0...S.Types.Resources.Names.length]
 
 defaultRoute =
-    object: null
+    object: {}
     in: true
     out: true
 

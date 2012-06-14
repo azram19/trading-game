@@ -55,6 +55,7 @@ class ObjectFactory
             name = 'Channel' + id
             state = _.extend new S.ObjectState(), _.clone(S.Properties.channel)
             state = _.extend state, {'name': name, 'id': id, 'owner': owner}
+            console.log "BUILDING: state", state 
             object = new S.GameObject new S.ChannelBehaviour(events), state
 
         @builders[S.Types.Entities.Player] = (id, args) =>

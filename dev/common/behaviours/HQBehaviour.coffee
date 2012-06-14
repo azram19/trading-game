@@ -15,12 +15,7 @@ class HQBehaviour
         menu = ['build:channel', 'routing']
 
     requestAccept: ( signal, state ) ->
-        if signal.owner is state.owner
-            availableRoutes = _.filter state.routing, (route, direction) ->
-                route.in && route.object is signal.source
-            availableRoutes.length > 0 and state.capacity + 1 <= state.signals.length
-        else
-            true
+        true
 
     produce: ( state ) ->
         if state.field.resource.type?

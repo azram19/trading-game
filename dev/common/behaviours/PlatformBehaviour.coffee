@@ -1,8 +1,10 @@
 S = {}
 if require?
   _ = require 'underscore'
+  S.Types = require '../config/Types'
 else
   _ = window._
+  S.Types = window.S.Types
 
 class PlatformBehaviour
 
@@ -10,13 +12,13 @@ class PlatformBehaviour
 
     actionMenu: ( state ) ->
         myName = S.Types.Entities.Names[state.type]
-        menu = ['build:channel', 'routing', '/!platforminfo', "/:#{ myName }"]
+        menu = ['build:channel', 'routing']#, '/!platforminfo', "/:#{ myName }"]
 
     requestAccept: ( signal, state ) ->
         if signal.owner.id is state.owner.id
             availableRoutes = _.filter state.routing, (route) ->
                 route.in or route.object is signal.source
-            availableRoutes.length > 0 and state.capacity + 1 >= state.signals.length
+            availableRoutes.length > 0 and state.capacity >= state.signals.length
         else
             true
 
@@ -27,8 +29,8 @@ class PlatformBehaviour
     accept: ( signal, state, callback ) ->
         callback signal
         if signal.owner.id is state.owner.id
-            signal.source = state.field.platform
-            signal.path.push state.field.platform
+            signal.source = state
+            signal.path.push state
             addSignal = (signal) =>
                 state.signals.push signal
                 @route state
@@ -44,9 +46,8 @@ class PlatformBehaviour
 
 
     route: ( state ) ->
-        console.log "signal is being routed"
         availableRoutes = []
-        _.each state.routing, (route, direction) -> if route.out and route.object? 
+        _.each state.routing, (route, direction) -> if route.out and route.object.type? 
             availableRoutes.push [route, direction]
         _.each state.signals, (signal) =>
             destNum = Math.ceil(Math.random()*100)%availableRoutes.length

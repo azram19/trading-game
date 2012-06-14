@@ -20,7 +20,7 @@ class Signal
     owner: {}
 
     constructor: ( @events, @strength, @type, @source ) ->
-        @owner = @source.state.owner
+        @owner = @source.owner
         @path = []
 
 if module? and module.exports

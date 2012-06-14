@@ -52,9 +52,12 @@ class Negotiator
 
     @communicator.on 'new:player', ( playerObject, position, HQState ) =>
       console.log '[Negotiator] new player'
+      pObject = S.ObjectFactory.build S.Types.Entities.Player
+      playerObject = _.extend pObject, playerObject
+      @renderer.addPlayer playerObject.id
       HQ = S.ObjectFactory.build S.Types.Entities.Platforms.HQ, @, playerObject
       HQ.state = HQState
-      @renderer.addPlayer playerObject.id
+
       @game.addPlayer playerObject
       @game.addHQ HQ, position
       [x,y] = position
@@ -105,15 +108,18 @@ class Negotiator
     getGame.done (game) =>
       console.log '[Negotiator] game: ', game
       @gameInfo = game
+      playerObject = S.ObjectFactory.build S.Types.Entities.Player
       @myPlayer = @gameInfo.players[@user.id].playerObject
+      @myPlayer = _.extend playerObject, @myPlayer
+
       @communicator.join @gameInfo.name
       @communicator.trigger 'get:game:state', @gameInfo.name
 
     @communicator.on 'user', ( user ) =>
       getUser.resolve user
 
-    @communicator.on 'user:game', (game) ->
-      getGame.resolve game
+    @communicator.on 'user:game', (game) =>
+      getGame.resolveWith @, [game]
 
     @communicator.on 'game:state', @setGameState(dfd)
 
@@ -122,13 +128,18 @@ class Negotiator
     (players, startingPoints, state, minWidth, maxWidth, nonUser) =>
       console.log '[Negotiator] game state', players, startingPoints, state, minWidth, maxWidth, nonUser
 
-      console.log state
       map = new S.Map @, minWidth, maxWidth, nonUser
       map.importGameState state
       @game = new S.GameManager @, map
-      @game.players = players
+      for id, player of players
+        pObject = S.ObjectFactory.build S.Types.Entities.Player, null, null
+        myPlayer = _.extend pObject, player
+        @game.players[id] = myPlayer
+      for i, point of startingPoints
+        [x,y] = point
+        field = @getField x, y
+        @game.map.fields[y][x].platform.state.owner = @game.players[(+i)]
       @game.startingPoints = startingPoints
-      console.log map
       dfd.resolveWith @
 
   startGame: ->
@@ -151,14 +162,11 @@ class Negotiator
     #@renderer.setScroll width, height
 
   setupUI: ->
-    console.log 'game loaded'
     [minWidth, maxWidth] = @game.getDimensions()
     window.ui = @ui =  new S.UIClass @, minWidth, maxWidth
     window.t = @terrain = new S.Terrain @, 'background', minWidth, maxWidth
     @renderer = new S.Renderer @, minWidth, maxWidth, _.pluck(@game.players, 'id'), @myPlayer
-    console.log 'renderer constructor triggered'
     $.when(@renderer.boardLoaded.promise()).done =>
-      console.log 'renderer constructor finished'
       @renderer.setupBoard @game.map
       @terrain.draw() #2 not extremely fast, disabled for debugging
 
