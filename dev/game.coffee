@@ -21,15 +21,6 @@ config = require('./config.coffee')(app, express)
 app.gameServer = new GameServer
 app.communicator = new Communicator app
 
-app.get '/board', ( req, res ) ->
-   res.render 'board'
-
-app.get '/terrain', ( req, res ) ->
-   res.render 'terrain'
-
-app.get '/radialDemo', ( req, res ) ->
-   res.render 'radialDemo'
-
 app.get '/lobby2', ( req, res ) ->
   if app.requireAuth and not req.loggedIn
     res.redirect '/'
