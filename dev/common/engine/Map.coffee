@@ -206,6 +206,30 @@ class Map
       mod = @directionModLower[dir]
     [x + mod[0], y + mod[1]]
 
+  directionGet: ( x1, y1, x2, y2 ) ->
+    xn = x2 - x1
+    yn = y2 - y1
+
+    if y1 < @diffRows or (y1 is @diffRows and y2 > @diffRows)
+      mods = @directionModUpper
+      dir = -1
+
+      _.each mods, ( o, i ) ->
+        [xMod, yMod] = o
+        if xMod == xn and yMod == yn
+          dir = i
+          return {}
+    else if y1 > @diffRows or (y1 is @diffRows and y2 <= @diffRows)
+      mods = @directionModLower
+      dir = -1
+      _.each mods, ( o, i ) ->
+        [xMod, yMod] = o
+        if xMod == xn and yMod == yn
+          dir = i
+          return {}
+
+    dir
+
   addField: ( field, x, y ) ->
     @fields[y] ?= {}
     @fields[y][x] = field

@@ -65,6 +65,8 @@ class RadialMenu
     @fadedOutOpacity = 0.3
     @opacity = 1
 
+    @validFields = []
+
     #Flags
     @visible = false
     @descDisplayed = false
@@ -81,7 +83,7 @@ class RadialMenu
     @radius = 10
 
     #Angles
-    @alpha = Math.PI / 6
+    @alpha = Math.PI / 3
     @beta = -(Math.PI * 7/6)
 
     #Children elements - class RadialMenu
@@ -134,10 +136,15 @@ class RadialMenu
 
     child.setObj obj for child in @children
 
+  setValidFields: ( array ) ->
+    @validFields = array
+
   setRoot: ( root ) ->
     @rootElement = root
 
     child.setRoot root for child in @children
+
+    null
 
   setDisplayHelper: ( displayHelper ) ->
     @displayHelper = displayHelper

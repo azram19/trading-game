@@ -62,7 +62,6 @@ Types =
           title: 'channel'
         Platform:
           title: 'platform'
-          desc: 'build some platfrom'
     Games:
       FFA:
         Number2: 0

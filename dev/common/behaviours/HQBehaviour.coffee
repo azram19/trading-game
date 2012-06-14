@@ -11,20 +11,30 @@ class HQBehaviour
     constructor: ( @eventBus ) ->
 
     actionMenu: ( state ) ->
-        myName = S.Types.Entities.Names[state.type]
-        menu = ['build:channel', 'routing']
+      possibleRoutes = []
+      _.each state.routing, (route, direction) ->
+        if not _.isEmpty(route.object)
+          possibleRoutes.push (+direction)
+
+      [x, y] = state.field.xy
+      possibleChannels = @eventBus.getPossibleChannels x, y
+
+      menu = [['build:channel', 'routing'], [possibleChannels, possibleRoutes]]
 
     requestAccept: ( signal, state ) ->
-        true
+        if signal.owner is state.owner
+            availableRoutes = _.filter state.routing, (route, direction) ->
+                route.in && route.object is signal.source
+            availableRoutes.length > 0 and state.capacity + 1 <= state.signals.length
+        else
+            true
 
     produce: ( state ) ->
         if state.field.resource.type?
             state.field.resource.trigger 'produce'
         production = =>
                 (
-                    if not state.field.platform.state.owner
-                        console.log ["Missing owner - HQ"], state.field
-                    state.owner.addResource(S.SignalFactory.build S.Types.Entities.Signal, @eventBus, state.extraction, S.Types.Resources[res], state)
+                    state.owner.addResource(S.SignalFactory.build S.Types.Entities.Signal, @eventBus, state.extraction, S.Types.Resources[res], state.field.platform)
                     @eventBus.trigger 'resource:produce', state.field.xy, state.extraction, S.Types.Resources[res]
                 ) for res in S.Types.Resources.Names
         setInterval production, state.delay

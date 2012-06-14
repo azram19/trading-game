@@ -193,15 +193,34 @@ class Negotiator
       if field.platform.actionMenu?
         field.platform.actionMenu()
       else
-        console.log field.channels
+        console.log field
         if _.isEmpty field.channels
           null
         else if (_.keys field.channels).length > 1 and not field.platform.type?
-          ['build:platform']
+          [['build:platform'], [[]]]
         else
-          ['build:platform', 'build:channel']
+          possibleChannels = @getPossibleChannels x, y
+          [['build:platform', 'build:channel'], [[],possibleChannels]]
 
   getField: ( x, y ) ->
     @game.map.getField x, y
+
+  getPossibleChannels: (x, y) ->
+    field = @getField x, y
+    possibleChannels = []
+    for k in [0..5]
+      [nX, nY] = @game.map.directionModificators x, y, k
+      nField = @getField nX, nY
+      existingDirections = _(field.channels).keys().map((dir) ->
+        (+dir)
+      )
+      amountOfChannels = _.keys(nField.channels).length
+
+      if (amountOfChannels < 2 or (nField.platfrom? and nField.platfrom.type?)) and not (k in existingDirections)
+        possibleChannels.push k
+
+    console.log "[Negotiator][possible channels]", x, y, possibleChannels
+
+    possibleChannels
 
 window.S.Negotiator = Negotiator

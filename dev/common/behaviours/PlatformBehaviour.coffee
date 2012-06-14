@@ -11,8 +11,15 @@ class PlatformBehaviour
     constructor: ( @eventBus ) ->
 
     actionMenu: ( state ) ->
-        myName = S.Types.Entities.Names[state.type]
-        menu = ['build:channel', 'routing']#, '/!platforminfo', "/:#{ myName }"]
+      possibleRoutes = []
+      _.each state.routing, (route, direction) ->
+        if not _.isEmpty(route.object)
+          possibleRoutes.push (+direction)
+
+      [x, y] = state.field.xy
+      possibleChannels = @eventBus.getPossibleChannels x, y
+
+      menu = [['build:channel', 'routing'], [possibleChannels, possibleRoutes]]
 
     requestAccept: ( signal, state ) ->
         if signal.owner.id is state.owner.id
