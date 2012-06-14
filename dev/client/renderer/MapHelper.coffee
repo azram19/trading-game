@@ -397,7 +397,7 @@ class MapHelper extends S.Drawer
 
     if obj?
       @currentDeferr = new $.Deferred()
-      
+
       @currentHelper = obj
       @i = caller.obj.xy[0]
       @j = caller.obj.xy[1]
@@ -417,7 +417,11 @@ class MapHelper extends S.Drawer
   accept: ( i, j, k ) =>
     args = @currentHelper.generateArguments.call @, @i, @j, i, j, k
 
+    console.log "[Map helper] ", args
+
     args = [@currentEvent].concat args
+
+    console.log "[Map helper] more args ", args
 
     @currentDeferr.resolveWith @currentMenu, args
 

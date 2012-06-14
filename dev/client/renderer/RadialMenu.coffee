@@ -150,11 +150,12 @@ class RadialMenu
   action: () =>
     if @actionHelper?
       helperPromise = @actionHelper.help @event, @
-      
-      $.when( helperPromise ).done ( args ) ->
-          @executeAction.apply @, args
+
+      $.when( helperPromise ).done () ->
+        @executeAction.apply @, arguments
 
       $.when( helperPromise ).fail () ->
+        null
     else
       @executeAction.call @, @event
 
