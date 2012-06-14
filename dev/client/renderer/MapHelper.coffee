@@ -39,46 +39,41 @@ class MapHelper extends S.Drawer
 
     @helpers =
       routing:
-        acceptShow: ( io, jo ) ->
-          tr = @drawHex io+3, jo, 0, @colours.positive, @colours.stroke
-          tr.onClick = @accept
-          tr.onMouseOver = null
-          tr.onMouseOut = null
-
-          @stage.addChild tr
         show: ( io, jo ) ->
-
             field = @currentMenu.obj
+
             for z in [0...6]
-              [i, j] = @getIJ io, jo, z
+              if z in @currentMenu.validFields
+                [i, j] = @getIJ io, jo, z
 
-              @state = field.platform.state.routing
+                @state = field.platform.state.routing
 
-              if @state[z].in
-                color = @colours.positive
-              else
-                color = @colours.negative
+                if @state[z].in
+                  color = @colours.positive
+                else
+                  color = @colours.negative
 
-              k = (5-z)%6
+                k = (5-z)%6
 
-              tr = @drawHalfHex i, j, k, color, @colours.stroke
-              tr.z = z
+                tr = @drawHalfHex i, j, k, color, @colours.stroke
+                tr.z = z
 
-              @fieldsObjs[i+":"+j+":"+k] = tr
-              @stage.addChild tr
+                @fieldsObjs[i+":"+j+":"+k] = tr
+                @stage.addChild tr
 
-              if @state[z].out
-                color = @colours.positive
-              else
-                color = @colours.negative
+                if @state[z].out
+                  color = @colours.positive
+                else
+                  color = @colours.negative
 
-              tr = @drawHalfHex i, j, (k+3), color, @colours.stroke
-              tr.z = z
+                tr = @drawHalfHex i, j, (k+3), color, @colours.stroke
+                tr.z = z
 
-              @fieldsObjs[i+":"+j+":"+(k+3)] = tr
-              @stage.addChild tr
+                @fieldsObjs[i+":"+j+":"+(k+3)] = tr
+                @stage.addChild tr
 
-            @helpers.routing.acceptShow.call @, io, jo
+            @acceptShow.call @, io, jo
+            @cancelShow.call @, io, jo
         over: ( i, j, k ) ->
           field = @currentMenu.obj
 
@@ -154,6 +149,7 @@ class MapHelper extends S.Drawer
         platform:
           show: ( io, jo ) ->
             @accept io, jo, 0
+
           generateArguments: ( io, jo, i, j, k ) ->
             field = @currentMenu.obj
 
@@ -170,12 +166,14 @@ class MapHelper extends S.Drawer
         channel:
           show: ( io, jo ) ->
             for z in [0...6]
-              [i, j] = @getIJ io, jo, z
-              h = @drawHex i, j, 0, @colours.fill, @colours.stroke
-              @fieldsObjs[i+":"+j] = h
-              @stage.addChild h
+              if z in @currentMenu.validFields
+                [i, j] = @getIJ io, jo, z
 
-            @update = true
+                h = @drawHex i, j, 0, @colours.fill, @colours.stroke
+                @fieldsObjs[i+":"+j] = h
+                @stage.addChild h
+
+            @cancelShow.call @, io, jo
 
           #io, jo - coordinates of the root
           #i, j  coordinates of the clicked hex
@@ -218,35 +216,44 @@ class MapHelper extends S.Drawer
 
   #Returns direction from i, j to ci, cj
   getK: ( i, j, ci, cj ) ->
-    mi = ci - i
-    mj = cj - j
-
-    ks = [
-      [-1,-1],
-      [0,-1],
-      [1,0],
-      [1,1],
-      [0,1],
-      [-1,0]
-    ]
-
-    h = _.map ks, ( [mik, mjk], i ) ->
-      if mik == mi and mjk == mj
-        i
-      else
-        7
-
-    r = _.find h, ( v, i ) ->
-      v != 7
-
-    r
+    @events.game.map.directionGet i, j, ci, cj
 
   getIJ: ( i, j, k ) ->
-    mi = [-1, 0, 1, 1, 0, -1]
-    mj = [-1, -1, 0, 1, 1, 0]
+    [mi, mj] = @events.game.map.directionModificators i, j, k
 
-    return [i+mi[k],j+mj[k]]
+    return [mi, mj]
 
+  acceptShow: ( io, jo ) ->
+    c = new Container()
+
+    tr = @drawHex io+3, jo, 0, @colours.positive, @colours.stroke
+    tr.onClick = @accept
+    tr.onMouseOver = null
+    tr.onMouseOut = null
+
+    text = new Text "Execute"
+    text.y = 20
+
+    c.addChild tr
+    c.addChild text
+
+    @stage.addChild c
+
+  cancelShow: ( io, jo ) ->
+    c = new Container()
+
+    tr = @drawHex io+4, jo, 0, @colours.negative, @colours.stroke
+    tr.onClick = @cancel
+    tr.onMouseOver = null
+    tr.onMouseOut = null
+
+    text = new Text "Cancel"
+    text.y = 20
+
+    c.addChild tr
+    c.addChild text
+
+    @stage.addChild c
 
   drawHex: ( i, j, k, fill, stroke, h ) ->
     if h?
@@ -416,12 +423,7 @@ class MapHelper extends S.Drawer
 
   accept: ( i, j, k ) =>
     args = @currentHelper.generateArguments.call @, @i, @j, i, j, k
-
-    console.log "[Map helper] ", args
-
     args = [@currentEvent].concat args
-
-    console.log "[Map helper] more args ", args
 
     @currentDeferr.resolveWith @currentMenu, args
 

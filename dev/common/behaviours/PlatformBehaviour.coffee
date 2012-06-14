@@ -1,3 +1,11 @@
+S = {}
+if require?
+  _ = require 'underscore'
+  S.Types = require '../config/Types'
+else
+  _ = window._
+  S.Types = window.S.Types
+
 class PlatformBehaviour
 
     constructor: ( @eventBus ) ->
@@ -46,7 +54,7 @@ class PlatformBehaviour
 
     route: ( state ) ->
         availableRoutes = []
-        _.each state.routing, (route, direction) -> if route.out and route.object.type? 
+        _.each state.routing, (route, direction) -> if route.out and route.object.type?
             availableRoutes.push [route, direction]
         _.each state.signals, (signal) =>
             destNum = Math.ceil(Math.random()*100)%availableRoutes.length

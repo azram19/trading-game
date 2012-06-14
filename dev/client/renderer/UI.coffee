@@ -125,7 +125,7 @@ class UI extends S.Drawer
   createMenu: (i, j) ->
     p = @getPoint i, j
 
-    menuStructure = @events.getMenu i, j
+    [menuStructure, menuValidFields] = @events.getMenu i, j
     console.debug menuStructure
     obj = @events.getField i, j
 
@@ -158,10 +158,12 @@ class UI extends S.Drawer
     ( subMenu = @buildMenu submenuName,
         eventsStructure,
         @getWithoutPrefix( submenuName, menuStructure ),
-        submenuName
+        submenuName,
+        menuStructure,
+        menuValidFields
 
       menu.addChild subMenu
-    ) for submenuName in submenuNames
+    ) for submenuName, i in submenuNames
 
     menu.setActionHelper @menuHelper
 
@@ -178,7 +180,7 @@ class UI extends S.Drawer
 
   #name of the event element, eventsStructure - Types.Events sub object
   #eventsStructure [a:b:c] ...
-  buildMenu: ( name, eventsStructure, menuStructure, fullname ) =>
+  buildMenu: ( name, eventsStructure, menuStructure, fullname, fullStructure, validFields ) =>
 
     stName = name[0].toUpperCase() + name[1..]
 
@@ -195,7 +197,9 @@ class UI extends S.Drawer
     if desc.length > 0 or not submenuNames.length
       m = new S.RadialMenu @events, @stage.canvas, 0, 0, title, desc
       m.setEvent fullname
-      console.log fullname
+
+      index = _.indexOf fullStructure, fullname
+      m.setValidFields validFields[index]
 
       m
     else
@@ -205,7 +209,9 @@ class UI extends S.Drawer
         subMenu = @buildMenu submenuName,
           eventsStructure,
           @getWithoutPrefix( submenuName, menuStructure ),
-          fullname + ':' + submenuName
+          fullname + ':' + submenuName,
+          fullStructure,
+          validFields
 
         m.addChild subMenu
       ) for submenuName in submenuNames

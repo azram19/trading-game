@@ -215,7 +215,12 @@ class Negotiator
         (+dir)
       )
       amountOfChannels = _.keys(nField.channels).length
-      if (amountOfChannels < 2 or nField.platfrom.type?) and not (k in  existingDirections)
+
+      if (amountOfChannels < 2 or (nField.platfrom? and nField.platfrom.type?)) and not (k in existingDirections)
         possibleChannels.push k
+
+    console.log "[Negotiator][possible channels]", x, y, possibleChannels
+
+    possibleChannels
 
 window.S.Negotiator = Negotiator
