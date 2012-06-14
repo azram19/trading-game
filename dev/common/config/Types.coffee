@@ -15,7 +15,7 @@ Types =
         'Signal'
         'Player'
         'HQ'
-        'Normal'
+        'Platform'
       ]
     Terrain:
       Water: 1

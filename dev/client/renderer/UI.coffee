@@ -111,13 +111,16 @@ class UI extends S.Drawer
 
     @events.trigger 'scroll', x, y
 
-    @canvasContainer.find( 'canvas' ).not( '.noScroll' ).each(
+    @canvasContainer.find( 'canvas, .scrollIt' ).not( '.noScroll' ).each(
       (i,el) ->
         $el = $ el
 
+        top = -y
+        left = -x
+
         $el.css(
-          top: -y
-          left: -x
+          top: top
+          left: left
         )
     )
 
@@ -125,27 +128,30 @@ class UI extends S.Drawer
   createMenu: (i, j) ->
     p = @getPoint i, j
 
-    [menuStructure, menuValidFields] = @events.getMenu i, j
-    console.debug menuStructure
+    menuInfo = @events.getMenu i, j
     obj = @events.getField i, j
 
-    if not menuStructure?
+    if not menuInfo?
       return
 
+    [menuStructure, menuValidFields] = menuInfo
+
     menuDesc = _.find menuStructure, ( menu ) ->
-      menu.search "/:*" == 0
+      menu.search( "/:*" ) == 0
 
     menuDesc =
       if menuDesc?
+        menuStructure = _.without menuStructure, menuDesc
         menuDesc.substring 2
       else
-        ''
+        null
 
     menuSpDisplay = _.find menuStructure, ( menu ) ->
-      menu.search "/!*" == 0
+      menu.search( "/!*" ) == 0
 
-    menuSpDispay =
+    menuSpDisplay =
       if menuSpDisplay?
+        menuStructure = _.without menuStructure, menuSpDisplay
         menuSpDisplay.substring 2
       else
         null
@@ -167,11 +173,10 @@ class UI extends S.Drawer
 
     menu.setActionHelper @menuHelper
 
-    ###
     if menuSpDisplay?
-      displayHelper = new S.MenuDisplayHelper @, menuSpDispay, menu, i, j, p.x, p.y
+      console.log menuSpDisplay
+      displayHelper = new S.MenuDisplayHelper( @events, menuSpDisplay, menu, i, j, p.x, p.y )
       menu.setDisplayHelper displayHelper
-    ###
 
     menu.setObj obj
     menu.setRoot menu

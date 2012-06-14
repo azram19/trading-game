@@ -16,7 +16,7 @@ else
 
 class Map
 
-  constructor: ( @eventBus, @minWidth, @maxWidth, @nonUser ) ->
+  constructor: ( @eventBus, @minWidth, @maxWidth, @nonUser, @startingFields ) ->
     @fields = {}
     @diffRows = @maxWidth - @minWidth
     @directionModUpper = [[-1, -1], [0, -1], [1, 0], [1, 1], [0, 1], [-1, 0]]
@@ -154,6 +154,13 @@ class Map
 
     #generate resources
     initializeResource = ( o, x, y ) =>
+      skip =  _.any @startingFields, ( o ) ->
+        [x2, y2] = o
+        x2 == x and y2 == y
+
+      if skip
+        return null
+
       chance = 0.72
       res = Math.random()
 

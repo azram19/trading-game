@@ -82,6 +82,8 @@ class Negotiator
       @game.startingPonts = startingPoints
       @game.map.importGameState state
       @renderer.setupBoard @game.map
+      $.when( @terrain.isReady() ).done =>
+        @terrain.setupBoard @game.map
 
     @communicator.on 'players:all:ready', =>
       console.log '[Negotiator] all players loaded'
@@ -168,7 +170,13 @@ class Negotiator
     @renderer = new S.Renderer @, minWidth, maxWidth, _.pluck(@game.players, 'id'), @myPlayer
     $.when(@renderer.boardLoaded.promise()).done =>
       @renderer.setupBoard @game.map
-      @terrain.draw() #2 not extremely fast, disabled for debugging
+
+      terrain = @terrain
+
+      terrain.draw()
+      $.when( terrain.isReady() ).done =>
+        terrain.setupBoard.call terrain, @game.map
+
 
   buildPlatform: ( x, y, type, owner ) ->
     platform = S.ObjectFactory.build S.Types.Entities.Platforms.Normal, @, owner, type
@@ -211,13 +219,15 @@ class Negotiator
     for k in [0..5]
       [nX, nY] = @game.map.directionModificators x, y, k
       nField = @getField nX, nY
-      existingDirections = _(field.channels).keys().map((dir) ->
-        (+dir)
-      )
-      amountOfChannels = _.keys(nField.channels).length
 
-      if (amountOfChannels < 2 or (nField.platfrom? and nField.platfrom.type?)) and not (k in existingDirections)
-        possibleChannels.push k
+      if nField?
+        existingDirections = _(field.channels).keys().map((dir) ->
+          (+dir)
+        )
+        amountOfChannels = _.keys(nField.channels).length
+
+        if (amountOfChannels < 2 or (nField.platfrom? and nField.platfrom.type?)) and not (k in existingDirections)
+          possibleChannels.push k
 
     console.log "[Negotiator][possible channels]", x, y, possibleChannels
 

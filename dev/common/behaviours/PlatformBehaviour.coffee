@@ -19,7 +19,7 @@ class PlatformBehaviour
       [x, y] = state.field.xy
       possibleChannels = @eventBus.getPossibleChannels x, y
 
-      menu = [['build:channel', 'routing'], [possibleChannels, possibleRoutes]]
+      menu = [['build:channel', 'routing', '/:Platform', '/!platforminfo'], [possibleChannels, possibleRoutes]]
 
     requestAccept: ( signal, state ) ->
         if signal.owner.id is state.owner.id

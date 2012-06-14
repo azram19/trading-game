@@ -216,14 +216,14 @@ class RadialMenu
     @circle.visible = false
     @circle.graphics
       .setStrokeStyle(2)
-      .beginStroke( "rgba(0,0,0,#{@fadedOutOpacity})" )
+      .beginStroke( "rgba(0,0,0,#{@fadedOutOpacity/4})" )
       .drawCircle( @x_o, @y_o, @expand_length )
 
     @circleC = new Shape()
     @circleC.visible = false
     @circleC.graphics
       .setStrokeStyle(2)
-      .beginStroke( "rgba(0,0,0,#{@fadedOutOpacity})" )
+      .beginStroke( "rgba(0,0,0,#{@fadedOutOpacity/4})" )
       .drawCircle( @x_o, @y_o, @compact_length )
 
     @actionButton = new Shape()

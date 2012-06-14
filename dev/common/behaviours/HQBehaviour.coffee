@@ -19,7 +19,7 @@ class HQBehaviour
       [x, y] = state.field.xy
       possibleChannels = @eventBus.getPossibleChannels x, y
 
-      menu = [['build:channel', 'routing'], [possibleChannels, possibleRoutes]]
+      menu = [['build:channel', 'routing', '/:HQ', '/!platforminfo'], [possibleChannels, possibleRoutes]]
 
     requestAccept: ( signal, state ) ->
         if signal.owner is state.owner
