@@ -200,6 +200,12 @@ class Negotiator
     @terrain.generateRoad x, y, x2, y2
     @renderer.changeOwnership x2, y2, owner.id
 
+  nonUserId: ( user ) ->
+    @game.map.nonUser.id
+
+  directionGet: (user, x1, y1, x2, y2) ->
+    @game.map.directionGet x1, y1, x2, y2
+
   getMenu: ( x, y ) ->
     field = @getField x, y
 
@@ -214,7 +220,7 @@ class Negotiator
           [['build:platform'], [[]]]
         else
           possibleChannels = @getPossibleChannels x, y
-          [['build:platform', 'build:channel'], [[],possibleChannels]]
+          [['build:channel', 'build:platform'], [possibleChannels,[]]]
 
   getField: ( x, y ) ->
     @game.map.getField x, y

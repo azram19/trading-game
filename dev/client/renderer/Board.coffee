@@ -433,8 +433,8 @@ class SignalsDrawer extends Drawer
             @stage.addChild signal
         signal.x = point.x
         signal.y = point.y
-        signal.tickSizeX = @ticksX[dir]
-        signal.tickSizeY = @ticksY[dir]
+        signal.tickSizeX = @offsetX[dir]/Ticker.getMeasuredFPS()
+        signal.tickSizeY = @offsetY[dir]/Ticker.getMeasuredFPS()
         signal.visible = true
         signal.k = 0
         @stage.update()

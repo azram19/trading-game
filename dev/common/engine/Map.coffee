@@ -290,10 +290,11 @@ class Map
         console.log "[Map] built channel destination", dest
         if dest?
           dest[1] = (+dest[1])
+          nK = (k + 3) % 6
           nIndex = (dest[1] + 3) % 6
           console.log "[Map] routing indices", dest[1], nIndex
-          dest[0].state.routing[k].object = channel
-          channel.state.routing[dest[1]].object = dest[0]
+          dest[0].state.routing[nIndex].object = channel
+          channel.state.routing[nK].object = dest[0]
 
     routingAddChannel x, y, k
     routingAddChannel nX, nY, nK
@@ -323,7 +324,7 @@ class Map
         #console.log '[Map] channel states', util.inspect(channels, false, 5)
         (
           channels[dir] = @clearRoutingObjects channel
-          channels[dir].field = {}
+          channels[dir].fields = []
         ) for dir, channel of channels
         #console.log '[Map] channel dump after extraction', util.inspect(channels, false, 5)
       platform = {}

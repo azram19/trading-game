@@ -23,11 +23,13 @@ class PlatformBehaviour
 
     requestAccept: ( signal, state ) ->
         if signal.owner.id is state.owner.id
-            availableRoutes = _.filter state.routing, (route) ->
-                route.in and route.object?.state?.id is signal.source.id
-            availableRoutes.length > 0 and state.capacity >= state.signals
+          availableRoutes = _.filter state.routing, (route) ->
+              route.in and route.object?.state?.id is signal.source.id
+          availableRoutes.length > 0 and state.capacity >= state.signals
+        else if signal.owner.id is @eventBus.nonUserId state.owner
+          state.capacity >= state.signals
         else
-            true
+          true
 
     produce: ( state ) ->
         if state.field.resource.type?
@@ -52,13 +54,13 @@ class PlatformBehaviour
 
     route: ( state, signal ) ->
         availableRoutes = []
-        _.each state.routing, (route, direction) -> if route.out and route.object?.type? 
-            availableRoutes.push [route, direction]   
+        _.each state.routing, (route, direction) -> if route.out and route.object?.type?
+            availableRoutes.push [route, direction]
         if availableRoutes.length > 0
             destNum = Math.ceil(Math.random()*100)%availableRoutes.length
             destination = availableRoutes[destNum]
             console.log "[PlatformBehaviour]: availableRoutes", availableRoutes
-            
+
             signal.source = state
             signal.owner = state.owner
             if destination[0].object.requestAccept signal

@@ -64,8 +64,11 @@ class ChannelBehaviour
           if destination[0].object.type() is S.Types.Entities.Channel
             console.log '[ChannelBehaviour] fields references', state.fields, destination[0].object.state.fields
             field = _.intersection state.fields, destination[0].object.state.fields
-            console.log "[ChannelBehaviour]: moving", field[0].xy, destination[1]
-            @eventBus.trigger 'move:signal', field[0].xy, destination[1]
+            field2 = _.difference destination[0].object.state.fields, state.fields
+            console.log "[ChannelBehaviour]: eventBus", @eventBus
+            dest = @eventBus.directionGet state.owner, field[0].xy[0], field[0].xy[1], field2[0].xy[0], field2[0].xy[1]
+            console.log "[ChannelBehaviour]: moving", field[0].xy, dest
+            @eventBus.trigger 'move:signal', field[0].xy, dest
 
           destination[0].object.trigger 'accept', signal, (signal) ->
             state.signals--
