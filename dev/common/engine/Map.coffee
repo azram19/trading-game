@@ -217,7 +217,7 @@ class Map
     xn = x2 - x1
     yn = y2 - y1
 
-    if y1 < @diffRows or (y1 is @diffRows and y2 > @diffRows)
+    if y1 < @diffRows or (y1 is @diffRows and y2 < y1)
       mods = @directionModUpper
       dir = -1
 
@@ -226,7 +226,7 @@ class Map
         if xMod == xn and yMod == yn
           dir = i
           return {}
-    else if y1 > @diffRows or (y1 is @diffRows and y2 <= @diffRows)
+    else if y1 > @diffRows or (y1 is @diffRows and y2 >= y1)
       mods = @directionModLower
       dir = -1
       _.each mods, ( o, i ) ->
@@ -290,10 +290,11 @@ class Map
         console.log "[Map] built channel destination", dest
         if dest?
           dest[1] = (+dest[1])
+          nK = (k + 3) % 6
           nIndex = (dest[1] + 3) % 6
           console.log "[Map] routing indices", dest[1], nIndex
-          dest[0].state.routing[k].object = channel
-          channel.state.routing[dest[1]].object = dest[0]
+          dest[0].state.routing[nIndex].object = channel
+          channel.state.routing[nK].object = dest[0]
 
     routingAddChannel x, y, k
     routingAddChannel nX, nY, nK

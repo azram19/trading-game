@@ -197,6 +197,9 @@ class Negotiator
   nonUserId: ( user ) ->
     @game.map.nonUser.id
 
+  directionGet: (user, x1, y1, x2, y2) ->
+    @game.map.directionGet x1, y1, x2, y2
+
   getMenu: ( x, y ) ->
     field = @getField x, y
 
