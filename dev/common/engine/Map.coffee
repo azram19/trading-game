@@ -330,7 +330,6 @@ class Map
         (
           channels[dir] = @clearRoutingObjects channel
           channels[dir].fields = []
-          circFreeSignals
           for i, signal in channels[dir].signals
             channels[dir].signals[i].source.field = {}
         ) for dir, channel of channels
