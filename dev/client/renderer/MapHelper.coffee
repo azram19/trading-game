@@ -57,22 +57,13 @@ class MapHelper extends S.Drawer
 
                 k = (5-z)%6
 
-                angle = Math.PI/3 * (z - 1)
-                addText = (z == 2 or z == 5 )
+                angle = 60 * (z-2)
 
                 tr = @drawHalfHex i, j, k, color, @colours.stroke
                 tr.z = z
 
                 @fieldsObjs[i+":"+j+":"+k] = tr
                 @stage.addChild tr
-
-                if addText
-                  text = new Text "in", "bold 13px 'Cabin', Helvetica,Arial,sans-serif", '#fff'
-                  text.textAlign = 'center'
-                  text.textBaseline = 'middle'
-                  text.x = p.x - 15 * Math.sin( angle )
-                  text.y = p.y
-                  @stage.addChild text
 
                 if @state[z].out
                   color = @colours.positive
@@ -82,17 +73,28 @@ class MapHelper extends S.Drawer
                 tr = @drawHalfHex i, j, (k+3), color, @colours.stroke
                 tr.z = z
 
-
                 @fieldsObjs[i+":"+j+":"+(k+3)] = tr
                 @stage.addChild tr
 
-                if addText
-                  text = new Text "out", "bold 13px 'Cabin', Helvetica,Arial,sans-serif", '#fff'
-                  text.textAlign = 'center'
-                  text.textBaseline = 'middle'
-                  text.x = p.x + 15 * Math.sin( angle )
-                  text.y = p.y
-                  @stage.addChild text
+                textContainer = new Container()
+                @stage.addChild textContainer
+                textContainer.x = p.x
+                textContainer.y = p.y
+                textContainer.rotation = angle
+
+                text = new Text "in", "bold 13px 'Cabin', Helvetica,Arial,sans-serif", '#fff'
+                text.textAlign = 'center'
+                text.textBaseline = 'middle'
+                text.x = -15
+                text.rotation = -angle
+                textContainer.addChild text
+
+                text = new Text "out", "bold 13px 'Cabin', Helvetica,Arial,sans-serif", '#fff'
+                text.textAlign = 'center'
+                text.textBaseline = 'middle'
+                text.x = 15
+                text.rotation = -angle
+                textContainer.addChild text
 
             @acceptShow.call @, io, jo
             @cancelShow.call @, io, jo

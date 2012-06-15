@@ -24,7 +24,6 @@ class HQBehaviour
     requestAccept: ( signal, state ) ->
         true
 
-
     produce: ( state ) ->
         if state.field.resource.type?
             state.field.resource.trigger 'produce'
@@ -33,7 +32,7 @@ class HQBehaviour
                     if not state.field.platform.state.owner
                         console.log ["Missing owner - HQ"], state.field
                     state.owner.addResource(S.SignalFactory.build S.Types.Entities.Signal, @eventBus, state.extraction, S.Types.Resources[res], state.field.platform)
-                    @eventBus.trigger 'resource:produce', state.field.xy, state.extraction, S.Types.Resources[res]
+                    #@eventBus.trigger 'resource:produce', state.field.xy, state.extraction, S.Types.Resources[res]
                 ) for res in S.Types.Resources.Names
         setInterval production, state.delay
 
