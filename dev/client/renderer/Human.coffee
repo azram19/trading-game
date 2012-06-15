@@ -66,7 +66,7 @@ class Human
 
   walk: ( k ) ->
     $.when( @ready ).then ->
-      @direction = Math.PI/3 * -1 * ((k+4)%6) - Math.PI*3/2
+      @direction = Math.PI/3 * -1 * ((k+4)%6) - Math.PI*3/2#(-Math.PI/3)*((k+4) % 6)
       @animation.gotoAndPlay "walk" + k
 
       v = @walkDistance / (@timeForAWalk / Ticker.getInterval())

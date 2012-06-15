@@ -411,6 +411,7 @@ class OffSignals
         shape.visible = false
         shape.isSignal = true
         @stage.addChild shape
+        
 
     toogleCache: (status) ->
         length = @stage.getNumChildren() - 1
@@ -426,9 +427,9 @@ class SignalsDrawer extends Drawer
     signalRadius: 8
     signalCount: 50
 
-    constructor: (@stage, @offStage, minRow, maxRow) ->
+    constructor: (@eventBus, @stage, @offStage, minRow, maxRow) ->
         super minRow, maxRow
-        @offSignals = new OffSignals @offStage
+        #@offSignals = new OffSignals @offStage
         Ticker.addListener this
 
     setupFPS: () ->
@@ -446,6 +447,7 @@ class SignalsDrawer extends Drawer
         if signal is null
             #console.log "new"
             signal = @offSignals.getSignal()
+            
             @stage.addChild signal
         signal.x = point.x
         signal.y = point.y
@@ -454,6 +456,11 @@ class SignalsDrawer extends Drawer
         signal.visible = true
         signal.k = 0
         @stage.update()
+
+    drawWorker: (x, y, direction) ->
+        worker = new S.Human(@eventBus, '/img/traggerSprite.png', null, @distance, 1000)
+        worker.appear x, y, direction
+        worker.walk direction
 
     getSignal: () ->
         for sig in @stage.children
@@ -468,6 +475,7 @@ class SignalsDrawer extends Drawer
         @stage.update()
 
     tick: () ->
+        ###
         for signal in @stage.children
             if signal.isSignal and signal.isVisible
                 if not @fogON or not @invisibleTerrain.hitTest signal.x, signal.y
@@ -480,6 +488,7 @@ class SignalsDrawer extends Drawer
                         signal.k += 1
                 else
                     signal.visible = false
+        ###
         @fpsLabel.text = Math.round(Ticker.getMeasuredFPS())+" fps"
         @stage.update()
 
@@ -522,7 +531,7 @@ class Renderer
             console.log '[Renderer] all Images have been loaded'
             boardStages = [@gridST, @fogST, @ownershipST, @resourcesST, @platformsST, @channelsST]
             @boardDR = new BoardDrawer @bitmapsST, boardStages, minRow, maxRow, players, myPlayer
-            @signalsDR = new SignalsDrawer @signalsST, @offST, minRow, maxRow
+            @signalsDR = new SignalsDrawer eventBus, @signalsST, @offST, minRow, maxRow
             @boardLoaded.resolve()
 
     loadImages: (dfd) ->
@@ -574,8 +583,8 @@ class Renderer
 
     # moves signal from field (x,y) in particular direction
     moveSignal: (x, y, direction) ->
-        @signalsDR.createSignal(x, y, direction)
-
+        #@signalsDR.createSignal(x, y, direction)
+        @signalsDR.drawWorker(x, y, direction)
     # builds a channel at field (x,y) in given direction
     buildChannel: (x, y, direction, channel) ->
         @boardDR.buildChannel(x, y, direction, channel.state.owner.id)
@@ -605,7 +614,7 @@ class Renderer
     setupBoard: (boardState) ->
         @clearAll()
         @signalsDR.setupFPS()
-        @signalsDR.setupOffSignals()
+        #@signalsDR.setupOffSignals()
         @boardDR.setupBoard(boardState)
         Ticker.useRAF = true
         Ticker.setFPS 60
