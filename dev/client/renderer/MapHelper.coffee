@@ -463,7 +463,7 @@ class MapHelper extends S.Drawer
     @close()
 
   cancel: () =>
-    @currentDeferr.rejectWith @currentMenu, @currentEvent
+    @currentDeferr.rejectWith @currentMenu, [@currentEvent]
 
     @clean()
     @close()
