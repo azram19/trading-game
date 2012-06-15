@@ -278,6 +278,7 @@ class RadialMenu
       @displayHelper.hide()
 
     @hideText()
+    @$desc.destroy()
     @button.visible = false
     @container.visible = false
 
