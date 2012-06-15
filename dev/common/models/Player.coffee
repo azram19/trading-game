@@ -1,6 +1,10 @@
 #node.js requirements
+S = {}
 if require?
   _ = require 'underscore'
+  S.Types = require '../config/Types'
+else
+  S.Types = window.S.Types
 
 class Player
 
@@ -8,8 +12,8 @@ class Player
     @resources = {}
 
   addResource: ( s ) ->
-    @resources[s.type] ?= 0
-    @resources[s.type] += s.strength
+    @resources[S.Types.Resources.Names[s.type-6]] ?= 0
+    @resources[S.Types.Resources.Names[s.type-6]] += s.strength
 
   spendResources: ( t, x ) ->
     if @resources[t] > x

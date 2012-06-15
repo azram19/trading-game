@@ -15,7 +15,7 @@ Properties =
         field: {}
         signals: 0
         routing: {}
-        delay: 3000
+        delay: 2000
         extraction: 20
         capacity: 10
         life: 100
@@ -28,7 +28,7 @@ Properties =
         field: {}
         signals: 0
         routing: {}
-        delay: 3000
+        delay: 1000
         extraction: 20
         capacity: 10
         life: 100
@@ -42,7 +42,7 @@ Properties =
         field: {}
         signals: 0
         routing: {}
-        delay: 3000
+        delay: 2000
         extraction: 20
         capacity: 10
         life: 100
@@ -64,7 +64,7 @@ Properties =
         field: {}
         signals: 0
         routing: {}
-        delay: 3000
+        delay: 2000
         extraction: 20
         capacity: 10
         life: 100

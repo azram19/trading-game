@@ -57,7 +57,7 @@ class ObjectFactory
             name = 'Channel' + id
             st = new S.ObjectState()
             state = _.extend st, @deepClone(S.Properties.channel, true)
-            state = _.extend state, {'name': name, 'id': id, 'owner': owner}
+            state = _.extend state, {'name': name, 'id': id, 'owner': owner, 'fields': []}
             object = new S.GameObject new S.ChannelBehaviour(events), state
 
         @builders[S.Types.Entities.Player] = (id, args) =>

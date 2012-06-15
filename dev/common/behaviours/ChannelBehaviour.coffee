@@ -20,6 +20,7 @@ class ChannelBehaviour
     requestAccept: ( signal, state ) ->
         if signal.owner.id is state.owner.id
             availableRoutes = _.filter state.routing, (route) ->
+                console.log "[ChannelBehaviour] availableRoutes", route.object.state, signal.source
                 route.in and route.object?.state?.id is signal.source.id
             availableRoutes.length > 0 and state.capacity >= state.signals
         else
@@ -33,10 +34,7 @@ class ChannelBehaviour
         if signal.owner.id is signal.owner.id
             addSignal = (signal) =>
                 state.signals++
-                console.log "[ChannelBehaviour]: old signal.source", signal.source
-                signal.source = state
-                console.log "[ChannelBehaviour]: new signal.source", signal.source
-                signal.owner = state.owner
+                console.log "[ChannelBehaviour]: now i will call @route", new Date()
                 @route state, signal
             _.delay addSignal, state.delay, signal
         else
@@ -47,18 +45,27 @@ class ChannelBehaviour
 
     route: ( state, signal ) ->
       availableRoutes = []
+      console.log "[ChannelBehaviour]: state.routing", state.routing
       _.each state.routing, (route, direction) -> 
-       #console.log "[ChannelBehaviour]: channel", route.object?.state?.id, signal.source.id, direction
-        if route.object.type? and route.object?.state?.id isnt signal.source.id
+        console.log "[ChannelBehaviour]: channel", route.object?.state?.id, signal.source.id, direction
+        if route.object.type? and route.object?.state?.name isnt signal.source.name
           availableRoutes.push [route, direction]
-      
-      destination = availableRoutes[0]
-      if destination[0].object.requestAccept signal
-        if destination[0].object.type is S.Types.Entities.Channel
-          @eventBus.trigger 'move:signal', state.field.xy, destination[1]
+      console.log "[ChannelBehaviour]: availableRoutes", availableRoutes
+      if availableRoutes.length > 0
+        destination = availableRoutes[0]
+        
+        signal.source = state
+        signal.owner = state.owner
+        if destination[0].object.requestAccept signal
+          console.log "[ChannelBehaviour]: object.type", destination[0].object.type()
+          if destination[0].object.type() is S.Types.Entities.Channel
+            console.log '[ChannelBehaviour] fields references', state.fields, destination[0].object.state.fields
+            field = _.intersection state.fields, destination[0].object.state.fields
+            console.log "[ChannelBehaviour]: moving", field[0].xy, destination[1]
+            @eventBus.trigger 'move:signal', field[0].xy, destination[1]
 
-        destination[0].object.trigger 'accept', signal, (signal) ->
-          state.signals--
+          destination[0].object.trigger 'accept', signal, (signal) ->
+            state.signals--
 
 if module? and module.exports
   exports = module.exports = ChannelBehaviour

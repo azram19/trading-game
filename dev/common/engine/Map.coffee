@@ -266,7 +266,7 @@ class Map
     channel.behaviour.eventBus = @eventBus
     @fields[y] ?= {}
     @fields[y][x].channels ?= {}
-    channel.state.field = @fields[y][x]
+    channel.state.fields.push @fields[y][x]
     channel.state.direction = k
     @fields[y][x].channels[k] = channel
     [nX, nY] = @directionModificators x, y, k
@@ -279,8 +279,25 @@ class Map
         @fields[y][x].platform.state.routing[k].object = channel
         channel.state.routing[nK].object = @fields[y][x].platform
 
+    channelRouting = (x, y, k) =>
+      if not (@fields[y][x].platform.type?)
+        channels = []
+        console.log '[Map] field channels on add', @getField(x, y).channels
+        _.each @getField(x, y).channels, (route, index) ->
+          if (+index) isnt k
+            channels.push [route, index]
+        dest = channels[0]
+        console.log "[Map] built channel destination", dest
+        if dest?
+          dest[1] = (+dest[1])
+          nIndex = (dest[1] + 3) % 6
+          console.log "[Map] routing indices", dest[1], nIndex
+          dest[0].state.routing[k].object = channel
+          channel.state.routing[dest[1]].object = dest[0]
+
     routingAddChannel x, y, k
     routingAddChannel nX, nY, nK
+    channelRouting x, y, k
     #if not (@getField(nX, nY).owner?)
       #@eventBus.trigger("owner:channel", [nX, nY], channel.state.owner)
 
@@ -288,6 +305,7 @@ class Map
     @fields[y] ?= {}
     @fields[y][x].channels ?= {}
     @fields[y][x].channels[k] = channel
+    channel.state.fields.push @fields[y][x]
 
   extractGameState: ->
     gameState = {}

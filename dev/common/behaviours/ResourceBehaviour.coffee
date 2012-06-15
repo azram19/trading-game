@@ -39,15 +39,18 @@ class ResourceBehaviour
                 @eventBus.trigger 'resource:produce', state.field.xy, state.extraction, @resourceType
                 #can the platform accept the signal
                 acceptable = state.field.platform.requestAccept newSignal
-
+                console.log '[ResourceBehaviour] the resource is acceptable', acceptable
                 if acceptable
                     #send the signal
                     state.life -= state.extraction
                     state.signals++
+                    console.log '[ResourceBehaviour] triggering accept on platform', new Date()
                     state.field.platform.trigger "accept", newSignal, (signal) ->
                         state.signals--
-
-        @PID = setInterval production, state.delay
+        @PID = setInterval ( ->
+          console.log '[ResourceBehaviour] Trigger resource production', new Date()
+          production()
+        ), state.delay
 
 if module? and module.exports
   exports = module.exports = ResourceBehaviour
