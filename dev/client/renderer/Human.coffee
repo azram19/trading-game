@@ -65,28 +65,30 @@ class Human
       Ticker.addListener @
 
   walk: ( k ) ->
-    @direction = Math.PI/3 * -1 * ((k+4)%6) - Math.PI*3/2
-    @animation.gotoAndPlay "walk" + k
+    $.when( @ready ).then ->
+      @direction = Math.PI/3 * -1 * ((k+4)%6) - Math.PI*3/2
+      @animation.gotoAndPlay "walk" + k
 
-    v = @walkDistance / (@timeForAWalk / Ticker.getInterval())
+      v = @walkDistance / (@timeForAWalk / Ticker.getInterval())
 
-    @vx = v * Math.sin @direction
-    @vy = v * Math.cos @direction
+      @vx = v * Math.sin @direction
+      @vy = v * Math.cos @direction
 
-    @move = true
+      @move = true
 
   appear: (i , j, k) ->
-    if not k?
-      k = 0
+    $.when( @ready ).then ->
+      if not k?
+        k = 0
 
-    p = @events.terrain.getPoint i, j
-    @animation.x = p.x
-    @animation.y = p.y
-    @animation.visible = true
+      p = @events.terrain.getPoint i, j
+      @animation.x = p.x
+      @animation.y = p.y
+      @animation.visible = true
 
-    @animation.gotoAndStop "stand" + k
+      @animation.gotoAndStop "stand" + k
 
-    @stage.update()
+      @stage.update()
 
   tick: () ->
     if @move
