@@ -78,7 +78,7 @@ class Drawer
     # Returns canvas coordinates in pixels
     getPoint: (x, y) ->
         offset = @margin + Math.abs(@diffRows - y)*@horIncrement
-        new Point(offset + 2*x*@horIncrement - @scrollX, @margin + y*@verIncrement - scrollY)
+        new Point(offset + 2*x*@horIncrement, @margin + y*@verIncrement)
 
     # Arguments: point with canvas coordinates and direction (0..5)
     # Returns canvas coordinates of destination point in particular direction
