@@ -54,7 +54,6 @@ Properties =
         strength: 0
         source: {}
         resource: ""
-        path: []
 
     resource:
         type: S.Types.Resources.Food
