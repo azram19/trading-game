@@ -121,6 +121,9 @@ p {
     transform: translateZ(0);
   }
 
+  #animations {
+    z-index:8;
+  }
   #background {
     z-index: 0;
   }
@@ -146,7 +149,7 @@ p {
     z-index: 7;
   }
   #UI {
-    z-index: 8;
+    z-index: 9;
   }
   #off {
     z-index: -1;
@@ -615,6 +618,7 @@ p {
     border-left:2px #000 solid;
     height:100%;
     background:#fff;
+    z-index:40;
   }
 
 }
@@ -625,9 +629,10 @@ p {
 }
 
 .platforminfo{
-  background: rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.7);
   padding: 10px;
   border-radius: 5px;
+  box-shadow: 0 0 16px rgba(0, 0, 0, 0.9);
 
   .resourceinfo{
     margin-bottom:20px;
