@@ -10,9 +10,13 @@ class Negotiator
       #console.debug 'move:signal', xy, dir
       @renderer.moveSignal xy[0], xy[1], dir
 
-    @on 'full:channel', (xy) ->
-      p = @ui.getPoint xy[0], xy[1]
-      @ui.showTextBubble "Channel full", p.x+40, p.y+20
+    @on 'full:channel', (fields) ->
+      p1 = @ui.getPoint fields[0].xy[0], fields[0].xy[1]
+      p2 = @ui.getPoint fields[1].xy[0], fields[1].xy[1]
+      x1 = (p2.x+p1.x)/2
+      y1 = ((p2.y+p1.y)/2) + 10
+      console.log "[NEGOTIATOR]: FULL FULL CHANNEL": x1, y1
+      @ui.showTextBubble "Channel full", x1, y1
 
     @on 'owner:channel', (xy, dir, owner) ->
       #console.debug 'owner:channel', xy, dir, state.owner
@@ -45,10 +49,19 @@ class Negotiator
 
     @on 'routing', (obj, routing) =>
       _.extend obj.platform.state.routing, routing
-      routingValues = _.map routing, (route) ->
+      obj.platform.trigger 'route'
+      _.each routing, ( route ) ->
+        if route.type?
+         route.object.trigger 'route'
+
+      routingValues = {}
+
+      for dir, route of routing
         ret =
           in: route.in
           out: route.out
+        routingValues[dir] = ret
+
       console.log '[Negotiator] new routing: ', routingValues
       @communicator.trigger 'send:routing', obj.xy[0], obj.xy[1], routingValues, obj.platform.state.owner
 
@@ -88,8 +101,8 @@ class Negotiator
       @game.startingPonts = startingPoints
       @game.map.importGameState state
       @renderer.setupBoard @game.map
-      $.when( @terrain.isReady() ).done =>
-        @terrain.setupBoard @game.map
+      #$.when( @terrain.isReady() ).done =>
+        #@terrain.setupBoard @game.map
 
     @communicator.on 'players:all:ready', =>
       console.log '[Negotiator] all players loaded'
@@ -161,7 +174,7 @@ class Negotiator
       hash = shaObj.getHash "SHA-512", "B64"
       @communicator.trigger 'get:state:sync', @gameInfo.name, hash
 
-    @syncID = setInterval requestSync, 11*1000
+    #@syncID = setInterval requestSync, 11*1000
 
   #setScroll: ( x, y ) ->
     #@renderer.setScroll x, y
@@ -180,8 +193,8 @@ class Negotiator
       terrain = @terrain
 
       terrain.draw()
-      $.when( terrain.isReady() ).done =>
-        terrain.setupBoard.call terrain, @game.map
+      #$.when( terrain.isReady() ).done =>
+        #terrain.setupBoard.call terrain, @game.map
 
 
   buildPlatform: ( x, y, type, owner ) ->
@@ -197,7 +210,7 @@ class Negotiator
     @renderer.buildChannel x, y, k, channel
     @renderer.changeOwnership x, y, owner.id
     [x2 ,y2] = @game.map.directionModificators(x, y, k)
-    @terrain.generateRoad x, y, x2, y2
+    #@terrain.generateRoad x, y, x2, y2
     @renderer.changeOwnership x2, y2, owner.id
 
   nonUserId: ( user ) ->

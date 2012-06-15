@@ -133,6 +133,7 @@ class GameServer
     instance = @gameInstances[game]
     field = instance.map.getField x, y
     _.extend field.platform.state.routing, routing
+    console.log '[GameServer] setting new routing', routing
     @trigger 'routing:changed', game, x, y, routing, owner
 
 module.exports = exports = GameServer
