@@ -12,8 +12,9 @@ class GameObject
 
     constructor: ( @behaviour, @state ) ->
         _.extend @, Backbone.Events
-        @.on 'accept', @accept, @
-        @.on 'produce', @produce, @
+        @on 'accept', @accept, @
+        @on 'produce', @produce, @
+        @on 'route', @route, @
 
     type: ->
         @state.type
@@ -25,10 +26,13 @@ class GameObject
         @behaviour.actionMenu @state
 
     accept: ( signal, callback ) ->
-        @behaviour.accept signal, @state, callback
+        @behaviour.accept signal, @state, callback, @
 
     produce: ->
         @behaviour.produce @state
+
+    route: ->
+        @behaviour.route @state, @
 
 if module? and module.exports
     exports = module.exports = GameObject

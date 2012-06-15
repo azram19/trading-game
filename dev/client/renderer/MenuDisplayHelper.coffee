@@ -36,7 +36,7 @@ class MenuDisplayHelper
           @data.resources.push res
 
         @data.life = platformSt.life
-        @data.space = platformSt.signals
+        @data.space = platformSt.signals.length
         @data.maxSpace = platformSt.capacity
 
         @data.platform = @data

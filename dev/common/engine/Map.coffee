@@ -259,7 +259,9 @@ class Map
       nDir = (+dir + 3) % 6
       platform.state.routing[dir].object = channel
       channel.state.routing[nDir].object = platform
+      channel.trigger 'route'
     ) for dir, channel of @fields[y][x].channels
+    platform.trigger 'route'
 
   #k - direction [0..5] clockwise from the top
   addChannel: ( channel, x, y, k ) ->
@@ -276,8 +278,11 @@ class Map
     routingAddChannel = (x, y, k) =>
       if @fields[y][x].platform.type?
         nK = (k + 3) % 6
+        platform = @fields[y][x].platform
         @fields[y][x].platform.state.routing[k].object = channel
+        channel.trigger 'route'
         channel.state.routing[nK].object = @fields[y][x].platform
+        @fields[y][x].platform.trigger 'route'
 
     channelRouting = (x, y, k) =>
       if not (@fields[y][x].platform.type?)
@@ -294,13 +299,13 @@ class Map
           nIndex = (dest[1] + 3) % 6
           console.log "[Map] routing indices", dest[1], nIndex
           dest[0].state.routing[nIndex].object = channel
+          dest[0].trigger 'route'
           channel.state.routing[nK].object = dest[0]
+          channel.trigger 'route'
 
     routingAddChannel x, y, k
     routingAddChannel nX, nY, nK
     channelRouting x, y, k
-    #if not (@getField(nX, nY).owner?)
-      #@eventBus.trigger("owner:channel", [nX, nY], channel.state.owner)
 
   addReverseChannel: ( channel, x, y, k ) ->
     @fields[y] ?= {}
@@ -325,12 +330,17 @@ class Map
         (
           channels[dir] = @clearRoutingObjects channel
           channels[dir].fields = []
+          circFreeSignals
+          for i, signal in channels[dir].signals
+            channels[dir].signals[i].source.field = {}
         ) for dir, channel of channels
         #console.log '[Map] channel dump after extraction', util.inspect(channels, false, 5)
       platform = {}
       if field.platform.type?
         platform =  @clearRoutingObjects _.clone(field.platform.state)
         platform.field = {}
+        for i, signal in platform.signals
+          platform.signals[i].source.field = {}
       resource = {}
       if field.resource.type?
         resource = _.clone field.resource.state

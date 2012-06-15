@@ -49,10 +49,19 @@ class Negotiator
 
     @on 'routing', (obj, routing) =>
       _.extend obj.platform.state.routing, routing
-      routingValues = _.map routing, (route) ->
+      obj.platform.trigger 'route'
+      _.each routing, ( route ) ->
+        if route.type?
+         route.trigger 'route'
+
+      routingValues = {}
+
+      for dir, route of routing
         ret =
           in: route.in
           out: route.out
+        routingValues[dir] = ret
+
       console.log '[Negotiator] new routing: ', routingValues
       @communicator.trigger 'send:routing', obj.xy[0], obj.xy[1], routingValues, obj.platform.state.owner
 

@@ -13,7 +13,7 @@ Properties =
         fov: 1
         name: 'Object'
         field: {}
-        signals: 0
+        signals: []
         routing: {}
         delay: 200
         extraction: 20
@@ -26,7 +26,7 @@ Properties =
         fov: 1
         name: 'Channel'
         field: {}
-        signals: 0
+        signals: []
         routing: {}
         delay: 1000
         extraction: 20
@@ -40,7 +40,7 @@ Properties =
         fov: 1
         name: 'HQ'
         field: {}
-        signals: 0
+        signals: []
         routing: {}
         delay: 4000
         extraction: 20
@@ -62,7 +62,7 @@ Properties =
         fov: 0
         name: 'Resource'
         field: {}
-        signals: 0
+        signals: []
         routing: {}
         delay: 4000
         extraction: 20

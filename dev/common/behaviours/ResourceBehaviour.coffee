@@ -18,9 +18,9 @@ class ResourceBehaviour
 
     requestAccept: ( signal, state ) ->
 
-    accept: ( signal, callback ) ->
+    accept: ( signal, state, callback, ownObject ) ->
 
-    route: ( state ) ->
+    route: ( state, ownObject ) ->
 
     produce: ( state ) ->
         production = =>
@@ -44,14 +44,13 @@ class ResourceBehaviour
                 if acceptable
                     #send the signal
                     state.life -= extractAmount
-                    state.signals++
                     console.log '[ResourceBehaviour] triggering accept on platform', new Date()
                     state.field.platform.trigger "accept", newSignal, (signal) ->
-                        state.signals--
-        @PID = setInterval ( ->
-          console.log '[ResourceBehaviour] Trigger resource production', new Date()
-          production()
-        ), state.delay
+        production()
+        #@PID = setInterval ( ->
+          #console.log '[ResourceBehaviour] Trigger resource production', new Date()
+          #production()
+        #), state.delay
 
 if module? and module.exports
   exports = module.exports = ResourceBehaviour

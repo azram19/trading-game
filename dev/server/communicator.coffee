@@ -87,6 +87,8 @@ class Communicator
       client.joinChannel 'lobby'
       accessToken = ''
 
+      socket.setMaxListeners 0
+
       if hs.session.auth?
         if hs.session.auth.facebook?
           accessToken = hs.session.auth.facebook.accessToken
