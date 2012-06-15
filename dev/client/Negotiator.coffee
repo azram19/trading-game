@@ -52,7 +52,7 @@ class Negotiator
       obj.platform.trigger 'route'
       _.each routing, ( route ) ->
         if route.type?
-         route.trigger 'route'
+         route.object.trigger 'route'
 
       routingValues = {}
 

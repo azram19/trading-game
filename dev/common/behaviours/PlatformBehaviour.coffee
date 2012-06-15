@@ -61,7 +61,7 @@ class PlatformBehaviour
           if availableRoutes.length > 0
               destNum = Math.ceil(Math.random()*100)%availableRoutes.length
               destination = availableRoutes[destNum]
-              console.log "[PlatformBehaviour]: availableRoutes", availableRoutes
+              #console.log "[PlatformBehaviour]: availableRoutes", availableRoutes
               origOwner = signal.owner
               origSource = signal.source
  
@@ -69,7 +69,7 @@ class PlatformBehaviour
               signal.owner = state.owner
               if destination[0].object.requestAccept signal
                 @eventBus.trigger 'move:signal', state.field.xy, destination[1]
-                console.log '[PlatformBehaviour] triggering accept on channel', new Date()
+                # console.log '[PlatformBehaviour] triggering accept on channel', new Date()
                 destination[0].object.trigger 'accept', signal, (signal) ->
                   if ownObject.state.signals.length > 0
                     ownObject.trigger 'route'
