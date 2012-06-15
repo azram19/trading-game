@@ -38,9 +38,6 @@ class UI extends S.Drawer
 
     _.extend config, options
 
-    console.log config
-
-    console.log "[UI] bubble"
     i  = -1
 
     _.each @bubble, ( b, k ) ->

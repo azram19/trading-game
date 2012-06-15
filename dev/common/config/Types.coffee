@@ -49,9 +49,9 @@ Types =
             100
         ]
         Lifes: [
-            -> (Math.random() * 1000 % 760) + 100
-            -> (Math.random() * 2000 % 1260) + 300
-            -> (Math.random() * 1000 % 560) + 400
+            -> Math.round((Math.random() * 2000 % 760) + 500)
+            -> Math.round((Math.random() * 4000 % 1260) + 300)
+            -> Math.round((Math.random() * 2000 % 560) + 500)
         ]
     Events:
       Routing:
