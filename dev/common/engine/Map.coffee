@@ -323,7 +323,7 @@ class Map
         #console.log '[Map] channel states', util.inspect(channels, false, 5)
         (
           channels[dir] = @clearRoutingObjects channel
-          channels[dir].field = {}
+          channels[dir].fields = []
         ) for dir, channel of channels
         #console.log '[Map] channel dump after extraction', util.inspect(channels, false, 5)
       platform = {}

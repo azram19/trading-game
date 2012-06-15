@@ -105,8 +105,12 @@ class GameServer
 
   startGame: ( name ) ->
     @trigger 'all:ready', name
-    instance = @getGameInstance name
-    instance.startGame()
+    @getGameInstance(name).startGame()
+
+  nonUserId: ( user ) ->
+    game = @playersGame[user.userId]
+    instance = @getGameInstance(game.name)
+    instance.map.nonUser.id
 
   buildChannel: ( game, x, y, k, owner ) ->
     instance = @gameInstances[game]

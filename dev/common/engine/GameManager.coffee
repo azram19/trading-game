@@ -24,12 +24,14 @@ class GameManager
     @startingPoints[playerObject.id] = position
 
   startGame: ->
-    (
-      [x,y] = point
-      (@map.getField x, y).platform.produce()
-    ) for point in @startingPoints
+    @map.iterateFields ( o ) ->
+      if o.platform.type?
+        o.platform.produce()
 
-    null
+  stopGame: ->
+    @map.iterateFields ( o ) ->
+      if o.resource.type? and o.resource.behaviour.PID
+        clearInterval o.resource.behaviour.PID
 
   addHQ: ( HQ, position ) ->
     [x,y] = position
