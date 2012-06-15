@@ -19,13 +19,13 @@ class ChannelBehaviour
 
     requestAccept: ( signal, state ) ->
         if state.capacity < state.signals
-          @eventBus.trigger 'full:channel', state.field.xy
+          @eventBus.trigger 'full:channel', state.fields
 
         if signal.owner.id is state.owner.id
             availableRoutes = _.filter state.routing, (route) ->
-                console.log "[ChannelBehaviour] availableRoutes", route.object.state, signal.source
+                #console.log "[ChannelBehaviour] availableRoutes", route.object.state, signal.source
                 route.in and route.object?.state?.id is signal.source.id
-            availableRoutes.length > 0 and state.capacity >= state.signals
+            availableRoutes.length > 0 and state.capacity > state.signals
         else
             true
 
@@ -37,7 +37,8 @@ class ChannelBehaviour
         if signal.owner.id is signal.owner.id
             addSignal = (signal) =>
                 state.signals++
-                console.log "[ChannelBehaviour]: now i will call @route", new Date()
+                #console.log "[ChannelBehaviour]: state.signals++", state.signals
+                #console.log "[ChannelBehaviour]: now i will call @route", new Date()
                 @route state, signal
             _.delay addSignal, state.delay, signal
         else
@@ -48,26 +49,26 @@ class ChannelBehaviour
 
     route: ( state, signal ) ->
       availableRoutes = []
-      console.log "[ChannelBehaviour]: state.routing", state.routing
+      #console.log "[ChannelBehaviour]: state.routing", state.routing
       _.each state.routing, (route, direction) ->
-        console.log "[ChannelBehaviour]: channel", route.object?.state?.id, signal.source.id, direction
+        #console.log "[ChannelBehaviour]: channel", route.object?.state?.id, signal.source.id, direction
         if route.object.type? and route.object?.state?.name isnt signal.source.name
           availableRoutes.push [route, direction]
-      console.log "[ChannelBehaviour]: availableRoutes", availableRoutes
+      #console.log "[ChannelBehaviour]: availableRoutes", availableRoutes
       if availableRoutes.length > 0
         destination = availableRoutes[0]
 
         signal.source = state
         signal.owner = state.owner
         if destination[0].object.requestAccept signal
-          console.log "[ChannelBehaviour]: object.type", destination[0].object.type()
+          #console.log "[ChannelBehaviour]: object.type", destination[0].object.type()
           if destination[0].object.type() is S.Types.Entities.Channel
-            console.log '[ChannelBehaviour] fields references', state.fields, destination[0].object.state.fields
+            #console.log '[ChannelBehaviour] fields references', state.fields, destination[0].object.state.fields
             field = _.intersection state.fields, destination[0].object.state.fields
             field2 = _.difference destination[0].object.state.fields, state.fields
-            console.log "[ChannelBehaviour]: eventBus", @eventBus
+            #console.log "[ChannelBehaviour]: eventBus", @eventBus
             dest = @eventBus.directionGet state.owner, field[0].xy[0], field[0].xy[1], field2[0].xy[0], field2[0].xy[1]
-            console.log "[ChannelBehaviour]: moving", field[0].xy, dest
+            #console.log "[ChannelBehaviour]: moving", field[0].xy, dest
             @eventBus.trigger 'move:signal', field[0].xy, dest
 
           destination[0].object.trigger 'accept', signal, (signal) ->

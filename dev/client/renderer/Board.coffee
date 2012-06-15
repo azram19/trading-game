@@ -181,7 +181,6 @@ class BoardDrawer extends Drawer
 
     buildChannel: (x, y, direction, ownerid) ->
         point = @getPoint(x, y)
-        destination = @getDestination(point, direction)
         @addElement x, y, @drawChannel(point, direction)
         @channelsST.updateCache()
         @channelsST.update()
@@ -254,7 +253,10 @@ class BoardDrawer extends Drawer
     drawResource: (point, type) ->
         draw = (type) =>
             switch type
-                when S.Types.Resources.Gold then resource = @bitmapsST.getChildAt(1).clone()
+                when S.Types.Resources.Gold 
+                    resource = @bitmapsST.getChildAt(1).clone()
+                    resource.regX = 30
+                    resource.regY = 35
                 when S.Types.Resources.Food then resource = @bitmapsST.getChildAt(0).clone()
                 when S.Types.Resources.Resources then resource = @bitmapsST.getChildAt(3).clone()
             resource
@@ -269,18 +271,32 @@ class BoardDrawer extends Drawer
         resource
 
     drawChannel: (point, direction) ->
-        destination = @getDestination(point, direction)
-        g = new Graphics()
-        ###
-        g.moveTo(point.x, point.y)
-            .setStrokeStyle(3)
-            .beginStroke("#FFFF00")
-            .beginFill("#FFFF00")
-            .lineTo(destination.x, destination.y)
-        ###
-        channel = new Shape g
+        draw = (point, direction) =>
+            destination = @getDestination(point, direction)
+            g = new Graphics()
+            g.moveTo(point.x, point.y)
+             .setStrokeStyle(8,1,0,5)
+             .beginStroke("#564334")
+             .lineTo(destination.x, destination.y)
+             .endStroke()
+             .moveTo(point.x, point.y)
+             .setStrokeStyle(5,1,0,5)
+             .beginStroke("#CFB590")   
+             .lineTo(destination.x, destination.y)
+            new Shape g
+            #road = @bitmapsST.getChildAt(5).clone()
+            #road.regX = 0
+            #road.regY = 0
+            #road.rotation = 60 * ((direction+4)%6)
+            #road
+        channel = draw(point, direction)
+        channel.alpha = 0.7
         if @fogON
             channel.visible = false
+        else
+            channel.visible = true
+        #channel.x = point.x
+        #channel.y = point.y
         @channelsST.addChild channel
         channel
 #--------------------#
@@ -478,7 +494,7 @@ class Renderer
         canvasSignals = document.getElementById "signals"
         canvasOff = document.getElementById "off"
         canvasBitmaps = document.getElementById "bitmaps"
-        @bitmaps = ["/img/deer.png", "/img/gold.png", "/img/hq.png", "/img/iron.png", "/img/platform.png"]
+        @bitmaps = ["/img/deer.png", "/img/gold.png", "/img/hq.png", "/img/iron.png", "/img/platform.png", "/img/road.png"]
         @boardLoaded = $.Deferred()
 
         if canvasOwnership?
