@@ -27,7 +27,7 @@ class PlatformBehaviour
               route.in and route.object?.state?.id is signal.source.id
           availableRoutes.length > 0 and state.capacity >= state.signals.length
         else if signal.owner.id is @eventBus.nonUserId state.owner
-          state.capacity >= state.signals.length
+          state.capacity > state.signals.length
         else
           true
 

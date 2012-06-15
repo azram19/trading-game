@@ -18,14 +18,14 @@ class ChannelBehaviour
       menu = [['routing'], [possibleRoutes]]
 
     requestAccept: ( signal, state ) ->
-        if state.capacity < state.signals.length
-          @eventBus.trigger 'full:channel', state.field.xy
+        if state.capacity <= state.signals.length
+          @eventBus.trigger 'full:channel', state.fields
 
         if signal.owner.id is state.owner.id
             availableRoutes = _.filter state.routing, (route) ->
                 #console.log "[ChannelBehaviour] availableRoutes", route.object.state, signal.source
                 route.in and route.object?.state?.id is signal.source.id
-            availableRoutes.length > 0 and state.capacity >= state.signals.length
+            availableRoutes.length > 0 and state.capacity > state.signals.length
         else
             true
 
