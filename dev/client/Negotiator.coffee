@@ -246,12 +246,9 @@ class Negotiator
       nField = @getField nX, nY
 
       if nField?
-        existingDirections = _(field.channels).keys().map((dir) ->
-          (+dir)
-        )
         amountOfChannels = _.keys(nField.channels).length
 
-        if (amountOfChannels < 2 or (nField.platfrom? and nField.platfrom.type?)) and not (k in existingDirections)
+        if not field.channels[k]? and (amountOfChannels < 2 or nField.platform.type?)
           possibleChannels.push k
 
     console.log "[Negotiator][possible channels]", x, y, possibleChannels
