@@ -7,8 +7,12 @@ class Negotiator
     @renderer = {}
 
     @on 'move:signal', (xy, dir) ->
-      console.debug 'move:signal', xy, dir
+      #console.debug 'move:signal', xy, dir
       @renderer.moveSignal xy[0], xy[1], dir
+
+    @on 'full:channel', (xy) ->
+      p = @ui.getPoint xy[0], xy[1]
+      @ui.showTextBubble "Channel full", p.x+40, p.y+20
 
     @on 'owner:channel', (xy, dir, owner) ->
       #console.debug 'owner:channel', xy, dir, state.owner
@@ -22,9 +26,13 @@ class Negotiator
       #console.debug 'lost', player
 
     @on 'resource:produce', (xy, amount, type) ->
+      p = @ui.getPoint xy[0], xy[1]
+      @ui.showTextBubble "-#{amount}",  p.x+40,  p.y+20
       #console.debug xy, amount, type
 
     @on 'resource:receive', (xy, amount, type) ->
+      p = @ui.getPoint xy[0], xy[1]
+      @ui.showTextBubble "+#{amount}", p.x+40, p.y+20
       #console.debug xy, amount, type
 
     @on 'build:platform', (x, y, type, owner) =>
@@ -47,8 +55,6 @@ class Negotiator
     @on 'scroll', @setScroll
 
     @on 'scroll', @setViewport
-
-
 
     @communicator.on 'new:player', ( playerObject, position, HQState ) =>
       console.log '[Negotiator] new player'
@@ -92,7 +98,7 @@ class Negotiator
     initiate = new $.Deferred()
 
     $.when(initiate.promise()).done(@setupUI).then( =>
-      #console.log 'UI has been loaded'
+      console.log 'UI has been loaded'
       @communicator.trigger 'set:user:ready', @user.id
     )
 

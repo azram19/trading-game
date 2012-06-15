@@ -12,8 +12,8 @@ class MenuDisplayHelper
 
         @data.resources = []
 
-        if field.resource.type? and platformSt.type != S.Types.Entities.Platforms.HQ
-          resource = field.resource
+        if field.resource.state? and field.resource.state.type? and platformSt.type != S.Types.Entities.Platforms.HQ
+          resource = field.resource.state
           res =
               size: Math.floor resource.life
               extraction: Math.round( (resource.extraction * 1000) / resource.delay )

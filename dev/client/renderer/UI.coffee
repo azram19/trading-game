@@ -13,6 +13,8 @@ class UI extends S.Drawer
     @scrollX = 0
     @scrollY = 0
 
+    @bubble = []
+
     $(canvas).bind "contextmenu", @handleClick
     $(this).bind "contextmenu", ( e ) ->
       e.preventDefault()
@@ -22,8 +24,85 @@ class UI extends S.Drawer
     @curMenu = null
     @menuHelper = new S.MapHelper @events, @minRow, @maxRow
 
+    Ticker.addListener @
+
   getLoadingStage: ( @loading ) ->
   setLoadingStage: ( @loading ) ->
+
+  showTextBubble: ( text, x, y, options ) ->
+    config =
+      vy: 100
+      vx: 0
+      t: 1000
+      color: [255, 255, 255, 1]
+
+    _.extend config, options
+
+    console.log config
+
+    console.log "[UI] bubble"
+    i  = -1
+
+    _.each @bubble, ( b, k ) ->
+      if b.animate == false
+        i = k
+        return {}
+
+    if i < 0
+      bubble = new Text()
+      bubble.textAlign = 'center'
+      bubble.baseline = ''
+      bubble.font = "bold 13px 'Cabin', Helvetica,Arial,sans-serif"
+      bubble.color = config.color
+      @stage.addChild bubble
+      @bubble.push bubble
+
+      i = @bubble.length - 1
+
+    bubble = @bubble[i]
+    tInv = config.t/Ticker.getInterval()
+
+    bubble.alpha = 1
+
+    [r,g,b,a] = config.color
+    bubble.color = "rgba(#{ r },#{ g },#{ b },#{ a })"
+    bubble.c = config.color
+
+    bubble.text = text
+    bubble.x = x
+    bubble.y = y
+    bubble.valpha = 1/tInv
+    bubble.vx = config.vx/tInv
+    bubble.vy = config.vy/tInv
+    bubble.t = config.t
+    bubble.visible = true
+    bubble.animate = true
+
+    @stage.update()
+
+  tick: () ->
+    interval = Ticker.getInterval()
+
+    (
+      if bubble.animate == true
+        if bubble.t > 0
+
+          [r,g,b,a] = bubble.c
+          a -= bubble.valpha
+          a = Math.max a, 0
+
+          bubble.color = "rgba(#{ r },#{ g },#{ b },#{ a })"
+          bubble.c = [r,g,b,a]
+
+          bubble.x -= bubble.vx
+          bubble.y -= bubble.vy
+          bubble.t -= interval
+        else
+          bubble.animate = false
+          bubble.visible = false
+    ) for bubble in @bubble
+
+    @stage.update()
 
   initializeMenus: () ->
 
@@ -134,6 +213,8 @@ class UI extends S.Drawer
     if not menuInfo?
       return
 
+    console.log "[UI]", i, j, menuInfo, obj
+
     [menuStructure, menuValidFields] = menuInfo
 
     menuDesc = _.find menuStructure, ( menu ) ->
@@ -169,7 +250,7 @@ class UI extends S.Drawer
         menuValidFields
 
       menu.addChild subMenu
-    ) for submenuName, i in submenuNames
+    ) for submenuName in submenuNames
 
     menu.setActionHelper @menuHelper
 

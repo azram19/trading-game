@@ -18,6 +18,9 @@ class ChannelBehaviour
       menu = [['routing'], [possibleRoutes]]
 
     requestAccept: ( signal, state ) ->
+        if state.capacity < state.signals
+          @eventBus.trigger 'full:channel', state.field.xy
+
         if signal.owner.id is state.owner.id
             availableRoutes = _.filter state.routing, (route) ->
                 console.log "[ChannelBehaviour] availableRoutes", route.object.state, signal.source
@@ -46,14 +49,14 @@ class ChannelBehaviour
     route: ( state, signal ) ->
       availableRoutes = []
       console.log "[ChannelBehaviour]: state.routing", state.routing
-      _.each state.routing, (route, direction) -> 
+      _.each state.routing, (route, direction) ->
         console.log "[ChannelBehaviour]: channel", route.object?.state?.id, signal.source.id, direction
         if route.object.type? and route.object?.state?.name isnt signal.source.name
           availableRoutes.push [route, direction]
       console.log "[ChannelBehaviour]: availableRoutes", availableRoutes
       if availableRoutes.length > 0
         destination = availableRoutes[0]
-        
+
         signal.source = state
         signal.owner = state.owner
         if destination[0].object.requestAccept signal

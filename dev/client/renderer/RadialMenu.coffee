@@ -95,13 +95,13 @@ class RadialMenu
       default and shown only when menu item is in visibile state
       ###
       @$title = new Text @text,
-        "13px 'Cabin', Helvetica,Arial,sans-serif",
+        "bold 13px 'Cabin', Helvetica,Arial,sans-serif",
         "#FFF"
 
       @$title.visible = false
 
       @$actionTitle = new Text @positive_action,
-        "13px 'Cabin', Helvetica,Arial,sans-serif",
+        "bold 13px 'Cabin', Helvetica,Arial,sans-serif",
         "#FFF"
 
       @$actionTitle.visible = false

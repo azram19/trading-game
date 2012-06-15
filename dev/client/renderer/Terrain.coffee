@@ -1,10 +1,19 @@
 class Terrain extends S.Drawer
-  constructor: ( @events, id, @minRow, @maxRow, map ) ->
+  constructor: ( @events, id, @minRow, @maxRow, map, useAWorker ) ->
     canvas = document.getElementById id
     @stage = new Stage canvas
 
     canvas2 = document.getElementById 'water'
     @waterStage = new Stage canvas2
+
+    if useAWorker
+      @worker = new Worker '/js/TerrainWorker.js'
+      @worker.postMessage()
+
+      @worker.addEventListener('message', ( e ) ->
+        data = e.data
+
+      , false)
 
     @n = 1
     @bitmaps = {}
@@ -54,7 +63,7 @@ class Terrain extends S.Drawer
     @hitHexMap = new Shape()
     @hitHexMap.graphics
       .beginFill( "#FFF" )
-      .drawPolyStar(0, 0, @size+1, 6, 0, 90)
+      .drawPolyStar(0, 0, @size, 6, 0, 90)
     @hitHexMap.visible = false
 
     @hitBitmap = null
@@ -82,7 +91,7 @@ class Terrain extends S.Drawer
           if boardState.getChannel(i, j, k)?.state?
             [i2, j2] = @events.game.map.directionModificators i, j, k
 
-            @events.terrain.generateRoad i, j, i2, j2
+            @generateRoad i, j, i2, j2
 
   randomTerrain: () ->
     index = Math.floor((Math.random() * 100) % @typesOfTerrain.length)
@@ -585,7 +594,7 @@ class Terrain extends S.Drawer
     shadowMap = []
     heightMap = []
 
-    sunVisibilityHeight = 4
+    sunVisibilityHeight = 2
 
     for x in [0..@canvasDimensions.x]
       shadowMap[x] = []
@@ -618,13 +627,16 @@ class Terrain extends S.Drawer
 
         #if shadowHeight > sourceHeight
         #Compute the diference in height of points
-        heightDiff = shadowHeight - sourceHeight
+        heightDiff = sourceHeight - shadowHeight
 
         #Divide by the difference from which the sun is not visible
         heightDiff /= sunVisibilityHeight
 
-        #Save the shadow in the map
-        shadowMap[x][y] = heightDiff
+        if heightDiff * shadowMap[x-1][y+1] > 0
+          #Save the shadow in the map
+          shadowMap[x][y] =  ( heightDiff + shadowMap[x-1][y+1]/(sunVisibilityHeight*2) )
+        else
+          shadowMap[x][y] = heightDiff
 
     console.log "[Terrain] shadow map generated"
 

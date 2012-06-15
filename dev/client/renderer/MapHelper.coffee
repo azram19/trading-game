@@ -46,6 +46,8 @@ class MapHelper extends S.Drawer
               if z in @currentMenu.validFields
                 [i, j] = @getIJ io, jo, z
 
+                p = @getPoint i, j
+
                 @state = field.platform.state.routing
 
                 if @state[z].in
@@ -55,11 +57,22 @@ class MapHelper extends S.Drawer
 
                 k = (5-z)%6
 
+                angle = Math.PI/3 * (z - 1)
+                addText = (z == 2 or z == 5 )
+
                 tr = @drawHalfHex i, j, k, color, @colours.stroke
                 tr.z = z
 
                 @fieldsObjs[i+":"+j+":"+k] = tr
                 @stage.addChild tr
+
+                if addText
+                  text = new Text "in", "bold 13px 'Cabin', Helvetica,Arial,sans-serif", '#fff'
+                  text.textAlign = 'center'
+                  text.textBaseline = 'middle'
+                  text.x = p.x - 15 * Math.sin( angle )
+                  text.y = p.y
+                  @stage.addChild text
 
                 if @state[z].out
                   color = @colours.positive
@@ -69,8 +82,17 @@ class MapHelper extends S.Drawer
                 tr = @drawHalfHex i, j, (k+3), color, @colours.stroke
                 tr.z = z
 
+
                 @fieldsObjs[i+":"+j+":"+(k+3)] = tr
                 @stage.addChild tr
+
+                if addText
+                  text = new Text "out", "bold 13px 'Cabin', Helvetica,Arial,sans-serif", '#fff'
+                  text.textAlign = 'center'
+                  text.textBaseline = 'middle'
+                  text.x = p.x + 15 * Math.sin( angle )
+                  text.y = p.y
+                  @stage.addChild text
 
             @acceptShow.call @, io, jo
             @cancelShow.call @, io, jo
@@ -232,12 +254,12 @@ class MapHelper extends S.Drawer
     tr.onMouseOut = null
 
     p = @getPoint io+3, jo
-    text = new Text 'Execute', 'bold 24px', '#fff'
+    text = new Text 'Execute', "bold 13px 'Cabin', Helvetica,Arial,sans-serif", '#fff'
     text.textAlign = 'center'
     text.textBaseline = 'middle'
     text.y = p.y
     text.x = p.x
-    text.onClick = @cancle
+    text.onClick = @cancel
 
     c.addChild tr
     c.addChild text
@@ -253,12 +275,12 @@ class MapHelper extends S.Drawer
     tr.onMouseOut = null
 
     p = @getPoint io+4, jo
-    text = new Text "Cancel", 'bold 24px', '#fff'
+    text = new Text "Cancel", "bold 13px 'Cabin', Helvetica,Arial,sans-serif", '#fff'
     text.textAlign = 'center'
     text.textBaseline = 'middle'
     text.y = p.y
     text.x = p.x
-    text.onClick = @cancle
+    text.onClick = @cancel
 
     c.addChild tr
     c.addChild text

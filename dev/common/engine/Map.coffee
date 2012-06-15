@@ -217,7 +217,7 @@ class Map
     xn = x2 - x1
     yn = y2 - y1
 
-    if y1 < @diffRows or (y1 is @diffRows and y2 > @diffRows)
+    if y1 < @diffRows or (y1 is @diffRows and y2 < y1)
       mods = @directionModUpper
       dir = -1
 
@@ -226,7 +226,7 @@ class Map
         if xMod == xn and yMod == yn
           dir = i
           return {}
-    else if y1 > @diffRows or (y1 is @diffRows and y2 <= @diffRows)
+    else if y1 > @diffRows or (y1 is @diffRows and y2 >= y1)
       mods = @directionModLower
       dir = -1
       _.each mods, ( o, i ) ->

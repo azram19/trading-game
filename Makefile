@@ -1,6 +1,6 @@
 # Order is EXTREMELY important here
 ENGINE = Namespace.js HeightMap.js  GameObject.js ObjectState.js Field.js Signal.js Types.js Player.js Properties.js SignalFactory.js HQBehaviour.js ChannelBehaviour.js PlatformBehaviour.js ResourceBehaviour.js ObjectFactory.js Map.js GameManager.js
-RENDERER = Board.js MenuDisplayHelper.js MapHelper.js RadialMenu.js UI.js Terrain.js Human.js
+RENDERER = Board.js MenuDisplayHelper.js MapHelper.js RadialMenu.js UI.js TerrainWorker.js Terrain.js Human.js
 
 all: dir | js css
 	cp dev/build/*.js dev/webroot/js
