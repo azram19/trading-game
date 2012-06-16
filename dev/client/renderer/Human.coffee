@@ -1,10 +1,9 @@
 class Human
   constructor: ( @events, image, @stage, @walkDistance, @timeForAWalk ) ->
-    if not @stage?
-      canvas2 = document.getElementById 'animations'
-      @stage = new Stage canvas2
-
     @ready = new $.Deferred()
+    @tranferable = new $.Deferred()
+    @walked = new $.Deferred()
+
     @animation = null
     @currentAnimation = null
     @distance = 0
@@ -64,15 +63,24 @@ class Human
 
       Ticker.addListener @
 
-  walk: ( k ) ->
+  clear: () ->
+
+  walk: ( i, j, i2, j2 ) ->
     $.when( @ready ).then ->
-      @direction = Math.PI/3 * -1 * ((k+4)%6) - Math.PI*3/2#(-Math.PI/3)*((k+4) % 6)
+      k = @events.game.map.directionGet i, j, i2, j2
+
+      p1 = @events.ui.getPoint i, j
+      p2 = @events.ui.getPoint i2, j2
+
       @animation.gotoAndPlay "walk" + k
 
-      v = @walkDistance / (@timeForAWalk / Ticker.getInterval())
+      turns = (@timeForAWalk / Ticker.getInterval())
 
-      @vx = v * Math.sin @direction
-      @vy = v * Math.cos @direction
+      dx = p2.x - p1.x
+      dy = p2.y - p2.y
+
+      @vx = dx/turns
+      @vy = dy/turns
 
       @move = true
 
@@ -81,7 +89,7 @@ class Human
       if not k?
         k = 0
 
-      p = @events.terrain.getPoint i, j
+      p = @events.ui.getPoint i, j
       @animation.x = p.x
       @animation.y = p.y
       @animation.visible = true
@@ -100,7 +108,5 @@ class Human
         @distance = 0
         @move = false
         @animation.visible = false
-
-      @stage.update()
 
 window.S.Human = Human
