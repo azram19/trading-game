@@ -217,8 +217,9 @@ class BoardDrawer extends Drawer
     buildChannel: (x, y, direction, ownerid) ->
         point = @getPoint(x, y)
         @addElement x, y, @drawChannel(point, direction)
-        @channelsST.updateCache()
-        @channelsST.update()
+        if @fogON
+            @setVisibility [x, y], true, ownerid
+        @updateAll()
         #console.log "[BOARD]:visibility, ownership", @visibility, @ownership
 
     captureOwnership: (x, y, ownerid) ->
@@ -346,33 +347,37 @@ class BoardDrawer extends Drawer
     setFog: (point, status) ->
         if @fog[point[0]]?[point[1]]?
             @fog[point[0]][point[1]].visible = status
-            if @elements[point[0]]?[point[1]]?
+            
+    setElements: (point, status) ->
+        console.log "[Board]: elements", @elements, point, status
+        if @elements[point[0]]?[point[1]]?
                 for elem in @elements[point[0]][point[1]]
-                    elem.visible = not status
+                    elem.visible = status
 
     setVisibility: (point, status, ownerid) ->
         array = []
         for i in [0..6]
             array.push (@modifyCoords point[0], point[1], i)
-        if ownerid is @myPlayer.id and not (@contains @ownership, point)
+        if ownerid is @myPlayer.id
             #cl = @difference array.slice(0), @visibility
-            #console.log "BOARD:DIFFERENCE", array, array.length, @visibility, @visibility.length, cl, cl.length
+            #console.log "BOARD:DIFFERENCE", array, array.length, @visibility, @visibility.length
             for p in array
                 @setFog p, false
+                @setElements p, true
             @visibility = @union @visibility, array
-            @ownership.push point
+            if not (@contains @ownership, point)
+                @ownership.push point
         else
             if status
-                if @contains @visibility, point
-                    if @elements[point[0]]?[point[1]]?
-                        for elem in @elements[point[0]][point[1]]
-                            elem.visible = true
+                for p in array
+                    if @contains @visibility, p
+                        @setElements p, true
             else
                 @ownership = @without @ownership, point
                 @visibility = @getVisibility @ownership
+                @setElements point, true
                 for p in (@difference array, @visibility)
-                    if @fog[point[0]]?[point[1]]?
-                        @fog[point[0]][point[1]].visible = true
+                    @setFog p, true
 
     getVisibility: (ownership) ->
         visibility = []
@@ -428,6 +433,7 @@ class BoardDrawer extends Drawer
             @visibility = @getVisibility @ownership
             for point in @visibility
                 @setFog point, false
+                @setElements point, true
 
     toogleCache: (status) ->
         for i in [0..5]
