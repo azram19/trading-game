@@ -21,6 +21,8 @@ class UI extends S.Drawer
 
     $( window ).resize @resizeViewport
 
+    @resizeViewport()
+
     @curMenu = null
     @menuHelper = new S.MapHelper @events, @minRow, @maxRow
 
@@ -110,14 +112,34 @@ class UI extends S.Drawer
     null
 
   resizeViewport: () =>
-    @viewportWidth = viewportHeight = window.innerHeight
-    @viewportHeight = viewportWidth = window.innerWidth - 200
+    $chat = $ '#chat'
 
-    @canvasContainer.css(
-      height: viewportHeight
-      width: viewportWidth
-      overflow: 'hidden'
-    ).first()
+    @viewportHeight = viewportHeight = window.innerHeight
+    @viewportWidth = viewportWidth = window.innerWidth - $chat.outerWidth()
+
+    maxChatWidth = window.innerWidth - @canvasDimensions.x - 18
+    console.log maxChatWidth, 300, window.innerWidth, @canvasDimensions.x, 18
+
+    if maxChatWidth > 300
+      $chat.width maxChatWidth
+
+      @viewportWidth = viewportWidth = window.innerWidth - $chat.outerWidth()
+
+      @canvasContainer.css(
+        height: viewportHeight
+        width: viewportWidth
+        overflow: 'hidden'
+      ).first()
+    else
+      $chat.width 300
+
+      @viewportWidth = viewportWidth = window.innerWidth - $chat.outerWidth()
+
+      @canvasContainer.css(
+        height: viewportHeight
+        width: viewportWidth
+        overflow: 'hidden'
+      ).first()
 
     @scroller.setDimensions viewportWidth, viewportHeight, @canvasDimensions.x, @canvasDimensions.y
 
@@ -180,9 +202,9 @@ class UI extends S.Drawer
 
     @canvasContainer.get()[0].addEventListener("mousedown", scrollerDown , false)
 
-    @canvasContainer.get()[0].addEventListener("mousemove", scrollerMove, false)
+    document.addEventListener("mousemove", scrollerMove, false)
 
-    @canvasContainer.get()[0].addEventListener("mouseup", scrollerUp, false)
+    document.addEventListener("mouseup", scrollerUp, false)
 
 
   scroll: (x, y) =>
@@ -211,7 +233,13 @@ class UI extends S.Drawer
     menuInfo = @events.getMenu i, j
     obj = @events.getField i, j
 
-    if not menuInfo?
+    listOfOwnership = @events.renderer.boardDR.ownership
+
+    mine = _.find listOfOwnership, ( v ) ->
+      [i2, j2] = v
+      i2 == i and j2 == j
+
+    if not menuInfo? or not mine?
       return
 
     console.log "[UI]", i, j, menuInfo, obj

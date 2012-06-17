@@ -659,8 +659,8 @@ class Terrain extends S.Drawer
     n = Math.floor(@canvasDimensions.y/@bitmapHeight)
     m = Math.floor(@canvasDimensions.x/@bitmapWidth)
 
-    for i in [0...n]
-      for j in [0...m]
+    for i in [0..n]
+      for j in [0..m]
         b = @getWaterBitmap()
 
         b.y = i * @bitmapHeight
