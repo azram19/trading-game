@@ -86,7 +86,7 @@ class Chat extends Backbone.View
         content: message
         sender: sender
         time: time
-        channel: 'lobby'
+        channel: @communicator.channel
 
       #add message to the collection
       @collection.add msg

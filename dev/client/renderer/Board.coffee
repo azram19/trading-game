@@ -29,13 +29,17 @@ class Drawer
         @invisibleTerrain = {}
 
         @canvasDimensions = {}
-        @canvasDimensions.x =
-            2*(@margin-@horIncrement) +
-            @maxRow * @distance + @margin
+        @canvasDimensions.x = $( 'canvas' ).first().outerWidth()
+        ###
+        2*(@margin-@horIncrement) +
+        @maxRow * @distance + @margin
+        ###
 
-        @canvasDimensions.y =
-            (@margin+@size) +
-            (@diffRows * 2 + 1) * @verIncrement + @margin
+        @canvasDimensions.y = $( 'canvas' ).first().outerHeight()
+        ###
+        (@margin+@size) +
+        (@diffRows * 2 + 1) * @verIncrement + @margin
+        ###
 
     # Setups table of offsets according to direction
     setupOffsets: () ->

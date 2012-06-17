@@ -10,7 +10,7 @@ body {
   padding: 0;
   margin: 0;
   color:#bbb;
-  background: #333 url('http://cdn.humblebundle.com/hib3/bg.png');
+  background: #333 url('/img/txture.png');
 
   color: #111;
   text-shadow: 1px 1px rgba(255, 255, 255, 0.1);
@@ -548,6 +548,11 @@ p {
 
 #chat{
   -webkit-transition: color 0.4s ease-out,  text-shadow 0.4s ease-out;
+  -moz-user-select: none;
+  -khtml-user-select: none;
+  -webkit-user-select: none;
+  -o-user-select: none;
+
 
   &:hover{
     color:#bbb;
@@ -619,11 +624,22 @@ p {
     position:fixed;
     right:0;
     top:0;
-    width:240px;
+    width:300px;
     border-left:2px #000 solid;
     height:100%;
     background:#fff;
     z-index:9999;
+    color:#222;
+    text-shadow:none;
+    padding-right:20px;
+
+    textarea{
+      width:90%;
+    }
+
+    ul{
+      margin-top:20px;
+    }
   }
 
 }
