@@ -37,21 +37,17 @@ Types =
     Resources:
         Gold: 6
         Food: 7
-        Resources: 8
         Names: [
             "Gold"
             "Food"
-            "Resources"
         ]
         Amounts: [
             200
             300
-            100
         ]
         Lifes: [
             -> Math.round((Math.random() * 2000 % 760) + 500)
             -> Math.round((Math.random() * 4000 % 1260) + 300)
-            -> Math.round((Math.random() * 2000 % 560) + 500)
         ]
     Events:
       Routing:

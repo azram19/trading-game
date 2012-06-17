@@ -20,6 +20,11 @@ class People
 
     Ticker.addListener @
 
+    @updateStageThr = _.throttle @updateStage, 40
+
+  updateStage: () ->
+    @stage.update()
+
   create: () ->
     h = new S.Human @events, @images[0], @stage, @distance, @time
     @buffer.push h
@@ -102,6 +107,6 @@ class People
     @walkItHuman i, j, i2, j2, k
 
   tick: () ->
-    @stage.update()
+    @updateStageThr()
 
 window.S.People = People

@@ -15,6 +15,8 @@ class UI extends S.Drawer
 
     @bubble = []
 
+    @resourcesTemplate = Handlebars.templates.resources
+
     $(canvas).bind "contextmenu", @handleClick
     $(this).bind "contextmenu", ( e ) ->
       e.preventDefault()
@@ -27,6 +29,8 @@ class UI extends S.Drawer
     @menuHelper = new S.MapHelper @events, @minRow, @maxRow
 
     Ticker.addListener @
+
+    @showResources()
 
   getLoadingStage: ( @loading ) ->
   setLoadingStage: ( @loading ) ->
@@ -198,8 +202,6 @@ class UI extends S.Drawer
     #scrollerMoveThr = _.throttle scrollerMove, 100
     #scrollerUpThr = _.throttle scrollerUp, 50
 
-
-
     @canvasContainer.get()[0].addEventListener("mousedown", scrollerDown , false)
 
     document.addEventListener("mousemove", scrollerMove, false)
@@ -226,6 +228,18 @@ class UI extends S.Drawer
         )
     )
 
+  showResources: () ->
+    if @$html?
+      @$html.remove()
+
+    resources = @events.myPlayer.resources
+    resources = _.map resources, (v, k) ->
+        name : k
+        value: v
+
+    html = @resourcesTemplate resources: resources
+
+    @$html = $( html ).appendTo '#canvasWrapper'
 
   createMenu: (i, j) ->
     p = @getPoint i, j
