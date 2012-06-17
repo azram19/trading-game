@@ -40,6 +40,7 @@ class Negotiator
     @on 'resource:receive', (xy, amount, type) ->
       p = @ui.getPoint xy[0], xy[1]
       @ui.showTextBubble "+#{amount}", p.x+40, p.y+20
+      @ui.showResources()
       #console.debug xy, amount, type
 
     @on 'build:platform', (x, y, type, owner) =>

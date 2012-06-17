@@ -505,7 +505,7 @@ class SignalsDrawer extends Drawer
         @offSignals = new OffSignals @offStage, @players
         @people = new S.People @eventBus,
             distance: 80
-            time: 400
+            time: S.Properties.channel.delay
 
         Ticker.addListener this
 
@@ -573,7 +573,7 @@ class Renderer
         canvasSignals = document.getElementById "signals"
         canvasOff = document.getElementById "off"
         canvasBitmaps = document.getElementById "bitmaps"
-        @bitmaps = ["/img/deer.png", "/img/gold.png", "/img/hq.png", "/img/iron.png", "/img/platform.png", "/img/road.png"]
+        @bitmaps = ["/img/Food.png", "/img/Gold.png", "/img/hq.png", "/img/iron.png", "/img/platform.png", "/img/road.png"]
         @boardLoaded = $.Deferred()
 
         if canvasOwnership?
