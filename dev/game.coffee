@@ -39,6 +39,8 @@ app.get '/lobby2', ( req, res ) ->
        o
     res.render 'lobby2',
       games: games
+      title: 'Signals - lobby'
+      bodyClass: 'lobby'
 
 app.get '/game/:gameName/join', ( req, res ) ->
   if app.requireAuth and req.loggedIn
@@ -70,6 +72,7 @@ app.get '/', ( req, res ) ->
     else
       res.render 'index',
         title: 'Signals'
+        bodyClass: 'entrance'
 
 port =  process.env.PORT || process.env['PORT_WWW']  || 3000
 
