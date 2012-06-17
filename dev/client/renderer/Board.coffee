@@ -162,7 +162,7 @@ class BoardDrawer extends Drawer
         drawFog = () =>
             g1 = new Graphics()
             g1.beginFill("#000000")
-             .drawPolyStar(0, 0, @size, 6, 0, 90)
+             .drawPolyStar(0, 0, @size*1.008, 6, 0, 90)
             fog = new Shape g1
             fog.alpha = 0.6
             fog.regX = @horIncrement
