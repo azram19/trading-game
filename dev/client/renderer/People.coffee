@@ -1,9 +1,9 @@
 class People
   constructor: ( @events ) ->
     canvas2 = document.getElementById 'animations'
-      @stage = new Stage canvas2
+    @stage = new Stage canvas2
 
-      @onTheMove = 0
+    @onTheMove = 0
 
     @buffer = []
     @moving = {}
@@ -55,7 +55,7 @@ class People
       $.when( h.transferable( @ ) )
         .done () ->
           @transfer h, i, j, i2, j2
-      
+
       return
     else if @buffer.length > 0
       h = @buffer.pop()
@@ -65,7 +65,7 @@ class People
 
     h.key = key2
     h.walk i, j, i2, j2
-    
+
     if not @moving[key2]?
       @moving[key2] = []
 

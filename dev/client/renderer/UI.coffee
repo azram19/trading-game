@@ -79,6 +79,7 @@ class UI extends S.Drawer
 
   tick: () ->
     interval = Ticker.getInterval()
+    update = false
 
     (
       if bubble.animate == true
@@ -97,9 +98,12 @@ class UI extends S.Drawer
         else
           bubble.animate = false
           bubble.visible = false
+
+        update = true
     ) for bubble in @bubble
 
-    @stage.update()
+    if update
+      @stage.update()
 
   initializeMenus: () ->
 
