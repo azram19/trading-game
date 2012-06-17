@@ -116,7 +116,7 @@ class Drawer
         for i in [0..list.length]
             e = list[i]
             if _.isEqual e, elem
-                return list.splice i-1, 1
+                return list.splice(0, i).concat(list.splice i+1)
         list
 
     union: (list1, list2) ->
@@ -219,7 +219,7 @@ class BoardDrawer extends Drawer
         @addElement x, y, @drawChannel(point, direction)
         @channelsST.updateCache()
         @channelsST.update()
-        console.log "[BOARD]:visibility, ownership", @visibility, @ownership
+        #console.log "[BOARD]:visibility, ownership", @visibility, @ownership
 
     captureOwnership: (x, y, ownerid) ->
         point = @getPoint(x, y)
@@ -355,11 +355,11 @@ class BoardDrawer extends Drawer
         for i in [0..6]
             array.push (@modifyCoords point[0], point[1], i)
         if ownerid is @myPlayer.id and not (@contains @ownership, point)
-            cl = array
-            console.log "BOARD:DIFFERENCE", cl, cl.length, @visibility, @visibility.length, (@difference array, @visibility)
-            for p in (_.difference array, @visibility)
+            #cl = @difference array.slice(0), @visibility
+            #console.log "BOARD:DIFFERENCE", array, array.length, @visibility, @visibility.length, cl, cl.length
+            for p in array
                 @setFog p, false
-            @visibility = _.union @visibility, array
+            @visibility = @union @visibility, array
             @ownership.push point
         else
             if status
@@ -368,11 +368,11 @@ class BoardDrawer extends Drawer
                         for elem in @elements[point[0]][point[1]]
                             elem.visible = true
             else
-                @ownership = _.without @ownership, point
+                @ownership = @without @ownership, point
                 @visibility = @getVisibility @ownership
-                for p in (_.difference array, @visibility)
-                    @setFog p, true
-
+                for p in (@difference array, @visibility)
+                    if @fog[point[0]]?[point[1]]?
+                        @fog[point[0]][point[1]].visible = true
 
     getVisibility: (ownership) ->
         visibility = []
@@ -380,7 +380,7 @@ class BoardDrawer extends Drawer
             array = []
             for i in [0..6]
                 array.push @modifyCoords point[0], point[1], i
-            visibility = _.union visibility, array
+            visibility = @union visibility, array
         visibility
 
 #--------------------#
@@ -527,7 +527,8 @@ class SignalsDrawer extends Drawer
         signal.k = 0
 
     drawWorker: (x, y, direction) ->
-        @people.walk x, y, direction
+        if @contains @boardDR.visibility, [x, y]
+            @people.walk x, y, direction
 
     getSignal: () ->
         for sig in @stage.children

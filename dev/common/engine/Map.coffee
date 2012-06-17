@@ -287,17 +287,17 @@ class Map
     channelRouting = (x, y, k) =>
       if not (@fields[y][x].platform.type?)
         channels = []
-        console.log '[Map] field channels on add', @getField(x, y).channels
+        #console.log '[Map] field channels on add', @getField(x, y).channels
         _.each @getField(x, y).channels, (route, index) ->
           if (+index) isnt k
             channels.push [route, index]
         dest = channels[0]
-        console.log "[Map] built channel destination", dest
+        #console.log "[Map] built channel destination", dest
         if dest?
           dest[1] = (+dest[1])
           nK = (k + 3) % 6
           nIndex = (dest[1] + 3) % 6
-          console.log "[Map] routing indices", dest[1], nIndex
+          #console.log "[Map] routing indices", dest[1], nIndex
           dest[0].state.routing[nIndex].object = channel
           dest[0].trigger 'route'
           channel.state.routing[nK].object = dest[0]
