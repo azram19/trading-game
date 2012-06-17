@@ -92,10 +92,11 @@ class Communicator
   join: ( channel ) =>
     @socket.emit 'join:channel', channel, ( confirm ) =>
       if confirm
-        @com.trigger 'joined'
         @channel = channel
 
         console.log "Communicator: joined channel " + channel
+
+        @com.trigger 'joined', channel
       else
         @com.trigger 'join_failed'
         console.error 'Communicator: server does not love you'

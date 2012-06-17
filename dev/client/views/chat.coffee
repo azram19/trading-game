@@ -1,7 +1,9 @@
 class Chat extends Backbone.View
   collection: S.Collections.Messages
+
   initialize: ->
     @communicator = @options.communicator
+
     @messageTemplate = Handlebars.templates['lobbyMessage']
     @messagesTemplate = Handlebars.templates['lobbyMessages']
 
@@ -10,89 +12,94 @@ class Chat extends Backbone.View
 
     @communicator.on 'message:new', @handleServerMessage
     @communicator.on 'user', @handleUser
+    @communicator.on 'joined', @handleJoin, @, false
 
     @communicator.on 'chat:load', @handleChat
 
     KeyboardJS.bind.key 'enter', @newMessage, =>
       $( '#chat textarea:focus' ).val ''
 
-    handleUser: ( user ) =>
-      @user = user
-      @communicator.trigger "fetch:friends", user
-      @communicator.trigger "fetch:messages", 'lobby'
+  handleUser: ( user ) =>
+    @user = user
 
-    #Add new message to the chat
-    addMessage: ( model ) =>
-      msg = model.toJSON()
-      console.log "[Chat] New message", msg
+  handleJoin: ( channel ) =>
+    console.log '[Chat] joined' + channel
+    @communicator.trigger "fetch:messages"
 
-      msg = @messageTemplate msg
-      $( '#chat ul' ).append msg
-      $( "#chat .nano" ).nanoScroller scroll: 'bottom'
+  #Add new message to the chat
+  addMessage: ( model ) =>
+    msg = model.toJSON()
+    console.log "[Chat] New message", msg
 
-    # Reset chat with messages from the server
-    resetMessages: () =>
-      msgs = @collection.toJSON()
-      console.log "[Chat] Reset", msgs
+    msg = @messageTemplate msg
+    $( '#chat ul' ).append msg
+    $( "#chat .nano" ).nanoScroller scroll: 'bottom'
 
-      html = @messagesTemplate messages: msgs
-      $( '#chat ul' ).html html
-      $( "#chat .nano" ).nanoScroller scroll: 'bottom'
+  # Reset chat with messages from the server
+  resetMessages: () =>
+    msgs = @collection.toJSON()
+    console.log "[Chat] Reset", msgs
 
-    handleChat: ( messages ) =>
-      console.log "[Lobby] chat ", messages
+    html = @messagesTemplate messages: msgs
+    $( '#chat ul' ).html html
+    $( "#chat .nano" ).nanoScroller scroll: 'bottom'
 
-      if messages.length? and messages.length > 0
-        msgs = ((
-          msg.author = msg.sender.name
-          msg.sender = msg.sender._id
-          msg)for msg in messages)
+  handleChat: ( messages ) =>
+    console.log "[Lobby] chat ", messages
 
-        @collection.reset msgs
+    if messages.length? and messages.length > 0
+      msgs = ((
+        msg.author = msg.sender.name
+        msg.sender = msg.sender._id
+        msg)for msg in messages)
 
-    newMessage: =>
-      #Get the textarea and check if we are focused on it
-      textarea = $ '#chat textarea:focus'
-      if textarea.length > 0
+      @collection.reset msgs
 
-        #set message attributes
-        author = @user.name
-        message = textarea.val()
-        sender = @user._id
+  newMessage: =>
+    #Get the textarea and check if we are focused on it
+    textarea = $ '#chat textarea:focus'
+    if textarea.length > 0
 
-        date = new Date()
-        hour = date.getHours()
-        minute = date.getMinutes()
+      #set message attributes
+      author = @user.name
+      message = textarea.val()
+      sender = @user._id
 
-        if hour < 10
-          hour = "0#{ hour }"
+      date = new Date()
+      hour = date.getHours()
+      minute = date.getMinutes()
 
-        if minute < 10
-          minute = "0#{ minute }"
+      if hour < 10
+        hour = "0#{ hour }"
 
-        time = "#{ hour }:#{ minute }"
+      if minute < 10
+        minute = "0#{ minute }"
 
-        #clean textarea value
-        textarea.val ''
+      time = "#{ hour }:#{ minute }"
 
-        #create the message
-        msg = new S.Models.Message
-          author: author
-          content: message
-          sender: sender
-          time: time
-          channel: 'lobby'
+      #clean textarea value
+      textarea.val ''
 
-        #add message to the collection
-        @collection.add msg
+      #create the message
+      msg = new S.Models.Message
+        author: author
+        content: message
+        sender: sender
+        time: time
+        channel: 'lobby'
 
-        #send message to the server
-        @communicator.trigger 'message:add', msg.toJSON()
+      #add message to the collection
+      @collection.add msg
 
-    render: =>
-      msgs =  @messagesTemplate messages: @collection.toJSON()
+      #send message to the server
+      console.log "[Chat] new message", msg.toJSON()
 
-      $( '#chat ul' ).html msgs
-      $( "#chat .nano" ).nanoScroller()
+      @communicator.trigger 'message:add', msg.toJSON()
+
+  render: =>
+    msgs =  @messagesTemplate messages: @collection.toJSON()
+
+    $( '#chat ul' ).html msgs
+    $( "#chat .nano" ).nanoScroller()
 
 window.S.Chat = Chat

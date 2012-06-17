@@ -1,9 +1,8 @@
 $ ->
   if $('#main.lobby2').length > 0
-    w = window
-    w.communicator = communicator = new S.Communicator()
-    w.messages = messages = new S.Collections.Messages([{'author':'pies','message':'asdasd'}])
-    w.lobby = lobby = new S.Views.LobbyView
+    communicator = new S.Communicator()
+    messages = new S.Collections.Messages([{'author':'pies','message':'asdasd'}])
+    lobby = new S.Views.LobbyView
       communicator: communicator
       collection: messages
       el : $('#main.lobby2')[0]
@@ -15,9 +14,12 @@ $ ->
     if _.include location.split('/'), 'board'
       console.log 'we\'re on board'
     else
-      w = window
-      w.communicator = communicator = new S.Communicator()
+      communicator = new S.Communicator()
       negotiate = new S.Negotiator communicator
+      chat = new S.Chat
+        communicator: communicator
+        collection: new S.Collections.Messages()
+
       window.negotiate = negotiate
 
   null

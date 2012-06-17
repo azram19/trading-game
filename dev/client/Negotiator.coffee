@@ -16,7 +16,7 @@ class Negotiator
       x1 = (p2.x+p1.x)/2
       y1 = ((p2.y+p1.y)/2) + 10
       console.log "[NEGOTIATOR]: FULL FULL CHANNEL": x1, y1
-      @ui.showTextBubble "Channel full", x1, y1
+      @ui.showTextBubble "Channel full", x1, y1, color: [159, 17, 27, 1]
 
     @on 'owner:channel', (dest, src, ownerid) ->
       #console.debug 'owner:channel', xy, dir, state.owner
@@ -216,7 +216,7 @@ class Negotiator
     #@terrain.generateRoad x, y, x2, y2
     field = @game.map.getField(x2,y2)
     plOwner = field.platform?.state?.owner.id
-    nK = (k + 3) % 6 
+    nK = (k + 3) % 6
     for k in [0..5]
       if k isnt nK and field.channels[k]?.state?
         chOwner = field.channels[k]?.state?.owner.id

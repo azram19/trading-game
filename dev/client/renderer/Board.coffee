@@ -319,8 +319,8 @@ class BoardDrawer extends Drawer
              .endStroke()
              .setStrokeStyle(2,1)
              .beginStroke("#564334")
-             .beginFill("#CFB590") 
-             .drawCircle(destination.x, destination.y, 4) 
+             .beginFill("#CFB590")
+             .drawCircle(destination.x, destination.y, 4)
             new Shape g
             #road = @bitmapsST.getChildAt(5).clone()
             #road.regX = 0
@@ -362,13 +362,13 @@ class BoardDrawer extends Drawer
                 if @contains @visibility, point
                     if @elements[point[0]]?[point[1]]?
                         for elem in @elements[point[0]][point[1]]
-                            elem.visible = true                
+                            elem.visible = true
             else
                 @ownership = _.without @ownership, point
                 @visibility = @getVisibility @ownership
                 for p in (_.difference array, @visibility)
                     @setFog p, true
-        
+
 
     getVisibility: (ownership) ->
         visibility = []
@@ -414,7 +414,7 @@ class BoardDrawer extends Drawer
         for j in [0 ... (2*@diffRows + 1)]
             for i in [0 ... @maxRow - Math.abs(@diffRows - j)]
                 point = @getPoint(i, j)
-                @setupHex(point, i, j, boardState.getField(i, j))                       
+                @setupHex(point, i, j, boardState.getField(i, j))
         if @fogON
             @toogleFog true
         @toogleCache true
@@ -493,6 +493,10 @@ class SignalsDrawer extends Drawer
     constructor: (@eventBus, @stage, @offStage, minRow, maxRow, @boardDR, @players) ->
         super minRow, maxRow
         @offSignals = new OffSignals @offStage, @players
+        @people = new S.People @eventBus,
+            distance: 80
+            time: 400
+
         Ticker.addListener this
 
     setupFPS: () ->
@@ -638,8 +642,8 @@ class Renderer
 
     # moves signal from field (x,y) in particular direction
     moveSignal: (x, y, direction) ->
-        @signalsDR.createSignal(x, y, direction)
-        #@signalsDR.drawWorker(x, y, direction)
+        #@signalsDR.createSignal(x, y, direction)
+        @signalsDR.drawWorker(x, y, direction)
     # builds a channel at field (x,y) in given direction
     buildChannel: (x, y, direction, channel) ->
         @boardDR.buildChannel(x, y, direction, channel.state.owner.id)

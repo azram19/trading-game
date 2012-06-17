@@ -105,7 +105,8 @@ class Communicator
           .then ( friends ) ->
             socket.emit 'friends:load', friends
 
-      socket.on 'fetch:messages', ( channel ) =>
+      socket.on 'fetch:messages', () =>
+        channel = client.getChannel()
         Promise
           .when( app.fetchChat( channel ) )
           .then ( messages ) ->
