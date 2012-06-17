@@ -88,16 +88,6 @@ Types =
           numberOfSides: 4
           playersOnASide: 1
           teams: false
-        3:
-          name: 'Deathmatch'
-          numberOfSides: 5
-          playersOnASide: 1
-          teams: false
-        4:
-          name: 'Deathmatch'
-          numberOfSides: 6
-          playersOnASide: 1
-          teams: false
 
 if module? and module.exports
   exports = module.exports = Types

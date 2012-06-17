@@ -331,7 +331,8 @@ class Map
           channels[dir] = @clearRoutingObjects channel
           channels[dir].fields = []
           for i, signal in channels[dir].signals
-            channels[dir]?.signals[i].source.field = {}
+            if channels[dir] and channels[dir].signals[i]
+              channels[dir].signals[i].source.field = {}
         ) for dir, channel of channels
         #console.log '[Map] channel dump after extraction', util.inspect(channels, false, 5)
       platform = {}
@@ -339,7 +340,8 @@ class Map
         platform =  @clearRoutingObjects _.clone(field.platform.state)
         platform.field = {}
         for i, signal in platform.signals
-          platform.signals[i].source.field = {}
+          if platform.signals[i]?
+            platform.signals[i].source.field = {}
       resource = {}
       if field.resource.type?
         resource = _.clone field.resource.state

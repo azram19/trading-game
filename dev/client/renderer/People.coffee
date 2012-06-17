@@ -1,9 +1,12 @@
 class People
-  constructor: ( @events ) ->
-    canvas2 = document.getElementById 'animations'
-      @stage = new Stage canvas2
+  constructor: ( @events, options ) ->
+    @distance = options.distance
+    @time = options.time
 
-      @onTheMove = 0
+    canvas2 = document.getElementById 'animations'
+    @stage = new Stage canvas2
+
+    @onTheMove = 0
 
     @buffer = []
     @moving = {}
@@ -12,50 +15,60 @@ class People
       '/img/traggerSprite.png'
     ]
 
+    for i in [0...3]
+      @create()
+
     Ticker.addListener @
 
   create: () ->
-    h = new S.Human @events, @images[0], @stage
+    h = new S.Human @events, @images[0], @stage, @distance, @time
     @buffer.push h
 
-  transfer: ( h, i, j, i2, j2 ) ->
+  transfer: ( h, i, j, i2, j2, k ) ->
     key = "#{i}:#{j}"
     key2 = "#{i2}:#{j2}"
 
     h.key = key2
 
-    h.transfer i, j, i2, j2
+    self = @
+
+    #Transfer the human, and reset the situation once it's done
+    $.when( h.transfer(i, j, i2, j2, k) ).done () ->
+      self.clear.call self, h
 
     if not @moving[key2]?
       @moving[key2] = []
 
     @moving[key2].push h
 
-    $.when( h.walked( @ ) ).done () ->
-      @clear h
-
-  walkItHuman: (i, j, i2, j2) ->
+  walkItHuman: (i, j, i2, j2, k) ->
 
     key = "#{i}:#{j}"
     key2 = "#{i2}:#{j2}"
     #1 transfer
     #2 get from buffer
     #3 create
-    transferOptions = @moving[key]
+    transferOptions = []# @moving[key]
+
+    #Remove all opitions that are furthere then 5% from their target
+    transferOptions = _.filter transferOptions, ( v ) =>
+      v.distance < @distance/4
+
     if transferOptions? and transferOptions.length > 0
       #Get a human closest to the target
+      console.log "[People] Found a human :D"
+
       h = _.chain( transferOptions )
-        .sortBy( ( v ) -> -v.t )
+        .sortBy( ( v ) -> -v.distance )
         .first()
+        .value()
 
       #Remove it from the list
       @moving[key] = _.without @moving[key], h
 
-      #Wait until it is ready to be transfered and transfer it
-      $.when( h.transferable( @ ) )
-        .done () ->
-          @transfer h, i, j, i2, j2
-      
+      #Transfer
+      @transfer h, i, j, i2, j2, k
+
       return
     else if @buffer.length > 0
       h = @buffer.pop()
@@ -64,19 +77,20 @@ class People
       h = @buffer.pop()
 
     h.key = key2
-    h.walk i, j, i2, j2
-    
+
     if not @moving[key2]?
       @moving[key2] = []
 
     @moving[key2].push h
 
-    $.when( h.walked( @ ) ).done () ->
-      @clear h
+    self = @
+
+    $.when( h.walk( i, j, i2, j2, k ) ).done () ->
+      self.clear.call self, h
 
   clear: ( h ) ->
     key = h.key
-    @moving[key] = _.withou @moving[key], h
+    @moving[key] = _.without @moving[key], h
 
     h.clear()
     h.key = "-1"
@@ -85,8 +99,9 @@ class People
 
   walk: (i, j, k) ->
     [i2, j2] = @events.game.map.directionModificators i, j, k
-    @walkItHuman i, j, i2, j2
+    @walkItHuman i, j, i2, j2, k
 
   tick: () ->
-    if @onTheMove > 0
-      @stage.update()
+    @stage.update()
+
+window.S.People = People
