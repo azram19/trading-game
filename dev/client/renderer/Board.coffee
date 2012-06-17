@@ -253,7 +253,7 @@ class BoardDrawer extends Drawer
     drawResource: (point, type) ->
         draw = (type) =>
             switch type
-                when S.Types.Resources.Gold 
+                when S.Types.Resources.Gold
                     resource = @bitmapsST.getChildAt(1).clone()
                     resource.regX = 30
                     resource.regY = 35
@@ -281,7 +281,7 @@ class BoardDrawer extends Drawer
              .endStroke()
              .moveTo(point.x, point.y)
              .setStrokeStyle(5,1,0,5)
-             .beginStroke("#CFB590")   
+             .beginStroke("#CFB590")
              .lineTo(destination.x, destination.y)
             new Shape g
             #road = @bitmapsST.getChildAt(5).clone()
@@ -411,7 +411,7 @@ class OffSignals
         shape.visible = false
         shape.isSignal = true
         @stage.addChild shape
-        
+
 
     toogleCache: (status) ->
         length = @stage.getNumChildren() - 1
@@ -430,6 +430,10 @@ class SignalsDrawer extends Drawer
     constructor: (@eventBus, @stage, @offStage, minRow, maxRow) ->
         super minRow, maxRow
         #@offSignals = new OffSignals @offStage
+        window.p = @people = new S.People @eventBus,
+            distance: @distance
+            time: 400
+
         Ticker.addListener this
 
     setupFPS: () ->
@@ -447,7 +451,7 @@ class SignalsDrawer extends Drawer
         if signal is null
             #console.log "new"
             signal = @offSignals.getSignal()
-            
+
             @stage.addChild signal
         signal.x = point.x
         signal.y = point.y
@@ -458,9 +462,7 @@ class SignalsDrawer extends Drawer
         @stage.update()
 
     drawWorker: (x, y, direction) ->
-        worker = new S.Human(@eventBus, '/img/traggerSprite.png', null, @distance, 1000)
-        worker.appear x, y, direction
-        worker.walk direction
+        @people.walk x, y, direction
 
     getSignal: () ->
         for sig in @stage.children

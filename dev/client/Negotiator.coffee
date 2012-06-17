@@ -210,7 +210,6 @@ class Negotiator
     @renderer.buildChannel x, y, k, channel
     @renderer.changeOwnership x, y, owner.id
     [x2 ,y2] = @game.map.directionModificators(x, y, k)
-    #@terrain.generateRoad x, y, x2, y2
     @renderer.changeOwnership x2, y2, owner.id
 
   nonUserId: ( user ) ->
