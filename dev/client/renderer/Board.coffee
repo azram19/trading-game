@@ -281,7 +281,7 @@ class BoardDrawer extends Drawer
     drawResource: (point, type) ->
         draw = (type) =>
             switch type
-                when S.Types.Resources.Gold 
+                when S.Types.Resources.Gold
                     resource = @bitmapsST.getChildAt(1).clone()
                     resource.regX = 30
                     resource.regY = 35
@@ -475,7 +475,6 @@ class OffSignals
         shape.isSignal = true
         shape.alpha = 0.8
         @stage.addChild shape
-        
 
     toogleCache: (status) ->
         length = @stage.getNumChildren() - 1
@@ -520,9 +519,7 @@ class SignalsDrawer extends Drawer
         signal.k = 0
 
     drawWorker: (x, y, direction) ->
-        worker = new S.Human(@eventBus, '/img/traggerSprite.png', null, @distance, 1000)
-        worker.appear x, y, direction
-        worker.walk direction
+        @people.walk x, y, direction
 
     getSignal: () ->
         for sig in @stage.children
@@ -651,6 +648,12 @@ class Renderer
     # to indicate type of a platform
     buildPlatform: (x, y, platform) ->
         @boardDR.buildPlatform(x, y, platform.type())
+
+    # captures a channel, (x,y) are the coordinates of the player's field
+    # channel is the object at (x,y), helps to find the ownership
+    # direction indicates the field which will be captured with the channel
+    captureChannel: (x, y, direction, state) ->
+        @boardDR.captureOwnership(x, y, state.owner.id)
 
     # captures a platform at (x,y), field is a field object at (x,y)
     captureOwnership: (x, y, ownerid) ->

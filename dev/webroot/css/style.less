@@ -1,5 +1,9 @@
 @import 'nanoscroller.css';
 
+canvas{
+  cursor:pointer;
+}
+
 body {
   font-family: 'Cabin', Helvetica, Arial, sans-serif;
 
@@ -135,6 +139,7 @@ p {
   }
   #grid {
     z-index: 1;
+    opacity:0.1;
   }
   #platforms {
     z-index: 5;
@@ -614,11 +619,11 @@ p {
     position:fixed;
     right:0;
     top:0;
-    width:200px;
+    width:240px;
     border-left:2px #000 solid;
     height:100%;
     background:#fff;
-    z-index:40;
+    z-index:9999;
   }
 
 }

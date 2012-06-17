@@ -419,6 +419,7 @@ class MapHelper extends S.Drawer
       @currentHelper.highlight.call @, i, j
 
   help: ( event, caller ) =>
+    @update = true
     @parseAndPrepareEvent event, caller
 
   parseAndPrepareEvent: ( event, caller ) =>
@@ -487,9 +488,11 @@ class MapHelper extends S.Drawer
   close: () =>
     @hideOverlay()
 
-    @update = true
+    @update = false
+    @stage.update()
 
   tick: () ->
-    @stage.update()
+    if @update
+      @stage.update()
 
 window.S.MapHelper = MapHelper
