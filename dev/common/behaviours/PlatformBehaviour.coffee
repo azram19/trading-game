@@ -37,7 +37,7 @@ class PlatformBehaviour
 
     accept: ( signal, state, callback, ownObject ) ->
         callback signal
-        if signal.owner?.id is state.owner.id or S.Types.Resources.Gold <= signal.type <= S.Types.Resources.Resources
+        if signal.owner?.id is state.owner.id or S.Types.Resources.Gold <= signal.type <= S.Types.Resources.Food
             addSignal = (signal) =>
                 ownObject.state.signals.push signal
                 ownObject.trigger 'route'
@@ -46,7 +46,7 @@ class PlatformBehaviour
             state.life -= signal.strength
             console.log "[PlatformBehaviour]: signal dealt damage, life is:", state.life
             if state.life <= 0
-                state.owner = signal.owner       
+                state.owner = signal.owner
                 #FIXME Reset life
                 #console.log "[PlatformBehaviour]: source", signal.source
                 @eventBus.trigger 'owner:platform', state.field.xy, signal.owner.id
@@ -66,7 +66,7 @@ class PlatformBehaviour
               #console.log "[PlatformBehaviour]: availableRoutes", availableRoutes
               origOwner = signal.owner
               origSource = signal.source
- 
+
               signal.source = state
               signal.owner = state.owner
               if destination[0].object.requestAccept signal

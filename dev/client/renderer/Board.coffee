@@ -499,7 +499,7 @@ class SignalsDrawer extends Drawer
         @offSignals = new OffSignals @offStage, @players
         @people = new S.People @eventBus,
             distance: 80
-            time: 400
+            time: 800
 
         Ticker.addListener this
 
