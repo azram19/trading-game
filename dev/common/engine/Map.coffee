@@ -329,20 +329,24 @@ class Map
             channels[direction] = {}
         #console.log '[Map] channel states', util.inspect(channels, false, 5)
         (
-          channels[dir] = @clearRoutingObjects channel
-          channels[dir].fields = []
-          for i, signal in channels[dir].signals
-            if channels[dir] and channels[dir].signals[i]
-              channels[dir].signals[i].source.field = {}
+          if channels[dir]?
+            channels[dir] = @clearRoutingObjects channel
+            channels[dir].fields = []
+            for signal, i in channels[dir].signals
+              if channels[dir].signals[i]?
+                channels[dir].signals[i].source.field = {}
+                channels[dir].signals[i].events = {}
+                #console.log '[Map] specific channel', dir, channel
         ) for dir, channel of channels
         #console.log '[Map] channel dump after extraction', util.inspect(channels, false, 5)
       platform = {}
       if field.platform.type?
         platform =  @clearRoutingObjects _.clone(field.platform.state)
         platform.field = {}
-        for i, signal in platform.signals
+        for signal, i in platform.signals
           if platform.signals[i]?
             platform.signals[i].source.field = {}
+            platform.signals[i].events = {}
       resource = {}
       if field.resource.type?
         resource = _.clone field.resource.state

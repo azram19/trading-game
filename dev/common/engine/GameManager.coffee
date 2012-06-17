@@ -27,6 +27,10 @@ class GameManager
     @map.iterateFields ( o ) ->
       if o.platform.type?
         o.platform.produce()
+        o.platform.trigger 'route'
+      for dir, channel of o.channels
+        if channel?
+          channel.trigger 'route'
 
   stopGame: ->
     @map.iterateFields ( o ) ->
