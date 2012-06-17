@@ -217,9 +217,11 @@ class BoardDrawer extends Drawer
     buildChannel: (x, y, direction, ownerid) ->
         point = @getPoint(x, y)
         @addElement x, y, @drawChannel(point, direction)
-        if @fogON
-            @setVisibility [x, y], true, ownerid
-        @updateAll()
+        #if @fogON
+        #    @setVisibility [x, y], true, ownerid
+        #@updateAll()
+        @channelsST.updateCache()
+        @channelsST.update()
         #console.log "[BOARD]:visibility, ownership", @visibility, @ownership
 
     captureOwnership: (x, y, ownerid) ->
@@ -653,8 +655,8 @@ class Renderer
 
     # moves signal from field (x,y) in particular direction
     moveSignal: (x, y, direction) ->
-        #@signalsDR.createSignal(x, y, direction)
-        @signalsDR.drawWorker(x, y, direction)
+        @signalsDR.createSignal(x, y, direction)
+        #@signalsDR.drawWorker(x, y, direction)
     # builds a channel at field (x,y) in given direction
     buildChannel: (x, y, direction, channel) ->
         @boardDR.buildChannel(x, y, direction, channel.state.owner.id)
