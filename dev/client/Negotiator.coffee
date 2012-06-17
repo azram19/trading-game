@@ -211,7 +211,7 @@ class Negotiator
     channel = S.ObjectFactory.build S.Types.Entities.Channel, @, owner
     @game.map.addChannel channel, x, y, k
     @renderer.buildChannel x, y, k, channel
-    @renderer.changeOwnership x, y, owner.id
+    #@renderer.changeOwnership x, y, owner.id
     [x2 ,y2] = @game.map.directionModificators(x, y, k)
     #@terrain.generateRoad x, y, x2, y2
     field = @game.map.getField(x2,y2)
@@ -221,6 +221,7 @@ class Negotiator
       if k isnt nK and field.channels[k]?.state?
         chOwner = field.channels[k]?.state?.owner.id
         break
+      #console.log "[NEGOTIATOR]: ownership clause", plOwner?, owner.id, not (plOwner?), chOwner?, owner.id, not (chOwner?)
     if (plOwner? is owner.id) or (not (plOwner?) and chOwner? is owner.id) or (not (chOwner?))
         @renderer.changeOwnership x2, y2, owner.id
 
