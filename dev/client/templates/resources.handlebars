@@ -1,0 +1,16 @@
+<div class='player-resourcesinfo'>
+  <ul>
+    {{#each resources}}
+      {{#with this}}
+        <li>
+          <div class='img'>
+            <img src='/img/{{name}}.png'>
+          </div>
+          <div class='desc'>
+            {{name}} : {{value}}
+          </div>
+        </li>
+      {{/with}}
+    {{/each}}
+  </ul>
+</div>
