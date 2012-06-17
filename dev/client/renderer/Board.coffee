@@ -54,7 +54,7 @@ class Drawer
             mod = @directionModUpper[dir]
         else if y > @diffRows or (y is @diffRows and dir >= 3)
             mod = @directionModLower[dir]
-        new Point x + mod[0], y + mod[1]
+        [x + mod[0], y + mod[1]]
 
     setViewport: (width, height) ->
         @viewportHeight = height
@@ -171,6 +171,18 @@ class BoardDrawer extends Drawer
             stage.updateCache()
             stage.update()
 
+    clearData: () ->
+        @visibility = []
+        @ownership = []
+        @elements = {}
+        @fog = {}
+
+    contains: (list, elem) ->
+        for e in list
+            if _.isEqual e, elem
+                return true
+        false
+
 #--------------------#
 
     buildPlatform: (x, y, type) ->
@@ -190,9 +202,9 @@ class BoardDrawer extends Drawer
         @drawOwnership(point, ownerid)
         if @fogON
             if ownerid is @myPlayer.id
-                @setVisibility point, true
+                @setVisibility [x, y], true
             else if targetid is @myPlayer.id
-                @setVisibility point, false
+                @setVisibility [x, y], false
         @updateAll()
 
     changeOwnership: (x, y, ownerid) ->
@@ -200,7 +212,7 @@ class BoardDrawer extends Drawer
         @addElement x, y, @drawOwnership(point, ownerid)
         if @fogON
             if ownerid is @myPlayer.id
-                @setVisibility (new Point x, y), true
+                @setVisibility [x, y], true
         @updateAll()
 
 #--------------------#
@@ -302,16 +314,16 @@ class BoardDrawer extends Drawer
 #--------------------#
 
     setFog: (point, status) ->
-        if @fog[point.x]?[point.y]?
-            @fog[point.x][point.y].visible = status
-            if @elements[point.x]?[point.y]?
-                for elem in @elements[point.x][point.y]
+        if @fog[point[0]]?[point[1]]?
+            @fog[point[0]][point[1]].visible = status
+            if @elements[point[0]]?[point[1]]?
+                for elem in @elements[point[0]][point[1]]
                     elem.visible = not status
 
     setVisibility: (point, status) ->
         array = []
         for i in [0..6]
-            array.push @modifyCoords point.x, point.y, i
+            array.push @modifyCoords point[0], point[1], i
         if status
             for p in (_.difference array, @visibility)
                 @setFog p, false
@@ -328,34 +340,47 @@ class BoardDrawer extends Drawer
         for point in ownership
             array = []
             for i in [0..6]
-                array.push @modifyCoords point.x, point.y, i
-            visibility = _.union @visibility, array
+                array.push @modifyCoords point[0], point[1], i
+            visibility = _.union visibility, array
         visibility
 
 #--------------------#
-
-    drawHex: (point, x, y, field) ->
+    setupHex: (point, x, y, field) ->
         if @fogON
             @addFog x, y, @drawFog point
         @drawGrid point
-        if field.platform.type?
-            ownerid = field.platform.state.owner.id
-            @addElement x, y, @drawOwnership point, ownerid
-            if ownerid is @myPlayer.id
-                @ownership.push new Point x, y
         if field.resource.behaviour?
             @addElement x, y, @drawResource point, field.resource.type()
+        @setupPlatform point, x, y, field
+        @setupChannels point, x, y, field
+
+    setupPlatform: (point, x, y, field) ->
         if field.platform.type?
             @addElement x, y, @drawPlatform point, field.platform.type()
+            if field.platform.type() is S.Types.Entities.Platforms.HQ and not (@contains @ownership, [x, y])
+                ownerid = field.platform.state.owner.id
+                @addElement x, y, @drawOwnership point, ownerid
+                if ownerid is @myPlayer.id
+                    @ownership.push [x, y]
+
+    setupChannels: (point, x, y, field) ->
+        for k in [0..5]
+            channel = field.channels[k]
+            if channel?
+                @addElement x, y, @drawChannel(point, k)
+                newCoords = @modifyCoords x, y, k
+                if not (@contains @ownership, newCoords)
+                    #console.log "[Board]: I accept new coords", @ownership, newCoords, _.include @ownership, newCoords
+                    ownerid = channel.state.owner.id
+                    @addElement newCoords[0], newCoords[1], @drawOwnership @getDestination(point,k), ownerid
+                    if ownerid is @myPlayer.id
+                        @ownership.push newCoords
 
     setupBoard: (boardState) ->
         for j in [0 ... (2*@diffRows + 1)]
             for i in [0 ... @maxRow - Math.abs(@diffRows - j)]
                 point = @getPoint(i, j)
-                @drawHex(point, i, j, boardState.getField(i, j))
-                for k in [0 .. 5]
-                    if boardState.getChannel(i, j, k)?.state?
-                        @addElement i, j, @drawChannel(point, k)
+                @setupHex(point, i, j, boardState.getField(i, j))                       
         if @fogON
             @toogleFog true
         @toogleCache true
@@ -363,6 +388,8 @@ class BoardDrawer extends Drawer
     toogleFog: (status) ->
         if status
             @visibility = @getVisibility @ownership
+            console.log "[Board]: ownership", @ownership
+            console.log "[Board]: visibility", @visibility
             for point in @visibility
                 @setFog point, false
 
@@ -447,7 +474,6 @@ class SignalsDrawer extends Drawer
         if signal is null
             #console.log "new"
             signal = @offSignals.getSignal()
-            
             @stage.addChild signal
         signal.x = point.x
         signal.y = point.y
@@ -614,6 +640,7 @@ class Renderer
     setupBoard: (boardState) ->
         @clearAll()
         @signalsDR.setupFPS()
+        @boardDR.clearData()
         #@signalsDR.setupOffSignals()
         @boardDR.setupBoard(boardState)
         Ticker.useRAF = true
