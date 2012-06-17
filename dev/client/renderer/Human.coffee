@@ -79,8 +79,6 @@ class Human
       @animation = new BitmapAnimation @spriteSheet
       @stage.addChild @animation
 
-      Ticker.addListener @
-
   clear: () ->
 
   walk: ( i, j, i2, j2, k ) ->
@@ -98,7 +96,7 @@ class Human
 
       @animation.gotoAndPlay "walk" + k
 
-      turns = (@timeForAWalk / Ticker.getInterval())
+      turns = (@timeForAWalk / 90)
 
       dx = p2.x - p1.x
       dy = p2.y - p1.y
@@ -141,8 +139,6 @@ class Human
       @visible = true
 
       @animation.gotoAndStop "stand" + k
-
-      @stage.update()
 
   tick: () ->
     if @move

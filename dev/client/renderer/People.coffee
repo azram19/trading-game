@@ -10,6 +10,7 @@ class People
 
     @buffer = []
     @moving = {}
+    @allHumans = []
 
     @images = [
       '/img/traggerSprite.png'
@@ -20,14 +21,16 @@ class People
 
     Ticker.addListener @
 
-    @updateStageThr = _.throttle @updateStage, 40
+    @updateStageThr = _.throttle @updateStage, 50
 
   updateStage: () ->
+    human.tick() for human in @allHumans
     @stage.update()
 
   create: () ->
     h = new S.Human @events, @images[0], @stage, @distance, @time
     @buffer.push h
+    @allHumans.push h
 
   transfer: ( h, i, j, i2, j2, k ) ->
     key = "#{i}:#{j}"
