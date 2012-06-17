@@ -306,6 +306,7 @@ class Map
     routingAddChannel x, y, k
     routingAddChannel nX, nY, nK
     channelRouting x, y, k
+    channelRouting nX, nY, nK
 
   addReverseChannel: ( channel, x, y, k ) ->
     @fields[y] ?= {}

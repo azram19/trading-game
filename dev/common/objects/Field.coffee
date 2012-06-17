@@ -6,7 +6,7 @@ class Field
       @platform = {}
       @resource = {}
       @terrain = []
-      #@owner = {}
+      @owner = {}
 
 if module? and module.exports
   exports = module.exports = Field

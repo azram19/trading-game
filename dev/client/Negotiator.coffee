@@ -18,13 +18,16 @@ class Negotiator
       console.log "[NEGOTIATOR]: FULL FULL CHANNEL": x1, y1
       @ui.showTextBubble "Channel full", x1, y1
 
-    @on 'owner:channel', (xy, dir, owner) ->
+    @on 'owner:channel', (dest, src, ownerid) ->
       #console.debug 'owner:channel', xy, dir, state.owner
-      @renderer.changeOwnership xy[0], xy[1], owner
+      field = (_.intersection dest, src)[0]
+      console.log "NEG: field", field, dest, src
+      if not (field.platform.type?)
+        @renderer.captureOwnership field.xy[0], field.xy[1], ownerid
 
-    @on 'owner:platform', (xy, state) ->
+    @on 'owner:platform', (xy, ownerid) ->
       #console.debug 'owner:platform', xy, state
-      @renderer.capturePlatform xy[0], xy[1], state
+      @renderer.captureOwnership xy[0], xy[1], ownerid
 
     @on 'player:lost', (player) ->
       #console.debug 'lost', player
@@ -211,7 +214,15 @@ class Negotiator
     @renderer.changeOwnership x, y, owner.id
     [x2 ,y2] = @game.map.directionModificators(x, y, k)
     #@terrain.generateRoad x, y, x2, y2
-    @renderer.changeOwnership x2, y2, owner.id
+    field = @game.map.getField(x2,y2)
+    plOwner = field.platform?.state?.owner.id
+    nK = (k + 3) % 6 
+    for k in [0..5]
+      if k isnt nK and field.channels[k]?.state?
+        chOwner = field.channels[k]?.state?.owner.id
+        break
+    if (plOwner? is owner.id) or (not (plOwner?) and chOwner? is owner.id) or (not (chOwner?))
+        @renderer.changeOwnership x2, y2, owner.id
 
   nonUserId: ( user ) ->
     @game.map.nonUser.id

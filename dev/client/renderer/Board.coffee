@@ -102,16 +102,41 @@ class Drawer
     getDistance: (x, y) ->
         Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2))
 
+    contains: (list, elem) ->
+        for e in list
+            if _.isEqual e, elem
+                return true
+        false
+
+    without: (list, elem) ->
+        for i in [0..list.length]
+            e = list[i]
+            if _.isEqual e, elem
+                return list.splice i-1, 1
+        list
+
+    union: (list1, list2) ->
+        for elem in list2
+            if not @contains list1, elem
+                list1.push elem
+        list1
+
+    difference: (list1, list2) ->
+        for elem in list2
+            list1 = @without list1, elem
+        list1
+
 class BoardDrawer extends Drawer
     constructor: (@bitmapsST, @stages, minRow, maxRow, @players, @myPlayer) ->
         super minRow, maxRow
-        @colors = ["#274E7D", "#900020", "#FFA000", "#B80049", "#00A550", "#9999FF", "#367588", "#FFFFFF"]
         @gridST = @stages[0]
         @fogST = @stages[1]
         @ownershipST = @stages[2]
         @resourcesST = @stages[3]
         @platformsST = @stages[4]
         @channelsST = @stages[5]
+        @colors = ["#274E7D", "#900020", "#FFA000", "#B80049", "#00A550", "#9999FF", "#367588", "#FFFFFF"]
+
 
         @visibility = []
         @ownership = []
@@ -177,12 +202,6 @@ class BoardDrawer extends Drawer
         @elements = {}
         @fog = {}
 
-    contains: (list, elem) ->
-        for e in list
-            if _.isEqual e, elem
-                return true
-        false
-
 #--------------------#
 
     buildPlatform: (x, y, type) ->
@@ -196,23 +215,20 @@ class BoardDrawer extends Drawer
         @addElement x, y, @drawChannel(point, direction)
         @channelsST.updateCache()
         @channelsST.update()
+        console.log "[BOARD]:visibility, ownership", @visibility, @ownership
 
-    captureOwnership: (x, y, ownerid, targetid) ->
+    captureOwnership: (x, y, ownerid) ->
         point = @getPoint(x, y)
-        @drawOwnership(point, ownerid)
+        @addElement x, y, @drawOwnership(point, ownerid)
         if @fogON
-            if ownerid is @myPlayer.id
-                @setVisibility [x, y], true
-            else if targetid is @myPlayer.id
-                @setVisibility [x, y], false
+            @setVisibility [x, y], false, ownerid
         @updateAll()
 
     changeOwnership: (x, y, ownerid) ->
         point = @getPoint(x, y)
         @addElement x, y, @drawOwnership(point, ownerid)
         if @fogON
-            if ownerid is @myPlayer.id
-                @setVisibility [x, y], true
+            @setVisibility [x, y], true, ownerid
         @updateAll()
 
 #--------------------#
@@ -287,14 +303,24 @@ class BoardDrawer extends Drawer
             destination = @getDestination(point, direction)
             g = new Graphics()
             g.moveTo(point.x, point.y)
-             .setStrokeStyle(8,1,0,5)
+             .setStrokeStyle(8,1)
              .beginStroke("#564334")
              .lineTo(destination.x, destination.y)
              .endStroke()
              .moveTo(point.x, point.y)
-             .setStrokeStyle(5,1,0,5)
-             .beginStroke("#CFB590")   
+             .setStrokeStyle(5,1)
+             .beginStroke("#CFB590")
              .lineTo(destination.x, destination.y)
+             .endStroke()
+             .setStrokeStyle(2,1)
+             .beginStroke("#564334")
+             .beginFill("#CFB590")
+             .drawCircle(point.x, point.y, 4)
+             .endStroke()
+             .setStrokeStyle(2,1)
+             .beginStroke("#564334")
+             .beginFill("#CFB590") 
+             .drawCircle(destination.x, destination.y, 4) 
             new Shape g
             #road = @bitmapsST.getChildAt(5).clone()
             #road.regX = 0
@@ -320,20 +346,29 @@ class BoardDrawer extends Drawer
                 for elem in @elements[point[0]][point[1]]
                     elem.visible = not status
 
-    setVisibility: (point, status) ->
+    setVisibility: (point, status, ownerid) ->
         array = []
         for i in [0..6]
-            array.push @modifyCoords point[0], point[1], i
-        if status
+            array.push (@modifyCoords point[0], point[1], i)
+        if ownerid is @myPlayer.id and not (@contains @ownership, point)
+            cl = array
+            console.log "BOARD:DIFFERENCE", cl, cl.length, @visibility, @visibility.length, (@difference array, @visibility)
             for p in (_.difference array, @visibility)
                 @setFog p, false
             @visibility = _.union @visibility, array
             @ownership.push point
         else
-            @ownership = _.without @ownership, point
-            @visibility = @getVisibility @ownership
-            for p in (_.difference array, @visibility)
-                @setFog p, true
+            if status
+                if @contains @visibility, point
+                    if @elements[point[0]]?[point[1]]?
+                        for elem in @elements[point[0]][point[1]]
+                            elem.visible = true                
+            else
+                @ownership = _.without @ownership, point
+                @visibility = @getVisibility @ownership
+                for p in (_.difference array, @visibility)
+                    @setFog p, true
+        
 
     getVisibility: (ownership) ->
         visibility = []
@@ -370,7 +405,6 @@ class BoardDrawer extends Drawer
                 @addElement x, y, @drawChannel(point, k)
                 newCoords = @modifyCoords x, y, k
                 if not (@contains @ownership, newCoords)
-                    #console.log "[Board]: I accept new coords", @ownership, newCoords, _.include @ownership, newCoords
                     ownerid = channel.state.owner.id
                     @addElement newCoords[0], newCoords[1], @drawOwnership @getDestination(point,k), ownerid
                     if ownerid is @myPlayer.id
@@ -388,8 +422,6 @@ class BoardDrawer extends Drawer
     toogleFog: (status) ->
         if status
             @visibility = @getVisibility @ownership
-            console.log "[Board]: ownership", @ownership
-            console.log "[Board]: visibility", @visibility
             for point in @visibility
                 @setFog point, false
 
@@ -405,11 +437,12 @@ class BoardDrawer extends Drawer
 #--------------------#
 
 class OffSignals
-    signalRadius: 8
-    signalCount: 50
+    signalRadius: 7
+    signalCount: 150
 
-    constructor: (@stage) ->
+    constructor: (@stage, @players) ->
         @stage.snapToPixelEnabled = true
+        @colors = ["#274E7D", "#900020", "#FFA000", "#B80049", "#00A550", "#9999FF", "#367588", "#FFFFFF"]
 
     getSignal: () ->
         signal = @stage.getChildAt 0
@@ -430,13 +463,17 @@ class OffSignals
 
     drawSignal: () ->
         g = new Graphics()
-        g.setStrokeStyle(1)
-            .beginStroke("#FFFF00")
+        g.setStrokeStyle(2)
+            #.beginStroke("#C7F66F")
+            #.beginFill("#84B22D")
+            .beginStroke("#0F4DA8")
+            .beginFill("#437DD4")
             .drawCircle(0, 0, @signalRadius)
         shape = new Shape g
         shape.snapToPixel = true
         shape.visible = false
         shape.isSignal = true
+        shape.alpha = 0.8
         @stage.addChild shape
         
 
@@ -454,9 +491,9 @@ class SignalsDrawer extends Drawer
     signalRadius: 8
     signalCount: 50
 
-    constructor: (@eventBus, @stage, @offStage, minRow, maxRow) ->
+    constructor: (@eventBus, @stage, @offStage, minRow, maxRow, @boardDR, @players) ->
         super minRow, maxRow
-        #@offSignals = new OffSignals @offStage
+        @offSignals = new OffSignals @offStage, @players
         Ticker.addListener this
 
     setupFPS: () ->
@@ -481,7 +518,6 @@ class SignalsDrawer extends Drawer
         signal.tickSizeY = @offsetY[dir]/Ticker.getMeasuredFPS()
         signal.visible = true
         signal.k = 0
-        @stage.update()
 
     drawWorker: (x, y, direction) ->
         worker = new S.Human(@eventBus, '/img/traggerSprite.png', null, @distance, 1000)
@@ -496,25 +532,21 @@ class SignalsDrawer extends Drawer
         null
 
     createSignal: (x, y, direction) ->
-        point = @getPoint(x, y)
-        @drawSignal(point, direction)
-        @stage.update()
+        if @contains @boardDR.visibility, [x, y]
+            point = @getPoint(x, y)
+            @drawSignal(point, direction)
+            @stage.update()
 
     tick: () ->
-        ###
         for signal in @stage.children
             if signal.isSignal and signal.isVisible
-                if not @fogON or not @invisibleTerrain.hitTest signal.x, signal.y
-                    signal.visible = true
-                    if @getDistance(signal.k * signal.tickSizeX, signal.k * signal.tickSizeY) >= @distance
-                        signal.visible = false
-                    else
-                        signal.x += signal.tickSizeX
-                        signal.y += signal.tickSizeY
-                        signal.k += 1
-                else
+                signal.visible = true
+                if @getDistance(signal.k * signal.tickSizeX, signal.k * signal.tickSizeY) >= @distance
                     signal.visible = false
-        ###
+                else
+                    signal.x += signal.tickSizeX
+                    signal.y += signal.tickSizeY
+                    signal.k += 1
         @fpsLabel.text = Math.round(Ticker.getMeasuredFPS())+" fps"
         @stage.update()
 
@@ -557,7 +589,7 @@ class Renderer
             console.log '[Renderer] all Images have been loaded'
             boardStages = [@gridST, @fogST, @ownershipST, @resourcesST, @platformsST, @channelsST]
             @boardDR = new BoardDrawer @bitmapsST, boardStages, minRow, maxRow, players, myPlayer
-            @signalsDR = new SignalsDrawer eventBus, @signalsST, @offST, minRow, maxRow
+            @signalsDR = new SignalsDrawer eventBus, @signalsST, @offST, minRow, maxRow, @boardDR, players
             @boardLoaded.resolve()
 
     loadImages: (dfd) ->
@@ -609,8 +641,8 @@ class Renderer
 
     # moves signal from field (x,y) in particular direction
     moveSignal: (x, y, direction) ->
-        #@signalsDR.createSignal(x, y, direction)
-        @signalsDR.drawWorker(x, y, direction)
+        @signalsDR.createSignal(x, y, direction)
+        #@signalsDR.drawWorker(x, y, direction)
     # builds a channel at field (x,y) in given direction
     buildChannel: (x, y, direction, channel) ->
         @boardDR.buildChannel(x, y, direction, channel.state.owner.id)
@@ -620,15 +652,9 @@ class Renderer
     buildPlatform: (x, y, platform) ->
         @boardDR.buildPlatform(x, y, platform.type())
 
-    # captures a channel, (x,y) are the coordinates of the player's field
-    # channel is the object at (x,y), helps to find the ownership
-    # direction indicates the field which will be captured with the channel
-    captureChannel: (x, y, direction, state) ->
-        @boardDR.captureOwnership(x, y, state.owner.id)
-
     # captures a platform at (x,y), field is a field object at (x,y)
-    capturePlatform: (x, y, state) ->
-        @boardDR.captureOwnership(x, y, state.owner.id)
+    captureOwnership: (x, y, ownerid) ->
+        @boardDR.captureOwnership(x, y, ownerid)
 
     # changes ownership of the field at x, y
     changeOwnership: (x, y, ownerid) ->
@@ -641,7 +667,7 @@ class Renderer
         @clearAll()
         @signalsDR.setupFPS()
         @boardDR.clearData()
-        #@signalsDR.setupOffSignals()
+        @signalsDR.setupOffSignals()
         @boardDR.setupBoard(boardState)
         Ticker.useRAF = true
         Ticker.setFPS 60

@@ -44,10 +44,12 @@ class PlatformBehaviour
             _.delay addSignal, state.delay, signal
         else
             state.life -= signal.strength
-            if state.life < 0
-                state.owner = signal.owner
+            console.log "[PlatformBehaviour]: signal dealt damage, life is:", state.life
+            if state.life <= 0
+                state.owner = signal.owner       
                 #FIXME Reset life
-                @eventBus.trigger 'owner:platform', state.field.xy, state
+                #console.log "[PlatformBehaviour]: source", signal.source
+                @eventBus.trigger 'owner:platform', state.field.xy, signal.owner.id
 
     depleted: ( state ) ->
 

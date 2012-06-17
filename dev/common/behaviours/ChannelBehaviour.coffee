@@ -34,7 +34,7 @@ class ChannelBehaviour
 
     accept: ( signal, state, callback, ownObject ) ->
         callback signal
-        if signal.owner.id is signal.owner.id
+        if state.owner.id is signal.owner.id
             addSignal = (signal) =>
                 ownObject.state.signals.push signal
                 #console.log "[ChannelBehaviour]: now i will call @route", new Date()
@@ -42,9 +42,11 @@ class ChannelBehaviour
             _.delay addSignal, state.delay, signal
         else
             state.life -= signal.strength
+            console.log "[ChannelBehaviour]: signal dealt damage, life is:", state.life
             if state.life <= 0
                 state.owner = signal.owner
-                @eventBus.trigger 'owner:channel', state.field.xy, state.direction, state
+                #console.log "[ChannelBehaviour]: source", signal.source
+                @eventBus.trigger 'owner:channel', state.fields, signal.source.fields, signal.owner.id
 
     route: ( state, ownObject ) ->
       signal = ownObject.state.signals.shift()

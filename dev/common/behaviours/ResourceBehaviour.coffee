@@ -48,7 +48,7 @@ class ResourceBehaviour
                     state.field.platform.trigger "accept", newSignal, (signal) ->
         #production()
         @PID = setInterval ( ->
-          console.log '[ResourceBehaviour] Trigger resource production', new Date()
+          #console.log '[ResourceBehaviour] Trigger resource production', new Date()
           production()
         ), state.delay
 
