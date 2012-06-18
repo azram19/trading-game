@@ -253,7 +253,7 @@ class UI extends S.Drawer
     menuInfo = @events.getMenu i, j
     obj = @events.getField i, j
 
-    listOfOwnership = @events.renderer.boardDR.ownership
+    listOfOwnership = @events.renderer.boardDR.roads
 
     mine = _.find listOfOwnership, ( v ) ->
       [i2, j2] = v

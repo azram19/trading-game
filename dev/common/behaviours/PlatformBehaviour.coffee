@@ -2,9 +2,11 @@ S = {}
 if require?
   _ = require 'underscore'
   S.Types = require '../config/Types'
+  S.Properties = require '../config/Properties'
 else
   _ = window._
   S.Types = window.S.Types
+  S.Properties = window.S.Properties
 
 class PlatformBehaviour
 
@@ -47,7 +49,7 @@ class PlatformBehaviour
             console.log "[PlatformBehaviour]: signal dealt damage, life is:", state.life
             if state.life <= 0
                 state.owner = signal.owner
-                #FIXME Reset life
+                state.life = S.Properties.platform.life
                 #console.log "[PlatformBehaviour]: source", signal.source
                 @eventBus.trigger 'owner:platform', state.field.xy, signal.owner.id
 

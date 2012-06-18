@@ -1,8 +1,10 @@
 S = {}
 if require?
   S.Types = require '../config/Types'
+  S.Properties = require '../config/Properties'
   _ = require 'underscore'
 else
+  S.Properties = window.S.Properties
   S.Types = window.S.Types
   _ = window._
 
@@ -45,6 +47,7 @@ class ChannelBehaviour
             console.log "[ChannelBehaviour]: signal dealt damage, life is:", state.life
             if state.life <= 0
                 state.owner = signal.owner
+                state.life  = S.Properties.channel.life
                 #console.log "[ChannelBehaviour]: source", signal.source
                 @eventBus.trigger 'owner:channel', state.fields, signal.source.fields, signal.owner.id
 

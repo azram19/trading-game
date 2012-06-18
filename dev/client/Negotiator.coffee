@@ -26,13 +26,15 @@ class Negotiator
     @on 'owner:channel', (dest, src, ownerid) ->
       #console.debug 'owner:channel', xy, dir, state.owner
       field = (_.intersection dest, src)[0]
-      console.log "NEG: field", field, dest, src
-      if not (field.platform.type?)
-        @renderer.captureOwnership field.xy[0], field.xy[1], ownerid
+      field2 = (_.difference dest, src)[0]
+      #console.log "NEG: field", field, dest, src
+      @renderer.captureOwnership field.xy[0], field.xy[1], ownerid, true
+      if not (field2.platform.type?)
+        @renderer.captureOwnership field2.xy[0], field2.xy[1], ownerid, false
 
     @on 'owner:platform', (xy, ownerid) ->
       #console.debug 'owner:platform', xy, state
-      @renderer.captureOwnership xy[0], xy[1], ownerid
+      @renderer.captureOwnership xy[0], xy[1], ownerid, true
 
     @on 'player:lost', (player) ->
       #console.debug 'lost', player
@@ -89,8 +91,8 @@ class Negotiator
       @renderer.addPlayer playerObject.id
       HQ = S.ObjectFactory.build S.Types.Entities.Platforms.HQ, @, playerObject
       HQ.state = HQState
-
-      @game.addPlayer playerObject
+      HQ.state.owner = playerObject
+      @game.addPlayer playerObject, position
       @game.addHQ HQ, position
       [x,y] = position
       @renderer.buildPlatform x, y, HQ
@@ -110,12 +112,18 @@ class Negotiator
         _.extend field.platform.state.routing, routing
 
     @communicator.on 'state:sync', (players, startingPoints, state) =>
-      @game.players = players
-      @game.startingPonts = startingPoints
       @game.map.importGameState state
+      for id, player of players
+        pObject = S.ObjectFactory.build S.Types.Entities.Player, null, null
+        myPlayer = _.extend pObject, player
+        @game.players[id] = myPlayer
+      for i, point of startingPoints
+        [x,y] = point
+        field = @getField x, y
+        @game.map.fields[y][x].platform.state.owner = @game.players[(+i)]
+      @game.startingPoints = startingPoints
+      @game.startGame()
       @renderer.setupBoard @game.map
-      #$.when( @terrain.isReady() ).done =>
-        #@terrain.setupBoard @game.map
 
     @communicator.on 'players:all:ready', =>
       console.log '[Negotiator] all players loaded'
@@ -231,19 +239,20 @@ class Negotiator
     channel = S.ObjectFactory.build S.Types.Entities.Channel, @, owner
     @game.map.addChannel channel, x, y, k
     @renderer.buildChannel x, y, k, channel
-    #@renderer.changeOwnership x, y, owner.id
+    @renderer.changeOwnership x, y, owner.id
     [x2 ,y2] = @game.map.directionModificators(x, y, k)
-    #@terrain.generateRoad x, y, x2, y2
-    field = @game.map.getField(x2,y2)
-    plOwner = field.platform?.state?.owner.id
     nK = (k + 3) % 6
-    for k in [0..5]
-      if k isnt nK and field.channels[k]?.state?
-        chOwner = field.channels[k]?.state?.owner.id
-        break
-    console.log "[NEGOTIATOR]: ownership clause", plOwner, owner.id, not (plOwner?), chOwner?, owner.id, not (chOwner?)
-    if (plOwner is owner.id) or (not (plOwner?) and chOwner? is owner.id) or (not (chOwner?))
-        @renderer.changeOwnership x2, y2, owner.id
+    @renderer.buildChannel x2, y2, nK, channel
+    #@terrain.generateRoad x, y, x2, y2
+    #field = @game.map.getField(x2,y2)
+    #plOwner = field.platform?.state?.owner.id  
+    #for k in [0..5]
+    #  if k isnt nK and field.channels[k]?.state?
+    #    chOwner = field.channels[k]?.state?.owner.id
+    #    break
+    #console.log "[NEGOTIATOR]: ownership clause", plOwner, owner.id, not (plOwner?), chOwner?, owner.id, not (chOwner?)
+    #if (plOwner is owner.id) or (not (plOwner?) and chOwner? is owner.id) or (not (chOwner?))
+    #    @renderer.changeOwnership x2, y2, owner.id
 
   nonUserId: ( user ) ->
     @game.map.nonUser.id

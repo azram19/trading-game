@@ -150,7 +150,7 @@ class Communicator
         startingPoints = game.startingPoints
         hashOwn.update JSON.stringify(startingPoints), 'ascii'
         hashOwn = hashOwn.digest 'base64'
-        console.log '[Communicator]', hashOwn
+        console.log '[Communicator] game hash - ', name, hashOwn
         if hash isnt hashOwn
           socket.emit 'state:sync', game.players, game.startingPoints, state
 

@@ -10,27 +10,11 @@ class GameServer
 
   constructor: ->
     @games = {}
+    createdGame = @createGame 0
+    @games[createdGame.name] = createdGame
     @playersGame = {}
     @gameInstances = {}
     _.extend @, Backbone.Events
-
-    @enforceAvailableGames()
-
-  enforceAvailableGames: ->
-    presentGames = _.chain(@games).map( (game) ->
-      maxPlayers = game.typeData.numberOfSides * game.typeData.playersOnASide
-      players = _.keys(game.players).length
-      [game.type, maxPlayers is players]
-    ).filter( (game) ->
-      not game[1]
-    ).map((game) ->
-      game[0]
-    ).value()
-    (
-      if not (type in presentGames)
-        createdGame = @createGame type
-        @games[createdGame.name] = createdGame
-    ) for type, info of S.Types.Games.Info
 
   createGame: ( type ) ->
     id = _.uniqueId()
@@ -74,26 +58,35 @@ class GameServer
       @gameInstances[name] = instance
     @gameInstances[name]
 
-  joinGame: ( name, user ) ->
-    game = @games[name]
-    if not (game.players[user]?)
+  joinGame: ( user ) ->
+    gameToJoin = null
+    for name, game of @games
       maxPlayers = game.typeData.numberOfSides * game.typeData.playersOnASide
       numberPlayers = _.keys(game.players).length
       if numberPlayers < maxPlayers
-        console.log '[Game Server] user: ' + user + ' joined ' + name
-        playerObject = S.ObjectFactory.build S.Types.Entities.Player, user
-        position = game.typeData.startingPoints[numberPlayers]
-        instance = @getGameInstance name
-        game.players[user] =
-          ready: false
-          playerObject: playerObject
-          position: position
-        @playersGame[user] = game
-        HQ = S.ObjectFactory.build S.Types.Entities.Platforms.HQ, @, playerObject
-        @trigger 'player:joined', game.name, playerObject, position, HQ.state
-        @trigger 'update:lobby:game', @games[name]
-        instance.addPlayer playerObject, position
-        instance.addHQ HQ, position
+        gameToJoin = game
+    if not (gameToJoin?)
+      createdGame = @createGame 0
+      @games[createdGame.name] = createdGame
+      gameToJoin = createdGame
+
+    numberPlayers =  _.keys(gameToJoin.players).length
+    name = gameToJoin.name
+    console.log '[Game Server] user: ' + user + ' joined ' + name
+    playerObject = S.ObjectFactory.build S.Types.Entities.Player, user
+    position = gameToJoin.typeData.startingPoints[numberPlayers]
+    instance = @getGameInstance name
+    gameToJoin.players[user] =
+      ready: false
+      playerObject: playerObject
+      position: position
+    @playersGame[user] = gameToJoin
+    HQ = S.ObjectFactory.build S.Types.Entities.Platforms.HQ, @, playerObject
+    @trigger 'player:joined', gameToJoin.name, playerObject, position, HQ.state
+    @trigger 'update:lobby:game', @games[name]
+    instance.addPlayer playerObject, position
+    instance.addHQ HQ, position
+    name
 
   setUserReady: ( userId ) ->
     game = @getUserGame userId
@@ -133,7 +126,6 @@ class GameServer
     instance = @gameInstances[game]
     field = instance.map.getField x, y
     _.extend field.platform.state.routing, routing
-    console.log '[GameServer] setting new routing', routing
     @trigger 'routing:changed', game, x, y, routing, owner
 
 module.exports = exports = GameServer
