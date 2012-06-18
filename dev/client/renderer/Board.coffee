@@ -144,8 +144,10 @@ class BoardDrawer extends Drawer
 
         @visibility = []
         @ownership = []
+        @roads = []
 
         @elements = {}
+        @owner = {}
         @fog = {}
 
         @bitmaps = []
@@ -191,6 +193,10 @@ class BoardDrawer extends Drawer
         @fog[x] ?= []
         @fog[x][y] = e
 
+    addOwner: (x, y, e) ->
+        @owner[x] ?= []
+        @owner[x][y] = e
+
     addPlayer: (player) ->
         @players.push player
 
@@ -203,6 +209,7 @@ class BoardDrawer extends Drawer
     clearData: () ->
         @visibility = []
         @ownership = []
+        @roads = []
         @elements = {}
         @fog = {}
 
@@ -217,23 +224,35 @@ class BoardDrawer extends Drawer
     buildChannel: (x, y, direction, ownerid) ->
         point = @getPoint(x, y)
         @addElement x, y, @drawChannel(point, direction)
-        #if @fogON
-        #    @setVisibility [x, y], true, ownerid
-        #@updateAll()
-        @channelsST.updateCache()
-        @channelsST.update()
+        if @fogON
+            @setVisibility [x, y], true, ownerid
+        @updateAll()
+        #@channelsST.updateCache()
+        #@channelsST.update()
         #console.log "[BOARD]:visibility, ownership", @visibility, @ownership
 
-    captureOwnership: (x, y, ownerid) ->
+    captureOwnership: (x, y, ownerid, status) ->
         point = @getPoint(x, y)
-        @addElement x, y, @drawOwnership(point, ownerid)
-        if @fogON
-            @setVisibility [x, y], false, ownerid
+        if status
+            @addOwner x, y, @drawOwnership(point, ownerid)
+            if ownerid is @myPlayer.id and not (@contains @ownership, point)
+                @ownership.push point
+            else
+                @ownership = @without @ownership, point
+            if @fogON
+                @setVisibility [x, y], false, ownerid
+        else
+            if ownerid is @myPlayer.id
+                if @fogON
+                    @setVisibility [x, y], false, ownerid
+            else
+                @ownership = @without @ownership, point
+            @owner[x][y].visibility = false
         @updateAll()
 
     changeOwnership: (x, y, ownerid) ->
         point = @getPoint(x, y)
-        @addElement x, y, @drawOwnership(point, ownerid)
+        @addOwner x, y, @drawOwnership(point, ownerid)
         if @fogON
             @setVisibility [x, y], true, ownerid
         @updateAll()
@@ -355,28 +374,28 @@ class BoardDrawer extends Drawer
         if @elements[point[0]]?[point[1]]?
                 for elem in @elements[point[0]][point[1]]
                     elem.visible = status
+        if @owner[point[0]]?[point[1]]?
+            @owner[point[0]][point[1]].visible = status
 
     setVisibility: (point, status, ownerid) ->
         array = []
         for i in [0..6]
             array.push (@modifyCoords point[0], point[1], i)
         if ownerid is @myPlayer.id
-            #cl = @difference array.slice(0), @visibility
-            #console.log "BOARD:DIFFERENCE", array, array.length, @visibility, @visibility.length
             for p in array
                 @setFog p, false
                 @setElements p, true
             @visibility = @union @visibility, array
-            if not (@contains @ownership, point)
-                @ownership.push point
+            if not (@contains @roads, point)
+                @roads.push point
         else
             if status
                 for p in array
                     if @contains @visibility, p
                         @setElements p, true
             else
-                @ownership = @without @ownership, point
-                @visibility = @getVisibility @ownership
+                @roads = @without @roads, point
+                @visibility = @getVisibility @roads
                 @setElements point, true
                 for p in (@difference array, @visibility)
                     @setFog p, true
@@ -403,23 +422,29 @@ class BoardDrawer extends Drawer
     setupPlatform: (point, x, y, field) ->
         if field.platform.type?
             @addElement x, y, @drawPlatform point, field.platform.type()
-            if field.platform.type() is S.Types.Entities.Platforms.HQ and not (@contains @ownership, [x, y])
-                ownerid = field.platform.state.owner.id
-                @addElement x, y, @drawOwnership point, ownerid
-                if ownerid is @myPlayer.id
+            ownerid = field.platform.state.owner.id
+            @addOwner x, y, @drawOwnership point, ownerid
+            if ownerid is @myPlayer.id 
+                if not (@contains @ownership, [x, y])
                     @ownership.push [x, y]
+                if not (@contains @roads, [x,y])
+                    @roads.push [x,y]
 
     setupChannels: (point, x, y, field) ->
+        ownerIDs = []
         for k in [0..5]
             channel = field.channels[k]
             if channel?
                 @addElement x, y, @drawChannel(point, k)
-                newCoords = @modifyCoords x, y, k
-                if not (@contains @ownership, newCoords)
-                    ownerid = channel.state.owner.id
-                    @addElement newCoords[0], newCoords[1], @drawOwnership @getDestination(point,k), ownerid
-                    if ownerid is @myPlayer.id
-                        @ownership.push newCoords
+                ownerIDs = @union ownerIDs, [channel.state.owner.id]
+        console.log "OWNER IDS", x, y, ownerIDs, field.channels
+        if _.keys(field.channels).length >= 2 and ownerIDs.length is 1
+            @addOwner x, y, @drawOwnership point, ownerIDs[0]
+            if not (@contains @ownership, [x, y]) and @contains ownerIDs, @myPlayer.id
+                @ownership.push [x,y]
+        if _.keys(field.channels).length >= 1 and not (@contains @roads, [x,y])
+            if @contains ownerIDs, @myPlayer.id
+                @roads.push [x,y]
 
     setupBoard: (boardState) ->
         for j in [0 ... (2*@diffRows + 1)]
@@ -432,7 +457,8 @@ class BoardDrawer extends Drawer
 
     toogleFog: (status) ->
         if status
-            @visibility = @getVisibility @ownership
+            @visibility = @getVisibility @roads
+            console.log "BLALADL", @visibility, @roads
             for point in @visibility
                 @setFog point, false
                 @setElements point, true
