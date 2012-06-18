@@ -19,16 +19,10 @@ class MapHelper extends S.Drawer
 
     _.extend @, Backbone.Events
 
-    @overlay = new Shape()
-    @overlay.graphics
-      .beginFill( "rgba(0,0,0,0.4)" )
-      .drawRect( 0, 0, @cwidth, @cheight )
-      .endFill()
-    #@overlay.cache 0, 0, @cwidth, @cheight
+    @$overlay = $( @canvas ).css
+      background: "rgba(0,0,0,0.7)"
 
-    @stage.addChild @overlay
-
-    @overlay.visible = false
+    @$overlay.hide()
 
     @fieldsObjs = {}
 
@@ -175,18 +169,7 @@ class MapHelper extends S.Drawer
             @accept io, jo, 0
 
           generateArguments: ( io, jo, i, j, k ) ->
-            field = @currentMenu.obj
-
-            if field.platform.type?
-              owner = field.platform.state.owner
-
-            if not owner?
-              (
-                owner = channel.state.owner
-                break
-              ) for id, channel of field.channels
-
-            [io, jo, S.Types.Entities.Platforms.Normal, owner]
+            [io, jo, S.Types.Entities.Platforms.Normal, undefined]
         channel:
           show: ( io, jo ) ->
             for z in [0...6]
@@ -294,7 +277,6 @@ class MapHelper extends S.Drawer
       hex = h
     else
       hex = new Shape()
-      #hex.cache 0, 0, @size, @size
 
     g = hex.graphics
     g.clear()
@@ -308,6 +290,8 @@ class MapHelper extends S.Drawer
     hex.x = p.x
     hex.y = p.y
 
+    hex.cache(-@horIncrement, -@size, (@distance), (@size)*2)
+
     hex.onMouseOver = () => @overField i, j, k
     hex.onMouseOut = () => @outField i, j, k
     hex.onClick = () => @clickField i, j, k
@@ -319,7 +303,6 @@ class MapHelper extends S.Drawer
       triangle = tr
     else
       triangle = new Shape()
-      #triangle.cache 0, 0, @size, @size
 
     g = triangle.graphics
     g.clear()
@@ -340,6 +323,8 @@ class MapHelper extends S.Drawer
       .closePath()
       .endFill()
       .endStroke()
+
+    triangle.cache(-@horIncrement, -@size, (@distance), (@size)*2)
 
     triangle.x = p.x
     triangle.y = p.y
@@ -385,6 +370,8 @@ class MapHelper extends S.Drawer
       .endFill()
       .endStroke()
 
+    halfHex.cache(-@horIncrement, -@size, (@distance), (@size)*2)
+
     halfHex.x = p.x
     halfHex.y = p.y
 
@@ -395,13 +382,13 @@ class MapHelper extends S.Drawer
     halfHex
 
   showOverlay: () ->
-    @overlay.visible = true
+    @$overlay.show()
 
     $( @canvas ).css
       'z-index': 20
 
   hideOverlay: () ->
-    @overlay.visible = false
+    @$overlay.hide()
 
     $( @canvas ).css
       'z-index': 7
