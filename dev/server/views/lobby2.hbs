@@ -57,7 +57,7 @@
                 {{#each games}}
                   {{#with this}}
                     <div class='row-fluid'>
-                      <div class='span6 game'>
+                      <div class='span12 game'>
                           <div class='name'>
                             <h3>{{name}}</h3>
                             <span>
@@ -70,12 +70,14 @@
                             </span>
                           </div>
                       </div>
-                      <div class='span6 options'>
-                        <a class='btn playBtn' data-id='{{name}}' href='/game/{{name}}/join'>Play</a>
-                      </div>
                     </div>
                   {{/with}}
                 {{/each}}
+                <div class='row-fluid'>
+                  <div class='span12 options'>
+                    <a class='btn playBtn' data-id='{{name}}' href='/game/join'>Play</a>
+                  </div>
+                </div>
               </div>
             </div>
           </div>

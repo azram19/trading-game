@@ -42,12 +42,11 @@ app.get '/lobby2', ( req, res ) ->
       title: 'Signals - lobby'
       bodyClass: 'lobby'
 
-app.get '/game/:gameName/join', ( req, res ) ->
+app.get '/game/join', ( req, res ) ->
   if app.requireAuth and req.loggedIn
     #Get player and game details
     player = req.user.id
-    gameName = req.params.gameName
-    app.gameServer.joinGame gameName, player
+    gameName = app.gameServer.joinGame player
     res.redirect '/game/' + gameName
   else
     res.redirect '/'
