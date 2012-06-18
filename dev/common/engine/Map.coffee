@@ -6,7 +6,6 @@ if require?
   S.ObjectFactory = require '../config/ObjectFactory'
   S.Types = require '../config/Types'
   S.HeightMap = require './HeightMap'
-  cloneextend = require 'cloneextend'
 else
   _ = window._
   S.Field = window.S.Field
