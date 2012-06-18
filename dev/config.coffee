@@ -74,7 +74,11 @@ module.exports = ( app, express ) ->
       else
         url = "https://www.googleapis.com/plus/v1/people/#{ user.id }?fields=image(url)&key=#{ app.googleApiKey }"
         extractImgSrc = ( error, response, dataObj ) ->
-          src = JSON.parse( dataObj ).image?.url
+          obj = JSON.parse( dataObj ).image
+          if obj? and obj.url?
+            src = obj.url
+          else
+            src = ''
           defer.resolve src
 
         request.get( url, extractImgSrc )
