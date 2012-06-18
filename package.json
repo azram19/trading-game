@@ -21,6 +21,7 @@
     "docco" : "0.3.0",
     "mongoose" : "2.5.10",
     "promised-io" : "0.3.0",
-    "request" : "2.9.202"
+    "request" : "2.9.202",
+    "cloneextend" : "0.0.3"
   }
 }

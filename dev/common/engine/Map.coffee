@@ -6,12 +6,15 @@ if require?
   S.ObjectFactory = require '../config/ObjectFactory'
   S.Types = require '../config/Types'
   S.HeightMap = require './HeightMap'
+  cloneextend = require 'cloneextend'
+  util = require 'util'
 else
   _ = window._
   S.Field = window.S.Field
   S.ObjectFactory = window.S.ObjectFactory
   S.Types = window.S.Types
   S.HeightMap = window.S.HeightMap
+  cloneextend = window.cloneextend
 
 class Map
 
@@ -277,7 +280,6 @@ class Map
     routingAddChannel = (x, y, k) =>
       if @fields[y][x].platform.type?
         nK = (k + 3) % 6
-        platform = @fields[y][x].platform
         @fields[y][x].platform.state.routing[k].object = channel
         channel.trigger 'route'
         channel.state.routing[nK].object = @fields[y][x].platform
@@ -323,34 +325,29 @@ class Map
       if _.keys(field.channels).length > 0
         _.each field.channels, (channel, direction) =>
           if not (_.isEmpty channel)
-            channels[direction] = _.clone channel.state
-            channels[direction] = @clearRoutingObjects _.clone(channel.state)
-            channels[direction].fields = _.clone channel.state.fields
-            channels[direction].fields = []
-            signals = channels[direction].signals.slice()
-            channels[direction].signals = []
-            for signal, i in signals
+            newChannel = cloneextend.cloneuptolevel channel.state, 4
+            for dir, route of newChannel.routing
+              newChannel.routing[dir].object = {}
+            newChannel.fields = []
+            for signal, i in newChannel.signals
               signal.source.field = {}
               signal.events = {}
-              channels[direction].signals.push signal
+            channels[direction] = newChannel
           else
             channels[direction] = {}
 
       platform = {}
       if field.platform.type?
-        platform = _.clone field.platform.state
-        platform = @clearRoutingObjects _.clone(platform)
+        platform = cloneextend.cloneuptolevel field.platform.state, 3
+        for dir, route of platform.routing
+          platform.routing[dir].object = {}
         platform.field = {}
-        signals = platform.signals.slice()
-        platform.signals = []
-        for signal, i in signals
+        for signal in platform.signals
           signal.source.field = {}
           signal.events = {}
-          platform.signals.push signal
       resource = {}
       if field.resource.type?
-        resource = _.clone field.resource.state
-        resource = @clearRoutingObjects _.clone(resource)
+        resource = cloneextend.cloneuptolevel field.resource.state, 3
         resource.field = {}
       terrain = field.terrain
       exportState =
@@ -361,18 +358,15 @@ class Map
       gameState[y][x] = exportState
     gameState
 
-  clearRoutingObjects: (state) ->
-    if state?
-      routing = _.clone state.routing
-      for route of routing
-        route.object = {}
-      state.routing = routing
-    state
-
   importGameState: ( gameState ) ->
     @heightMap = new S.HeightMap @heightMapSize+1
 
     @heightMap.map = gameState.heightMap
+    initializeField = ( o, x, y ) =>
+      @fields[y][x] = new S.Field(x, y)
+      #console.log x + " " + y + ":field"
+
+    @iterateFields initializeField
 
     @iterateFields ( field, x, y ) =>
       newField = gameState[y][x]

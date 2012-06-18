@@ -24,9 +24,9 @@ class GameManager
     @startingPoints[playerObject.id] = position
 
   startGame: ->
-    @map.iterateFields ( o ) ->
+    @map.iterateFields ( o, x, y ) ->
       if o.platform.type?
-        o.platform.produce()
+        o.platform.trigger 'produce'
         o.platform.trigger 'route'
       for dir, channel of o.channels
         if channel?
