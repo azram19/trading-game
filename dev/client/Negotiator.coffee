@@ -6,6 +6,11 @@ class Negotiator
     @game = {}
     @renderer = {}
 
+    window.loader = @loader = new S.Loader()
+    @loader.start()
+
+    @loading = new $.Deferred()
+
     @on 'move:signal', (xy, dir) ->
       #console.debug 'move:signal', xy, dir
       @renderer.moveSignal xy[0], xy[1], dir
@@ -39,9 +44,13 @@ class Negotiator
 
     @on 'resource:receive', (xy, amount, type) ->
       p = @ui.getPoint xy[0], xy[1]
-      @ui.showTextBubble "+#{amount}", p.x+40, p.y+20
-      @ui.showResources()
-      #console.debug xy, amount, type
+
+      name = S.Types.Resources.Names[type-6]
+      @myPlayer.resources[name] += amount
+
+      @ui.showTextBubble "+#{amount} #{name}", p.x+40, p.y+20
+      @ui.showResources amount, type
+
 
     @on 'build:platform', (x, y, type, owner) =>
       @buildPlatform x, y, type, owner
@@ -188,17 +197,27 @@ class Negotiator
 
   setupUI: ->
     [minWidth, maxWidth] = @game.getDimensions()
-    window.ui = @ui =  new S.UIClass @, minWidth, maxWidth
-    window.t = @terrain = new S.Terrain @, 'background', minWidth, maxWidth
+    @ui =  new S.UIClass @, minWidth, maxWidth
+    @terrain = new S.Terrain @, 'background', minWidth, maxWidth
     @renderer = new S.Renderer @, minWidth, maxWidth, _.pluck(@game.players, 'id'), @myPlayer
+
+    @loader.register @terrain.loading.promise(), 400
+    @loader.register @renderer.loading.promise(), 100
+    @loader.register @loading.promise(), 100
+
     $.when(@renderer.boardLoaded.promise()).done =>
+      @renderer.loading.notify 50
+
       @renderer.setupBoard @game.map
 
-      terrain = @terrain
+      @renderer.loading.notify 50
 
-      terrain.draw()
-      #$.when( terrain.isReady() ).done =>
-        #terrain.setupBoard.call terrain, @game.map
+      @terrain.draw()
+
+      @renderer.loading.notify 500
+
+      @ui.start()
+
 
 
   buildPlatform: ( x, y, type, owner ) ->

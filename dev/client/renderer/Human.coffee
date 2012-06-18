@@ -19,6 +19,8 @@ class Human
     @distance = 0
 
 
+    @hideAtTheEnd = true
+
     @catchUpDistance = 0
     @catchUpVX = 0
     @catchUpVY = 0
@@ -79,6 +81,8 @@ class Human
       @animation = new BitmapAnimation @spriteSheet
       @stage.addChild @animation
 
+      Ticker.addListener @
+
   clear: () ->
 
   walk: ( i, j, i2, j2, k ) ->
@@ -96,13 +100,13 @@ class Human
 
       @animation.gotoAndPlay "walk" + k
 
-      turns = (@timeForAWalk / 90)
+      turns = @timeForAWalk/(1000/Ticker.getMeasuredFPS())
 
       dx = p2.x - p1.x
       dy = p2.y - p1.y
 
-      @vx = dx/turns
-      @vy = dy/turns
+      @vx = Math.round dx/turns
+      @vy = Math.round  dy/turns
 
       @distance += @walkDistance
 
@@ -139,6 +143,8 @@ class Human
       @visible = true
 
       @animation.gotoAndStop "stand" + k
+
+      @stage.update()
 
   tick: () ->
     if @move

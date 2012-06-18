@@ -349,7 +349,7 @@ class BoardDrawer extends Drawer
     setFog: (point, status) ->
         if @fog[point[0]]?[point[1]]?
             @fog[point[0]][point[1]].visible = status
-            
+
     setElements: (point, status) ->
         console.log "[Board]: elements", @elements, point, status
         if @elements[point[0]]?[point[1]]?
@@ -505,7 +505,7 @@ class SignalsDrawer extends Drawer
     constructor: (@eventBus, @stage, @offStage, minRow, maxRow, @boardDR, @players) ->
         super minRow, maxRow
         @offSignals = new OffSignals @offStage, @players
-        @people = new S.People @eventBus,
+        window.p = @people = new S.People @eventBus,
             distance: 80
             time: S.Properties.channel.delay
 
@@ -552,6 +552,7 @@ class SignalsDrawer extends Drawer
             @stage.update()
 
     tick: () ->
+        ###
         for signal in @stage.children
             if signal.isSignal and signal.isVisible
                 signal.visible = true
@@ -561,6 +562,7 @@ class SignalsDrawer extends Drawer
                     signal.x += signal.tickSizeX
                     signal.y += signal.tickSizeY
                     signal.k += 1
+        ###
         @fpsLabel.text = Math.round(Ticker.getMeasuredFPS())+" fps"
         @stage.update()
 
@@ -577,6 +579,8 @@ class Renderer
         canvasBitmaps = document.getElementById "bitmaps"
         @bitmaps = ["/img/Food.png", "/img/Gold.png", "/img/hq.png", "/img/iron.png", "/img/platform.png", "/img/road.png"]
         @boardLoaded = $.Deferred()
+
+        @loading = $.Deferred()
 
         if canvasOwnership?
             @ownershipST = new Stage canvasOwnership
@@ -655,8 +659,9 @@ class Renderer
 
     # moves signal from field (x,y) in particular direction
     moveSignal: (x, y, direction) ->
-        @signalsDR.createSignal(x, y, direction)
-        #@signalsDR.drawWorker(x, y, direction)
+        #@signalsDR.createSignal(x, y, direction)
+        @signalsDR.drawWorker(x, y, direction)
+
     # builds a channel at field (x,y) in given direction
     buildChannel: (x, y, direction, channel) ->
         @boardDR.buildChannel(x, y, direction, channel.state.owner.id)

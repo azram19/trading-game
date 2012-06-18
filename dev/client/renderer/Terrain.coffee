@@ -18,6 +18,8 @@ class Terrain extends S.Drawer
     @n = 1
     @bitmaps = {}
 
+    @loading = new $.Deferred()
+
     @heightMap = @events.game.map.heightMap
     @shadowMap = []
     @blendMasks = {}
@@ -840,13 +842,23 @@ class Terrain extends S.Drawer
 
     @n = n
 
+    @loading.notify 100
+
     @stage.update()
 
     @hitHexMap.visible = false
 
     @events.game.map.smoothenTheTerrain(32)
+
+    @loading.notify 100
+
     @applyHeightMap()
+
+    @loading.notify 150
+
     @generateSurroundingWater()
+
+    @loading.notify 50
 
     @stage.update()
 

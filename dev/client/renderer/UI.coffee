@@ -1,7 +1,7 @@
 class UI extends S.Drawer
   constructor: ( @events, @minRow, @maxRow ) ->
-    canvas = document.getElementById "UI"
-    @stage = new Stage canvas
+    @canvas = document.getElementById "UI"
+    @stage = new Stage @canvas
     @stage.autoclear = false
 
     super @minRow, @maxRow
@@ -17,20 +17,66 @@ class UI extends S.Drawer
 
     @resourcesTemplate = Handlebars.templates.resources
 
-    $(canvas).bind "contextmenu", @handleClick
-    $(this).bind "contextmenu", ( e ) ->
+    @resizeViewport()
+
+  start: () =>
+    viewportHeight = window.innerHeight
+    viewportWidth = window.innerWidth - 200
+
+    #start scroller
+    @mousedown = false
+
+    @events.trigger 'resize', viewportWidth, viewportHeight
+
+    scrollerDown = ( e ) =>
+      @scroller.doTouchStart([{
+            pageX: e.pageX
+            pageY: e.pageY
+        }], e.timeStamp)
+
+      @mousedown = true
+
+    scrollerMove = ( e ) =>
+      if not @mousedown
+            return
+
+      @scroller.doTouchMove([{
+          pageX: e.pageX
+          pageY: e.pageY
+      }], e.timeStamp)
+
+      @mousedown = true
+
+    scrollerUp = ( e ) =>
+      if not @mousedown
+        return
+
+      @scroller.doTouchEnd(e.timeStamp)
+
+      @mousedown = false
+
+    @canvasContainer.get()[0].addEventListener("mousedown", scrollerDown , false)
+    document.addEventListener("mousemove", scrollerMove, false)
+    document.addEventListener("mouseup", scrollerUp, false)
+
+
+    #Initialize menus
+    @curMenu = null
+    @menuHelper = new S.MapHelper @events, @minRow, @maxRow
+
+    #ShowResources
+    @showResources()
+
+    #Bind events
+    $(@canvas).bind "contextmenu", @handleClick
+    $(window).bind "contextmenu", ( e ) ->
       e.preventDefault()
 
     $( window ).resize @resizeViewport
 
-    @resizeViewport()
-
-    @curMenu = null
-    @menuHelper = new S.MapHelper @events, @minRow, @maxRow
-
+    #Start listening to the ticker
     Ticker.addListener @
 
-    @showResources()
 
   getLoadingStage: ( @loading ) ->
   setLoadingStage: ( @loading ) ->
@@ -166,48 +212,6 @@ class UI extends S.Drawer
     }
     @scroller.setDimensions viewportWidth, viewportHeight, @canvasDimensions.x, @canvasDimensions.y
 
-    @mousedown = false
-
-    @events.trigger 'resize', viewportWidth, viewportHeight
-
-    scrollerDown = ( e ) =>
-      @scroller.doTouchStart([{
-            pageX: e.pageX
-            pageY: e.pageY
-        }], e.timeStamp)
-
-      @mousedown = true
-
-    scrollerMove = ( e ) =>
-      if not @mousedown
-            return
-
-      @scroller.doTouchMove([{
-          pageX: e.pageX
-          pageY: e.pageY
-      }], e.timeStamp)
-
-      @mousedown = true
-
-    scrollerUp = ( e ) =>
-      if not @mousedown
-        return
-
-      @scroller.doTouchEnd(e.timeStamp)
-
-      @mousedown = false
-
-
-    #scrollerDownThr = _.throttle scrollerDown, 50
-    #scrollerMoveThr = _.throttle scrollerMove, 100
-    #scrollerUpThr = _.throttle scrollerUp, 50
-
-    @canvasContainer.get()[0].addEventListener("mousedown", scrollerDown , false)
-
-    document.addEventListener("mousemove", scrollerMove, false)
-
-    document.addEventListener("mouseup", scrollerUp, false)
-
 
   scroll: (x, y) =>
     @scrollX = x
@@ -228,18 +232,20 @@ class UI extends S.Drawer
         )
     )
 
-  showResources: () ->
-    if @$html?
-      @$html.remove()
-
+  showResources: ( amount, type ) ->
     resources = @events.myPlayer.resources
-    resources = _.map resources, (v, k) ->
+
+    if not @$html?
+      resources = _.map resources, (v, k) ->
         name : k
         value: v
-
-    html = @resourcesTemplate resources: resources
-
-    @$html = $( html ).appendTo '#canvasWrapper'
+      html = @resourcesTemplate resources: resources
+      @$html = $( html ).appendTo '#canvasWrapper'
+    else
+      name = S.Types.Resources.Names[type-6]
+      value = resources[name]
+      console.log "[UI] resources", amount, type, value, name
+      @$html.find( ".res-#{name}" ).html( name + " : " + value )
 
   createMenu: (i, j) ->
     p = @getPoint i, j
