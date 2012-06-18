@@ -296,7 +296,9 @@ class UI extends S.Drawer
         @getWithoutPrefix( submenuName, menuStructure ),
         submenuName,
         menuStructure,
-        menuValidFields
+        menuValidFields,
+        i,
+        j,
 
       menu.addChild subMenu
     ) for submenuName in submenuNames
@@ -304,9 +306,10 @@ class UI extends S.Drawer
     menu.setActionHelper @menuHelper
 
     if menuSpDisplay?
-      console.log menuSpDisplay
       displayHelper = new S.MenuDisplayHelper( @events, menuSpDisplay, menu, i, j, p.x, p.y )
+
       menu.setDisplayHelper displayHelper
+      displayHelper.start()
 
     menu.setObj obj
     menu.setRoot menu
@@ -315,16 +318,19 @@ class UI extends S.Drawer
 
   #name of the event element, eventsStructure - Types.Events sub object
   #eventsStructure [a:b:c] ...
-  buildMenu: ( name, eventsStructure, menuStructure, fullname, fullStructure, validFields ) =>
+  buildMenu: ( name, eventsStructure, menuStructure, fullname, fullStructure, validFields, i, j ) =>
+    p = @getPoint i, j
 
     stName = name[0].toUpperCase() + name[1..]
 
     title = eventsStructure[stName].title
     desc = eventsStructure[stName].desc
+    price = eventsStructure[stName].cost
+
+    console.log name, stName, price, fullname, eventsStructure
 
     title ?= ""
     desc ?= ""
-
 
     eventsStructure = eventsStructure[stName]
     submenuNames = @getPrefixes menuStructure
@@ -332,6 +338,13 @@ class UI extends S.Drawer
     if desc.length > 0 or not submenuNames.length
       m = new S.RadialMenu @events, @stage.canvas, 0, 0, title, desc
       m.setEvent fullname
+
+      if price?
+        displayHelper = new S.MenuDisplayHelper( @events, 'price', m, i, j, p.x, p.y )
+        displayHelper.setData price
+
+        m.setDisplayHelper displayHelper
+        displayHelper.start()
 
       index = _.indexOf fullStructure, fullname
       m.setValidFields validFields[index]
@@ -346,7 +359,9 @@ class UI extends S.Drawer
           @getWithoutPrefix( submenuName, menuStructure ),
           fullname + ':' + submenuName,
           fullStructure,
-          validFields
+          validFields,
+          i,
+          j
 
         m.addChild subMenu
       ) for submenuName in submenuNames

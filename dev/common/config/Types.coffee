@@ -56,8 +56,15 @@ Types =
         title: 'build'
         Channel:
           title: 'channel'
+          cost:
+            Gold: 100
+            Food: 40
         Platform:
           title: 'platform'
+          cost:
+            Gold: 400
+            Food: 300
+
     Games:
       FFA:
         Number2: 0

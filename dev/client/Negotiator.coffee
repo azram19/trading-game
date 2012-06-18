@@ -55,12 +55,40 @@ class Negotiator
 
 
     @on 'build:platform', (x, y, type, owner) =>
-      @buildPlatform x, y, type, owner
-      @communicator.trigger 'send:build:platform', x, y, type, owner
+      p = @ui.getPoint x, y
+
+      cost = S.Types.Events.Build.Channel.cost
+      userHas = @myPlayer.resources
+
+      canAfford = _.all cost, ( v, k ) ->
+        userHas[k] > v
+
+      if canAfford
+        _.each cost, ( v, k ) ->
+          userHas[k] -= v
+
+        @buildPlatform x, y, type, owner
+        @communicator.trigger 'send:build:platform', x, y, type, owner
+      else
+        @ui.showTextBubble "Not enough resources", p.x+40, p.y+20, color: color: [159, 17, 27, 1]
 
     @on 'build:channel', (x, y, k, owner) =>
-      @buildChannel x, y, k, owner
-      @communicator.trigger 'send:build:channel', x, y, k, owner
+      p = @ui.getPoint x, y
+
+      cost = S.Types.Events.Build.Channel.cost
+      userHas = @myPlayer.resources
+
+      canAfford = _.all cost, ( v, k ) ->
+        userHas[k] > v
+
+      if canAfford
+        _.each cost, ( v, k ) ->
+          userHas[k] -= v
+
+        @buildChannel x, y, k, owner
+        @communicator.trigger 'send:build:channel', x, y, k, owner
+      else
+        @ui.showTextBubble "Not enough resources", p.x+40, p.y+20, color: color: [159, 17, 27, 1]
 
     @on 'routing', (obj, routing) =>
       _.extend obj.platform.state.routing, routing
@@ -248,7 +276,7 @@ class Negotiator
     @renderer.buildChannel x2, y2, nK, channel
     #@terrain.generateRoad x, y, x2, y2
     #field = @game.map.getField(x2,y2)
-    #plOwner = field.platform?.state?.owner.id  
+    #plOwner = field.platform?.state?.owner.id
     #for k in [0..5]
     #  if k isnt nK and field.channels[k]?.state?
     #    chOwner = field.channels[k]?.state?.owner.id
