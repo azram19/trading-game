@@ -1,7 +1,7 @@
 $ ->
   if $('#main.lobby2').length > 0
     communicator = new S.Communicator()
-    messages = new S.Collections.Messages([{'author':'pies','message':'asdasd'}])
+    messages = new S.Collections.Messages()
     lobby = new S.Views.LobbyView
       communicator: communicator
       collection: messages

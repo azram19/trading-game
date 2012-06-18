@@ -5,11 +5,9 @@ class LobbyView extends Backbone.View
   initialize: ->
     @communicator = @options.communicator
 
-    #Get temaplates
+    #Get templates
     @messageTemplate = Handlebars.templates['lobbyMessage']
     @messagesTemplate = Handlebars.templates['lobbyMessages']
-    #@gamesTemplate = Handlebars.templates['lobbyGames']
-    #@gameTemplate = Handlebars.template['lobbyGame']
 
     #Bind to changes and update the view
     @collection.bind 'add', @addMessage
@@ -35,7 +33,6 @@ class LobbyView extends Backbone.View
   #Add new message to the chat
   addMessage: ( model ) =>
     msg = model.toJSON()
-    console.log "[Chat] New message", msg
 
     msg = @messageTemplate msg
     $( '#chat ul' ).append msg
@@ -58,6 +55,13 @@ class LobbyView extends Backbone.View
     console.log "[Lobby] friends", friends
 
     friends.push @user
+    friends = _.map friends, ( o ) ->
+      if o.highscore?
+        o
+      else
+        o.highscore = 0
+        o
+
     friends = _.sortBy friends, ( o ) -> o.highscore
 
     maxScore = friends[0].highscore
@@ -68,12 +72,14 @@ class LobbyView extends Backbone.View
     scale = (maxScore + minScore) / 10
 
     now = maxScore
-    groups = {}
-    group = 10
+    groups = []
+    group = 1
 
-    groups[10] =
-      class: 10
-      users: []
+    for i in [0..10]
+      groups.push {
+        class: i
+        users: []
+      }
 
     (
       #prepare object
@@ -85,32 +91,32 @@ class LobbyView extends Backbone.View
           groups[group].users.push f
       else
         #fix the group index
-        m = Math.floor (now - f.fighscore)/scale
+        m = Math.floor (now - f.highscore)/scale
         now = now - m*scale
-        group -= m
+        group += m
 
-        #create new group and add user
-        groups[group] =
-          class: group
-          users: []
+        if group > 10
+          group = 10
+
+        console.log group
 
         groups[group].users.push f
     ) for f in friends
 
-    if groups[10].users.length == 0
-      delete groups[10]
+    groups = _.map groups, ( group ) ->
+      if group.users.length > 3
+        group.users = group.users.splice 0, 3
+      group
 
     scoreTemplate = Handlebars.templates.highscoreTicker
     html = scoreTemplate groups: groups
 
-    console.log html, maxScore, groups
+    console.log maxScore, groups
 
-    $( ".ranking ul" ).html html
+    $( ".ranking" ).html html
     $( ".userScore" ).html maxScore
 
   handleChat: ( messages ) =>
-    console.log "[Lobby] chat ", messages
-
     if messages.length? and messages.length > 0
       msgs = ((
         msg.author = msg.sender.name
@@ -120,12 +126,10 @@ class LobbyView extends Backbone.View
       @collection.reset msgs
 
   handleNewGame: ( data ) =>
-    console.log 'Lobby: New game has been created'
     game = new S.Models.Game data
     @games.add game
 
   handleServerMessage: ( data ) =>
-    console.log "Lobby: Server message"
     msg = new S.Models.Message data
     @collection.add msg
 
