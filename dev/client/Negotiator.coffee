@@ -112,7 +112,9 @@ class Negotiator
         _.extend field.platform.state.routing, routing
 
     @communicator.on 'state:sync', (players, startingPoints, state) =>
+      console.log '[Negotiator] importing map state', state
       @game.map.importGameState state
+      console.log '[Negotiator] after import', @game.map
       for id, player of players
         pObject = S.ObjectFactory.build S.Types.Entities.Player, null, null
         myPlayer = _.extend pObject, player
@@ -122,7 +124,7 @@ class Negotiator
         field = @getField x, y
         @game.map.fields[y][x].platform.state.owner = @game.players[(+i)]
       @game.startingPoints = startingPoints
-      @game.startGame()
+      #@game.startGame()
       @renderer.setupBoard @game.map
 
     @communicator.on 'players:all:ready', =>
@@ -189,13 +191,14 @@ class Negotiator
 
     requestSync = =>
       mapState = JSON.stringify @game.map.extractGameState()
+      console.log '[Negotiator] successfully converted map state'
       players = JSON.stringify @game.players
       startingPoints = JSON.stringify @game.startingPoints
       shaObj = new jsSHA mapState + players + startingPoints, 'ASCII'
       hash = shaObj.getHash "SHA-512", "B64"
       @communicator.trigger 'get:state:sync', @gameInfo.name, hash
 
-    #@syncID = setInterval requestSync, 11*1000
+    @syncID = setInterval requestSync, 11*1000
 
   #setScroll: ( x, y ) ->
     #@renderer.setScroll x, y

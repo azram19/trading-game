@@ -370,7 +370,7 @@ class BoardDrawer extends Drawer
             @fog[point[0]][point[1]].visible = status
 
     setElements: (point, status) ->
-        console.log "[Board]: elements", @elements, point, status
+        #console.log "[Board]: elements", @elements, point, status
         if @elements[point[0]]?[point[1]]?
                 for elem in @elements[point[0]][point[1]]
                     elem.visible = status
@@ -437,7 +437,7 @@ class BoardDrawer extends Drawer
             if channel?
                 @addElement x, y, @drawChannel(point, k)
                 ownerIDs = @union ownerIDs, [channel.state.owner.id]
-        console.log "OWNER IDS", x, y, ownerIDs, field.channels
+        #console.log "OWNER IDS", x, y, ownerIDs, field.channels
         if _.keys(field.channels).length >= 2 and ownerIDs.length is 1
             @addOwner x, y, @drawOwnership point, ownerIDs[0]
             if not (@contains @ownership, [x, y]) and @contains ownerIDs, @myPlayer.id
@@ -726,42 +726,3 @@ class Renderer
 
 window.S.Drawer = Drawer
 window.S.Renderer = Renderer
-
-#----------------------------------------#
-#--------For test purposes only---------#
-###
-player = ObjectFactory.build Types.Entities.Player
-manager = new GameManager Backbone.Events, [player], [[2,2]], 8, 15
-state = manager.map
-console.log state
-
-channelStat =
-    state: {
-        owner:
-            id: 1
-    }
-    platform: {
-        type: () -> 8
-        behaviour:
-            platformType: {}
-        state:
-            owner:
-                id: 1
-        }
-
-window.channelStat = channelStat
-window.state = state
-
-
-$ ->
-    #if $('#radial').length <= 0
-        #renderer = new Renderer 8, 15
-        #renderer.setupBoard(state)
-        #window.renderer = renderer
-        #for y in [0..4]
-                #for x in [0..4]
-                    #renderer.moveSignal y, x, 2
-        #renderer.buildChannel 2, 2, 3, channelStat
-        #renderer.buildChannel 3, 3, 3, channelStat
-        #renderer.buildChannel 4, 4, 5, channelStat
-###
