@@ -6,7 +6,6 @@ if require?
   S.ObjectFactory = require '../config/ObjectFactory'
   S.Types = require '../config/Types'
   S.HeightMap = require './HeightMap'
-  util = require 'util'
 else
   _ = window._
   S.Field = window.S.Field
@@ -322,34 +321,36 @@ class Map
       gameState[y] ?= {}
       channels = {}
       if _.keys(field.channels).length > 0
-        _.each field.channels, (channel, direction) ->
+        _.each field.channels, (channel, direction) =>
           if not (_.isEmpty channel)
-            channels[direction] = channel.state
+            channels[direction] = _.clone channel.state
+            channels[direction] = @clearRoutingObjects _.clone(channel.state)
+            channels[direction].fields = _.clone channel.state.fields
+            channels[direction].fields = []
+            signals = channels[direction].signals.slice()
+            channels[direction].signals = []
+            for signal, i in signals
+              signal.source.field = {}
+              signal.events = {}
+              channels[direction].signals.push signal
           else
             channels[direction] = {}
-        #console.log '[Map] channel states', util.inspect(channels, false, 5)
-        (
-          if channels[dir]?
-            channels[dir] = @clearRoutingObjects channel
-            channels[dir].fields = []
-            for signal, i in channels[dir].signals
-              if channels[dir].signals[i]?
-                channels[dir].signals[i].source.field = {}
-                channels[dir].signals[i].events = {}
-                #console.log '[Map] specific channel', dir, channel
-        ) for dir, channel of channels
-        #console.log '[Map] channel dump after extraction', util.inspect(channels, false, 5)
+
       platform = {}
       if field.platform.type?
-        platform =  @clearRoutingObjects _.clone(field.platform.state)
+        platform = _.clone field.platform.state
+        platform = @clearRoutingObjects _.clone(platform)
         platform.field = {}
-        for signal, i in platform.signals
-          if platform.signals[i]?
-            platform.signals[i].source.field = {}
-            platform.signals[i].events = {}
+        signals = platform.signals.slice()
+        platform.signals = []
+        for signal, i in signals
+          signal.source.field = {}
+          signal.events = {}
+          platform.signals.push signal
       resource = {}
       if field.resource.type?
         resource = _.clone field.resource.state
+        resource = @clearRoutingObjects _.clone(resource)
         resource.field = {}
       terrain = field.terrain
       exportState =
@@ -362,9 +363,10 @@ class Map
 
   clearRoutingObjects: (state) ->
     if state?
-      (
-        state.routing[dest].object = {}
-      ) for dest, route of state.routing
+      routing = _.clone state.routing
+      for route of routing
+        route.object = {}
+      state.routing = routing
     state
 
   importGameState: ( gameState ) ->
@@ -373,35 +375,25 @@ class Map
     @heightMap.map = gameState.heightMap
 
     @iterateFields ( field, x, y ) =>
-      field = gameState[y][x]
-      @addTerrain field.terrain, x, y
+      newField = gameState[y][x]
+      @addTerrain newField.terrain, x, y
       #console.log x, y
-      if field.platform.id?
+      if newField.platform.id?
         #console.log 'platform'
-        platform = S.ObjectFactory.build field.platform.type, @eventBus, {}
-        platform.state = _.extend platform.state, field.platform
+        platform = S.ObjectFactory.build newField.platform.type, @eventBus, {}
+        _.extend platform.state, newField.platform
         @addPlatform platform, x, y
-      if field.resource.id?
+      if newField.resource.id?
         #console.log 'resource'
-        resource = S.ObjectFactory.build field.resource.type, @eventBus, {}
-        resource.state = _.extend resource.state, field.resource
+        resource = S.ObjectFactory.build newField.resource.type, @eventBus, {}
+        _.extend resource.state, newField.resource
         @addResource resource, x, y
       (
         newChannel = S.ObjectFactory.build channel.type, @eventBus, {}
-        newChannel.state = _.extend newChannel.state, channel
+        _.extend newChannel.state, channel
         @addChannel newChannel, x, y, (+direction)
-      ) for direction, channel of field.channels
+      ) for direction, channel of newField.channels
     null
-
-  dump: ->
-    print = ( o, x, y ) ->
-      if o.resource.type?
-        console.log x + " " + y + " res"
-      if o.platform.type?
-        console.log x + " " + y + " " + o.platform.type()
-      o
-
-    @iterateFields print
 
   getChannel: (x, y, k) ->
     field = @getField x, y

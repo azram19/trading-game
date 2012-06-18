@@ -61,7 +61,8 @@ class PlatformBehaviour
           _.each state.routing, (route, direction) -> if route.out and route.object?.type?
               availableRoutes.push [route, direction]
           if availableRoutes.length > 0
-              destNum = Math.ceil(Math.random()*100)%availableRoutes.length
+              destNum = state.routeCounter%availableRoutes.length
+              state.routeCounter++
               destination = availableRoutes[destNum]
               #console.log "[PlatformBehaviour]: availableRoutes", availableRoutes
               origOwner = signal.owner

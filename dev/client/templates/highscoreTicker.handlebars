@@ -1,0 +1,12 @@
+{{#each groups}}
+	<div class='row-fluid pos{{this.class}}'>
+		{{#each this.users}}
+			<div class='span4'>
+				<div class='avatar'>
+        	<img src='{{this.imgsrc}}'/>
+      	</div>
+      <div class='name'>{{this.firstname}}</div>
+			</div>
+		{{/each}}
+	</div>
+{{/each}}

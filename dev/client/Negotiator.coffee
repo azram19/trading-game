@@ -82,8 +82,8 @@ class Negotiator
       @renderer.addPlayer playerObject.id
       HQ = S.ObjectFactory.build S.Types.Entities.Platforms.HQ, @, playerObject
       HQ.state = HQState
-
-      @game.addPlayer playerObject
+      HQ.state.owner = playerObject
+      @game.addPlayer playerObject, position
       @game.addHQ HQ, position
       [x,y] = position
       @renderer.buildPlatform x, y, HQ
@@ -103,10 +103,19 @@ class Negotiator
         _.extend field.platform.state.routing, routing
 
     @communicator.on 'state:sync', (players, startingPoints, state) =>
-      @game.players = players
-      @game.startingPonts = startingPoints
       @game.map.importGameState state
+      for id, player of players
+        pObject = S.ObjectFactory.build S.Types.Entities.Player, null, null
+        myPlayer = _.extend pObject, player
+        @game.players[id] = myPlayer
+      for i, point of startingPoints
+        [x,y] = point
+        field = @getField x, y
+        @game.map.fields[y][x].platform.state.owner = @game.players[(+i)]
+      @game.startingPoints = startingPoints
+      @game.startGame()
       @renderer.setupBoard @game.map
+
       #$.when( @terrain.isReady() ).done =>
         #@terrain.setupBoard @game.map
 
@@ -180,7 +189,7 @@ class Negotiator
       hash = shaObj.getHash "SHA-512", "B64"
       @communicator.trigger 'get:state:sync', @gameInfo.name, hash
 
-    #@syncID = setInterval requestSync, 11*1000
+      #@syncID = setInterval requestSync, 11*1000
 
   #setScroll: ( x, y ) ->
     #@renderer.setScroll x, y
@@ -195,9 +204,7 @@ class Negotiator
     @renderer = new S.Renderer @, minWidth, maxWidth, _.pluck(@game.players, 'id'), @myPlayer
     $.when(@renderer.boardLoaded.promise()).done =>
       @renderer.setupBoard @game.map
-
       terrain = @terrain
-
       terrain.draw()
       #$.when( terrain.isReady() ).done =>
         #terrain.setupBoard.call terrain, @game.map

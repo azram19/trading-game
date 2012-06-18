@@ -81,21 +81,21 @@ defaultRoute =
     out: true
 
 deepClone =  (obj, deep) ->
-      return obj  if not _.isObject(obj) or _.isFunction(obj)
-      return new Date(obj.getTime())  if _.isDate(obj)
-      return new RegExp(obj.source, obj.toString().replace(/.*\//, ""))  if _.isRegExp(obj)
-      isArr = (_.isArray(obj) or _.isArguments(obj))
-      if deep
-        func = (memo, value, key) ->
-          if isArr
-            memo.push deepClone(value, true)
-          else
-            memo[key] = deepClone(value, true)
-          memo
-
-        _.reduce obj, func, (if isArr then [] else {})
+  return obj  if not _.isObject(obj) or _.isFunction(obj)
+  return new Date(obj.getTime())  if _.isDate(obj)
+  return new RegExp(obj.source, obj.toString().replace(/.*\//, ""))  if _.isRegExp(obj)
+  isArr = (_.isArray(obj) or _.isArguments(obj))
+  if deep
+    func = (memo, value, key) ->
+      if isArr
+        memo.push deepClone(value, true)
       else
-        (if isArr then slice.call(obj) else _.extend({}, obj))
+        memo[key] = deepClone(value, true)
+      memo
+
+    _.reduce obj, func, (if isArr then [] else {})
+  else
+    (if isArr then slice.call(obj) else _.extend({}, obj))
 
 ( (
     Properties[field].routing[i] = deepClone defaultRoute, true

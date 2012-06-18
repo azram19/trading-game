@@ -19,8 +19,8 @@ class ObjectState
         # Routing table for given object
         @routing = {}
         (@routing[i] =
-            in: true
-            out: true
+            in: false
+            out: false
             object: null) for i in [0..5]
         # Amount of time each signal must wait at the platform before being routed
         @delay = 1000
@@ -30,6 +30,7 @@ class ObjectState
         @capacity = 10
         # Either life of the object or amount of resources held
         @life = 100
+        @routeCounter = 0
 
 if module? and module.exports
   exports = module.exports = ObjectState
