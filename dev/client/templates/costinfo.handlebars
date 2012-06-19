@@ -1,0 +1,16 @@
+<div class='build-costinfo'>
+  <ul>
+    {{#each resources}}
+      {{#with this}}
+        <li>
+          <div class='img'>
+            <img src='/img/{{name}}.png'>
+          </div>
+          <div class='desc res-{{name}}'>
+            {{value}}
+          </div>
+        </li>
+      {{/with}}
+    {{/each}}
+  </ul>
+</div>

@@ -29,6 +29,9 @@ app.get '/lobby2', ( req, res ) ->
   if app.requireAuth and not req.loggedIn
     res.redirect '/'
   else
+    #history = app.getHistory req.user
+    #highscores = app.getHighscores()
+
     games = JSON.parse app.gameServer.getGames()
     games = _.map games, ( o ) ->
       o.playersConnected = ( _.flatten o.players ).length
@@ -42,6 +45,59 @@ app.get '/lobby2', ( req, res ) ->
       games: games
       title: 'Signals - lobby'
       bodyClass: 'lobby'
+      history:[
+        {name: "Piotr Bar"
+        result: "Won"},
+        {name: "Robert Kruszewski"
+        result: "Defeated"},
+        {name: "Łukasz Koprowski"
+        result: "Won"}
+      ]
+      highscores:[
+        {
+          position: 1
+          name: "Łukasz Koprowski"
+          points: 1234
+        },
+        {
+          position: 2
+          name: "Piotr Bar"
+          points: 1034
+        },
+        {
+          position:3
+          name: "Robert Kruszewski"
+          points: 1002
+        },
+        {
+          name: "Piotr Bar"
+          points: 1034
+        },
+        {
+          name: "Robert Kruszewski"
+          points: 1002
+        },
+        {
+          name: "Piotr Bar"
+          points: 1034
+        },
+        {
+          name: "Robert Kruszewski"
+          points: 1002
+        },
+        {
+          name: "Piotr Bar"
+          points: 1034
+        },
+        {
+          name: "Robert Kruszewski"
+          points: 1002
+        },
+        {
+          name: "Robert Kruszewski"
+          points: 1002
+        }
+      ]
 
 app.get '/game/join', ( req, res ) ->
   if app.requireAuth and req.loggedIn

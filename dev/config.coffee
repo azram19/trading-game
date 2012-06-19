@@ -42,16 +42,22 @@ module.exports = ( app, express ) ->
 
   app.Mongoose.model 'User', app.userSchema
 
-  app.historySchema = new Schema
-    players: [
+  app.historySchema = new Schema(
+    {
+      players: [
         type: Schema.ObjectId
         ref: 'User'
-    ]
-    winners: [
-        type: Schema.ObjectId
-        ref: 'User'
-    ]
-    channel: String
+      ]
+      winners: [
+          type: Schema.ObjectId
+          ref: 'User'
+      ]
+      channel: String
+    },
+    {
+      collection: 'history'
+    }
+  )
 
   app.Mongoose.model 'History', app.historySchema
 
@@ -64,6 +70,63 @@ module.exports = ( app, express ) ->
     channel: String
 
   app.Mongoose.model 'Chat', app.chatSchema
+
+  app.getHistory = ( user ) ->
+    defer = new Promise.Deferred()
+
+    console.log user
+
+    handleHistory = ( err, history ) =>
+      if err?
+        console.error "[Mongoose] Cannot fetch history"
+        console.log err
+        defer.reject err
+      else if history.length > 0
+        console.log history
+        history = _.map history, ( v, k ) ->
+          userInWinners = _.any history.winners, ( v ) ->
+            v.id == user.id
+
+          if userInWinners
+            v.win = true
+          else
+            v.win = false
+
+        console.log history
+        defer.resolve history
+      else
+        defer.resolve []
+
+    historyModel = app.Mongoose.model 'History'
+    historyModel
+      .where( user._id ).in( 'players' )
+      .populate( 'players winners' )
+      .run handleHistory
+
+    defer.promise
+
+  app.getHighscores = ->
+    defer = new Promise.Deferred()
+
+    handleHighscores = ( err, highscores ) =>
+      if err?
+        console.error "[Mongoose] Cannot fetch highscores"
+        console.log err
+        defer.reject err
+      else if highscores.length > 0
+        defer.resolve highscores
+      else
+        defer.resolve []
+
+    userModel = app.Mongoose.model 'User'
+    userModel
+      .find()
+      .desc( 'highscore' )
+      .limit( 10 )
+      .select( 'name highscore' )
+      .run handleHighscores
+
+    defer.promise
 
   app.getUserImgSrc = ( user ) ->
     defer = new Promise.Deferred()

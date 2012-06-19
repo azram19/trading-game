@@ -40,7 +40,7 @@
                   <a class="withTooltip" title="History" href="#history" data-toggle="tab"><i class="icon-book"></i></a>
                 </li>
                 <li>
-                 <a class="withTooltip" title="Highgscores" href="#highscrores" data-toggle="tab"><i class="icon-bar-chart"></i></a>
+                 <a class="withTooltip" title="Highgscores" href="#highscores" data-toggle="tab"><i class="icon-bar-chart"></i></a>
                 </li>
               </ul>
             </div>
@@ -48,10 +48,29 @@
           <div class='row-fluid'>
             <div class='span12 tab-content'>
               <div class='tab-pane' id='history'>
-
+                {{#each history}}
+                  {{#with this}}
+                    <div class='row-fluid'>
+                      <div class='span8 name'><span>vs</span> {{name}}</div>
+                      <div class='span4 status status-{{result}}'>{{result}}</div>
+                    </div>
+                  {{/with}}
+                {{/each}}
               </div>
               <div class='tab-pane' id='highscores'>
-
+                {{#each highscores}}
+                  {{#with this}}
+                    <div class='row-fluid'>
+                      <div class='span1 position'>
+                        {{#if position}}
+                          {{position}}.
+                        {{/if}}
+                      </div>
+                      <div class='span7 name'>{{name}}</div>
+                      <div class='span4 status'>{{points}}</div>
+                    </div>
+                  {{/with}}
+                {{/each}}
               </div>
               <div class='tab-pane active games' id='gameMenu'>
                 {{#each games}}

@@ -729,8 +729,6 @@ p {
     margin:0;
 
     li{
-      margin-bottom:20px;
-
       .img{
         display: inline-block;
         margin-right: 10px;
@@ -739,5 +737,118 @@ p {
         display:inline;
       }
     }
+  }
+}
+
+#timer{
+  z-index:9997;
+  position:absolute;
+  top:0;
+  left:50%;
+  margin-left:-200px
+}
+
+#history{
+  font-weight:bold;
+  line-height:36px;
+  font-size:24px;
+
+  .name{
+
+    span{
+      width:32px;
+      margin-right:10px;
+      font-size:16px;
+      text-align:center;
+      display:inline-block;
+    }
+  }
+  .status{
+    padding-left:20px;
+    text-align:center;
+
+    &.status-Won{
+      color:#FA6900;
+    }
+    &.status-Defeated{
+      color:#69D2E7;
+    }
+  }
+  & > div{
+    border-bottom: 1px rgba(0, 0, 0, 0.15) solid;
+    margin-bottom: 8px;
+    padding-bottom:9px;
+
+    &:last-child{
+      margin-bottom:0;
+      border-bottom:none;
+    }
+  }
+}
+
+#highscores{
+  font-weight:bold;
+  line-height:36px;
+  font-size:24px;
+
+  @step1colour: #FA6900;
+  @step2colour: #E97419;
+  @step3colour: #D98033;
+  @step4colour: #C98C4D;
+  @step5colour: #B99766;
+  @step6colour: #A9A380;
+  @step7colour: #99AF9A;
+  @step8colour: #89BAB3;
+  @step9colour: #79C6CD;
+  @step10colour: #69D2E7;
+
+  & > div{
+    border-bottom: 1px rgba(0, 0, 0, 0.15) solid;
+    margin-bottom: 8px;
+    padding-bottom:9px;
+
+    &:last-child{
+      margin-bottom:0;
+      border-bottom:none;
+    }
+
+    &:nth-child(1){
+      color:@step1colour;
+    }
+    &:nth-child(2){
+      color:@step2colour;
+    }
+    &:nth-child(3){
+      color:@step3colour;
+    }
+    &:nth-child(4){
+      color:@step4colour;
+    }
+    &:nth-child(5){
+      color:@step5colour;
+    }
+    &:nth-child(6){
+      color:@step6colour;
+    }
+    &:nth-child(7){
+      color:@step7colour;
+    }
+    &:nth-child(8){
+      color:@step8colour;
+    }
+    &:nth-child(9){
+      color:@step9colour;
+    }
+    &:nth-child(10){
+      color:@step10colour;
+    }
+  }
+
+  .status{
+    padding-left:20px;
+    text-align:center;
+  }
+  .position{
+    text-align:center;
   }
 }

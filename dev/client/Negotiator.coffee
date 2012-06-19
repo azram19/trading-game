@@ -1,13 +1,19 @@
 class Negotiator
 
   constructor: ( @communicator ) ->
+    self= @
+
     _.extend @, Backbone.Events
     @myPlayer = {}
     @game = {}
     @renderer = {}
 
     window.loader = @loader = new S.Loader()
-    @loader.start()
+    @timer = new S.Timer @
+    @timer.setTime 1200
+
+    $.when( @loader.start() ).then ->
+      self.timer.start()
 
     @loading = new $.Deferred()
 
@@ -42,7 +48,6 @@ class Negotiator
     @on 'resource:produce', (xy, amount, type) ->
       p = @ui.getPoint xy[0], xy[1]
       @ui.showTextBubble "-#{amount}",  p.x+40,  p.y+20
-      #console.debug xy, amount, type
 
     @on 'resource:receive', (xy, amount, type) ->
       p = @ui.getPoint xy[0], xy[1]
@@ -64,13 +69,17 @@ class Negotiator
         userHas[k] > v
 
       if canAfford
-        _.each cost, ( v, k ) ->
-          userHas[k] -= v
+        _.each cost, ( v, k ) =>
+          @myPlayer.resources[k] -= v
+          @ui.showTextBubble "-#{v} #{ k }", p.x+40, p.y+20
 
-        @buildPlatform x, y, type, owner
-        @communicator.trigger 'send:build:platform', x, y, type, owner
+        @buildPlatform x, y, type, @myPlayer
+        @communicator.trigger 'send:build:platform', x, y, type, @myPlayer
+
+        @ui.showResources 0, 6
+        @ui.showResources 0, 7
       else
-        @ui.showTextBubble "Not enough resources", p.x+40, p.y+20, color: color: [159, 17, 27, 1]
+        @ui.showTextBubble "Not enough resources", p.x+40, p.y+20, color: [159, 17, 27, 1]
 
     @on 'build:channel', (x, y, k, owner) =>
       p = @ui.getPoint x, y
@@ -82,13 +91,17 @@ class Negotiator
         userHas[k] > v
 
       if canAfford
-        _.each cost, ( v, k ) ->
-          userHas[k] -= v
+        _.each cost, ( v, k ) =>
+          @myPlayer.resources[k] -= v
+          @ui.showTextBubble "-#{v} #{ k }", p.x+40, p.y+20
 
-        @buildChannel x, y, k, owner
-        @communicator.trigger 'send:build:channel', x, y, k, owner
+        @buildChannel x, y, k, @myPlayer
+        @communicator.trigger 'send:build:channel', x, y, k, @myPlayer
+
+        @ui.showResources 0, 6
+        @ui.showResources 0, 7
       else
-        @ui.showTextBubble "Not enough resources", p.x+40, p.y+20, color: color: [159, 17, 27, 1]
+        @ui.showTextBubble "Not enough resources", p.x+40, p.y+20, color: [159, 17, 27, 1]
 
     @on 'routing', (obj, routing) =>
       _.extend obj.platform.state.routing, routing

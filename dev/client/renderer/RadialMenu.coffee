@@ -163,9 +163,6 @@ class RadialMenu
 
       $.when( helperPromise ).done () ->
         @executeAction.apply @, arguments
-
-      $.when( helperPromise ).fail () ->
-        null
     else
       @executeAction.call @, @event
 
