@@ -151,7 +151,9 @@ class Negotiator
       #@renderer.loading.notify 250
 
     @communicator.on 'foreign:build:platform', (x, y, type, owner) =>
+      console.log '[Negotiator] build platform ', owner.id, @myPlayer.id
       if owner.id isnt @myPlayer.id
+        console.log '[Negotiator] opponent built platform', x, y, type, owner
         @buildPlatform x, y, type, owner
 
     @communicator.on 'foreign:build:channel', (x, y, k, owner) =>
@@ -161,7 +163,10 @@ class Negotiator
     @communicator.on 'foreign:routing', (x, y, routing, owner) =>
       if owner.id isnt @myPlayer.id
         field = @getField x, y
-        _.extend field.platform.state.routing, routing
+        routes = field.platform.state.routing
+        for dir, route of routing
+          routes[dir].in = route.in
+          routes[dir].out = route.out
 
     @communicator.on 'state:sync', (players, startingPoints, state) =>
       console.log '[Negotiator] importing map state', state
@@ -203,8 +208,8 @@ class Negotiator
 
     getGame.done (game) =>
       console.log '[Negotiator] game: ', game
-      @timer.setTime game.time - Math.round(2 * @communicator.lag)
-      console.log game.time - Math.round(2 * @communicator.lag)
+      @timer.setTime game.time - Math.round(2 * (+@communicator.lag))
+      console.log game.time - Math.round(2 * (+@communicator.lag))
       @gameInfo = game
       playerObject = S.ObjectFactory.build S.Types.Entities.Player
       @myPlayer = @gameInfo.players[@user.id].playerObject
