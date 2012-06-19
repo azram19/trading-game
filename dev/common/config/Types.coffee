@@ -42,8 +42,8 @@ Types =
             "Food"
         ]
         Amounts: [
-            200
-            300
+            1000
+            1000
         ]
         Lifes: [
             -> Math.round((Math.random() * 2000 % 760) + 500)
@@ -63,7 +63,7 @@ Types =
           title: 'platform'
           cost:
             Gold: 400
-            Food: 300
+            Food: 200
 
     Games:
       FFA:

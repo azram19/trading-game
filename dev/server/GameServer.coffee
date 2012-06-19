@@ -16,6 +16,8 @@ class GameServer
     @gameInstances = {}
     _.extend @, Backbone.Events
 
+    setInterval @tick, 1000
+
   createGame: ( type ) ->
     id = _.uniqueId()
     game =
@@ -23,6 +25,8 @@ class GameServer
       players: {}
       type: type
       typeData: S.Types.Games.Info[type]
+      time: 900
+      started: false
 
   getGames: ->
     JSON.stringify @games
@@ -39,7 +43,7 @@ class GameServer
     verIncrement = Math.ceil 3*S.Types.UI.Size/2
     diffRows = game.typeData.maxWidth - game.typeData.minWidth
     distance = 2*horIncrement
- 
+
     x = 2*(margin-horIncrement) + maxRow * distance + margin
     y = (margin+size) + (diffRows * 2 + 1) * verIncrement + margin
     [x, y]
@@ -96,9 +100,19 @@ class GameServer
       if _.all _.pluck( game.players, 'ready' ), _.identity
         @startGame game.name
 
+  tick: () =>
+    _.each @games, ( game ) ->
+      if game.started
+        game.time--
+
+        if game.time <= 0
+          @trigger 'time:out', game
+
   startGame: ( name ) ->
     @trigger 'all:ready', name
     @getGameInstance(name).startGame()
+
+    @games[name].started = true
 
   directionGet: (user, x1, y1, x2, y2) ->
     game = @playersGame[user.userId]

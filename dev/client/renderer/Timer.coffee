@@ -9,11 +9,11 @@ class Timer
     @counter.textAlign = "center"
     @counter.color = "#fff"
     @counter.font = "bold 32px 'Cabin', Helvetica,Arial,sans-serif"
-    @counter.x = 200
-    @counter.y = 50
+    @counter.x = 100
+    @counter.y = 25
 
-    canvas = document.getElementById 'timer'
-    @stage = new Stage canvas
+    @canvas = document.getElementById 'timer'
+    @stage = new Stage @canvas
     @stage.addChild @counter
 
   setTime: ( time ) ->
@@ -26,6 +26,8 @@ class Timer
     @started = false
 
   endOfTime: () ->
+    $( @canvas ).remove()
+    @stage.removeAllChildren()
     @events.trigger "time:out"
 
   draw: () ->

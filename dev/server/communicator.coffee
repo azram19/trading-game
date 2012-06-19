@@ -116,6 +116,10 @@ class Communicator
         @app.saveChatMessage data
         socket.broadcast.to( client.getChannel() ).emit 'message:new', data
 
+      socket.on 'sync:time', ( userId ) =>
+        game = @app.gameServer.getUserGame userId
+        socket.emit 'time:sync', game.time
+
       socket.on 'get:user:game', ( userId ) =>
         game = @app.gameServer.getUserGame userId
         socket.emit 'user:game', game

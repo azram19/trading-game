@@ -16,7 +16,7 @@ class Player
     @resources[S.Types.Resources.Names[s.type-6]] += s.strength
 
   spendResources: ( t, x ) ->
-    if @resources[t] > x
+    if @resources[t] >= x
       @resources[t] -= x
       true
     else

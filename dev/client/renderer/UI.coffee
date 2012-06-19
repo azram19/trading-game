@@ -81,6 +81,10 @@ class UI extends S.Drawer
   getLoadingStage: ( @loading ) ->
   setLoadingStage: ( @loading ) ->
 
+  gameOver: () ->
+    $( '<div id="gameover"><h1>Game Over</h1></div>' )
+      .appendTo( '#canvasWrapper' )
+
   showTextBubble: ( text, x, y, options ) ->
     config =
       vy: 100

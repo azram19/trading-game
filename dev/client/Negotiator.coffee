@@ -10,7 +10,7 @@ class Negotiator
 
     window.loader = @loader = new S.Loader()
     @timer = new S.Timer @
-    @timer.setTime 1200
+    @timer.setTime 900
 
     $.when( @loader.start() ).then ->
       self.timer.start()
@@ -48,6 +48,9 @@ class Negotiator
     @on 'player:lost', (player) ->
       #console.debug 'lost', player
 
+    @on 'time:out', () ->
+      @ui.gameOver()
+
     @on 'resource:produce', (xy, amount, type) ->
       p = @ui.getPoint xy[0], xy[1]
       @ui.showTextBubble "-#{amount}",  p.x+40,  p.y+20
@@ -69,12 +72,14 @@ class Negotiator
       userHas = @myPlayer.resources
 
       canAfford = _.all cost, ( v, k ) ->
-        userHas[k] > v
+        userHas[k] >= v
 
       if canAfford
+        i = 0
         _.each cost, ( v, k ) =>
-          @myPlayer.resources[k] -= v
-          @ui.showTextBubble "-#{v} #{ k }", p.x+40, p.y+20
+          @myPlayer.spendResources k, v
+          @ui.showTextBubble "-#{v} #{ k }", p.x+40, p.y+20+i*20
+          i++
 
         @buildPlatform x, y, type, @myPlayer
         @communicator.trigger 'send:build:platform', x, y, type, @myPlayer
@@ -91,12 +96,14 @@ class Negotiator
       userHas = @myPlayer.resources
 
       canAfford = _.all cost, ( v, k ) ->
-        userHas[k] > v
+        userHas[k] >= v
 
       if canAfford
+        i = 0
         _.each cost, ( v, k ) =>
-          @myPlayer.resources[k] -= v
-          @ui.showTextBubble "-#{v} #{ k }", p.x+40, p.y+20
+          @myPlayer.spendResources k, v
+          @ui.showTextBubble "-#{v} #{ k }", p.x+40, p.y+20+i*20
+          i++
 
         @buildChannel x, y, k, @myPlayer
         @communicator.trigger 'send:build:channel', x, y, k, @myPlayer
@@ -195,6 +202,8 @@ class Negotiator
 
     getGame.done (game) =>
       console.log '[Negotiator] game: ', game
+      @timer.setTime game.time - Math.round(2 * @communicator.lag)
+      console.log game.time - Math.round(2 * @communicator.lag)
       @gameInfo = game
       playerObject = S.ObjectFactory.build S.Types.Entities.Player
       @myPlayer = @gameInfo.players[@user.id].playerObject
@@ -205,6 +214,9 @@ class Negotiator
 
     @communicator.on 'user', ( user ) =>
       getUser.resolve user
+
+    @communicator.on 'time:sync', ( time ) =>
+      @timer.setTime time - 2 * @communicator.lag
 
     @communicator.on 'user:game', (game) =>
       getGame.resolveWith @, [game]
@@ -232,6 +244,7 @@ class Negotiator
 
   startGame: ->
     @game.startGame()
+    @communicator.trigger 'sync:time', @user.id
 
     requestSync = =>
       mapState = JSON.stringify @game.map.extractGameState()
