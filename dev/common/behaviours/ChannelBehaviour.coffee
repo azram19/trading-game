@@ -49,7 +49,10 @@ class ChannelBehaviour
                 state.owner = signal.owner
                 state.life  = S.Properties.channel.life
                 #console.log "[ChannelBehaviour]: source", signal.source
-                @eventBus.trigger 'owner:channel', state.fields, signal.source.fields, signal.owner.id
+                if signal.source.type is S.Types.Entities.Channel
+                  @eventBus.trigger 'owner:channel', state.fields, signal.source.fields, signal.owner.id
+                else
+                  @eventBus.trigger 'owner:channel', state.fields, [signal.source.field], signal.owner.id
 
     route: ( state, ownObject ) ->
       signal = ownObject.state.signals.shift()

@@ -269,7 +269,7 @@ class BoardDrawer extends Drawer
                     @setVisibility [x, y], false, ownerid
                 else
                     @ownership = @without @ownership, point
-                @owner[x][y].visible = false
+                @owner[x][y] = null
         @updateAll()
 
     changeOwnership: (x, y, ownerid) ->
