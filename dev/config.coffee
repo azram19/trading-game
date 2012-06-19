@@ -27,41 +27,41 @@ module.exports = ( app, express ) ->
   ObjectId = Schema.ObjectId
   app.Mongoose.connect app.mongoURL
   app.Mongoose.connection.on 'open', ->
-      console.log '[Mongoose] connected to MongoLab'
+    console.log '[Mongoose] connected to MongoLab'
 
   app.userSchema = new Schema
-        name: String
-        userName: String
-        id:
-          type: String
-          index:
-            unique: true
-        type: String
-        highscore: Number
-        imgsrc: String
+    name: String
+    userName: String
+    id:
+      type: String
+      index:
+        unique: true
+    type: String
+    highscore: Number
+    imgsrc: String
 
   app.Mongoose.model 'User', app.userSchema
 
   app.historySchema = new Schema
-        players: [
-            type: Schema.ObjectId
-            ref: 'User'
-        ]
-        winners: [
-            type: Schema.ObjectId
-            ref: 'User'
-        ]
-        channel: String
+    players: [
+        type: Schema.ObjectId
+        ref: 'User'
+    ]
+    winners: [
+        type: Schema.ObjectId
+        ref: 'User'
+    ]
+    channel: String
 
   app.Mongoose.model 'History', app.historySchema
 
   app.chatSchema = new Schema
-        sender:
-            type: Schema.ObjectId
-            ref: 'User'
-        time: String
-        content: String
-        channel: String
+    sender:
+        type: Schema.ObjectId
+        ref: 'User'
+    time: String
+    content: String
+    channel: String
 
   app.Mongoose.model 'Chat', app.chatSchema
 
@@ -180,7 +180,7 @@ module.exports = ( app, express ) ->
         promise.fail err
 
       if doc?
-          promise.fulfill doc
+        promise.fulfill doc
 
       else
         newUser = new userModel()

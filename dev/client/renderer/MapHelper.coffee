@@ -189,16 +189,7 @@ class MapHelper extends S.Drawer
             field = @currentMenu.obj
             k = @getK io, jo, i, j
 
-            if field.platform.type?
-              owner = field.platform.state.owner
-
-            if not owner?
-              (
-                owner = channel.state.owner
-                break
-              ) for id, channel of field.channels
-
-            [field.xy[0], field.xy[1], k, owner]
+            [field.xy[0], field.xy[1], k, undefined]
 
           over: ( i, j, k ) ->
             color = "rgba(255,255,255,0.8)"

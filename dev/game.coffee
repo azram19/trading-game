@@ -31,12 +31,13 @@ app.get '/lobby2', ( req, res ) ->
   else
     games = JSON.parse app.gameServer.getGames()
     games = _.map games, ( o ) ->
-       o.playersConnected = ( _.flatten o.players ).length
-       o.playersRequried =
-         o.typeData.numberOfSides *
-         o.typeData.playersOnASide
+      o.playersConnected = ( _.flatten o.players ).length
+      o.playersRequried =
+        o.typeData.numberOfSides *
+        o.typeData.playersOnASide
 
-       o
+      o
+
     res.render 'lobby2',
       games: games
       title: 'Signals - lobby'
@@ -59,19 +60,19 @@ app.get '/game/:gameName', ( req, res ) ->
     if game.name isnt req.params.gameName
       res.redirect '/game/' + game.name
     else
-     res.render 'board',
-       x: x
-       y: y
+      res.render 'board',
+        x: x
+        y: y
   else
     res.redirect '/'
 
 app.get '/', ( req, res ) ->
-    if app.requireAuth and req.loggedIn
-      res.redirect 'lobby2'
-    else
-      res.render 'index',
-        title: 'Signals'
-        bodyClass: 'entrance'
+  if app.requireAuth and req.loggedIn
+    res.redirect 'lobby2'
+  else
+    res.render 'index',
+      title: 'Signals'
+      bodyClass: 'entrance'
 
 port =  process.env.PORT || process.env['PORT_WWW']  || 3000
 

@@ -146,6 +146,9 @@ class RadialMenu
 
     null
 
+  setPrice: ( price ) ->
+    @price = price
+
   setDisplayHelper: ( displayHelper ) ->
     @displayHelper = displayHelper
 
@@ -284,6 +287,7 @@ class RadialMenu
 
     $( @canvas ).unbind "contextmenu", ( e ) ->
       e.preventDefault()
+
     Ticker.removeListener @
 
   drawButtonOrange: ( button ) ->
@@ -457,6 +461,8 @@ class RadialMenu
       @showing = false
       @visible = true
       @$title.visible = true
+      if @displayHelper
+        @displayHelper.show()
     else
       @steps--
       @x += @stepX
