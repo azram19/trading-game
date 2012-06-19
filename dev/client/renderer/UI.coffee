@@ -258,8 +258,8 @@ class UI extends S.Drawer
     mine = _.find listOfOwnership, ( v ) ->
       [i2, j2] = v
       i2 == i and j2 == j
-
-    if not menuInfo? or not mine?
+    console.log "CHUJEMUJE", @events.renderer.boardDR.owner[i]?[j]?, @events.renderer.boardDR.ownership
+    if not menuInfo? or not mine? or (@events.renderer.boardDR.owner[i]?[j]? and not @contains @events.renderer.boardDR.ownership, [i,j])
       return
 
     console.log "[UI]", i, j, menuInfo, obj
