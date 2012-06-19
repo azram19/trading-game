@@ -68,7 +68,7 @@ class Negotiator
     @on 'build:platform', (x, y, type, owner) =>
       p = @ui.getPoint x, y
 
-      cost = S.Types.Events.Build.Channel.cost
+      cost = S.Types.Events.Build.Platform.cost
       userHas = @myPlayer.resources
 
       canAfford = _.all cost, ( v, k ) ->
