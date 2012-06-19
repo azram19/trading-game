@@ -59,7 +59,6 @@ class Negotiator
       p = @ui.getPoint xy[0], xy[1]
 
       name = S.Types.Resources.Names[type-6]
-      @myPlayer.resources[name] += amount
 
       @ui.showTextBubble "+#{amount} #{name}", p.x+40, p.y+20
       @ui.showResources amount, type
@@ -151,9 +150,7 @@ class Negotiator
       #@renderer.loading.notify 250
 
     @communicator.on 'foreign:build:platform', (x, y, type, owner) =>
-      console.log '[Negotiator] build platform ', owner.id, @myPlayer.id
       if owner.id isnt @myPlayer.id
-        console.log '[Negotiator] opponent built platform', x, y, type, owner
         @buildPlatform x, y, type, owner
 
     @communicator.on 'foreign:build:channel', (x, y, k, owner) =>
@@ -189,8 +186,11 @@ class Negotiator
       @startGame()
 
     initiate = new $.Deferred()
+    uiLoaded = new $.Deferred()
 
-    $.when(initiate.promise()).done(@setupUI).then( =>
+    $.when(initiate.promise()).done( @setupUI uiLoaded )
+
+    $.when(uiLoaded.promise()).done( =>
       console.log 'UI has been loaded'
       @communicator.trigger 'set:user:ready', @user.id
     )
@@ -207,9 +207,11 @@ class Negotiator
       @communicator.trigger 'get:user:game', @user.id
 
     getGame.done (game) =>
-      console.log '[Negotiator] game: ', game
-      @timer.setTime game.time - Math.round(2 * (+@communicator.lag))
-      console.log game.time - Math.round(2 * (+@communicator.lag))
+      lag = 0
+      if @communicator.lag?
+        lag = (+@communicator.lag)
+      @timer.setTime game.time - Math.round(2 * lag)
+      console.log '[Negotitator] timer time ', game.time - Math.round(2 * lag)
       @gameInfo = game
       playerObject = S.ObjectFactory.build S.Types.Entities.Player
       @myPlayer = @gameInfo.players[@user.id].playerObject
@@ -240,11 +242,15 @@ class Negotiator
       for id, player of players
         pObject = S.ObjectFactory.build S.Types.Entities.Player, null, null
         myPlayer = _.extend pObject, player
-        @game.players[id] = myPlayer
+        if myPlayer.id isnt @myPlayer.id
+          @game.players[id] = myPlayer
+        else
+          @game.players[id] = @myPlayer
+      console.log @game.players
       for i, point of startingPoints
         [x,y] = point
         field = @getField x, y
-        @game.map.fields[y][x].platform.state.owner = @game.players[(+i)]
+        @game.map.fields[y][x].platform.state.owner = @game.players[i]
       @game.startingPoints = startingPoints
       dfd.resolveWith @
 
@@ -269,29 +275,31 @@ class Negotiator
   #setViewport: ( width, height ) ->
     #@renderer.setScroll width, height
 
-  setupUI: ->
-    [minWidth, maxWidth] = @game.getDimensions()
-    @ui =  new S.UIClass @, minWidth, maxWidth
-    @terrain = new S.Terrain @, 'background', minWidth, maxWidth
-    @renderer = new S.Renderer @, minWidth, maxWidth, _.pluck(@game.players, 'id'), @myPlayer
+  setupUI: (dfd) ->
+    =>
+      [minWidth, maxWidth] = @game.getDimensions()
+      @ui =  new S.UIClass @, minWidth, maxWidth
+      @terrain = new S.Terrain @, 'background', minWidth, maxWidth
+      @renderer = new S.Renderer @, minWidth, maxWidth, _.pluck(@game.players, 'id'), @myPlayer
 
-    @loader.register @terrain.loading.promise(), 400
-    @loader.register @renderer.loading.promise(), 100
-    @loader.register @loading.promise(), 100
+      @loader.register @terrain.loading.promise(), 400
+      @loader.register @renderer.loading.promise(), 100
+      @loader.register @loading.promise(), 100
 
-    $.when(@renderer.boardLoaded.promise()).done =>
-      @renderer.loading.notify 50
+      $.when(@renderer.boardLoaded.promise()).done =>
+        @renderer.loading.notify 50
 
-      @renderer.setupBoard @game.map
+        @renderer.setupBoard @game.map
 
-      @renderer.loading.notify 50
+        @renderer.loading.notify 50
 
-      @terrain.draw()
+        @terrain.draw()
 
-      @renderer.loading.notify 500
-      #@renderer.loading.notify 250
+        @renderer.loading.notify 500
+        #@renderer.loading.notify 250
 
-      @ui.start()
+        @ui.start()
+        dfd.resolveWith @
 
 
 
@@ -318,16 +326,6 @@ class Negotiator
         ownerIDs = _.union ownerIDs, [channel.state.owner.id]
     if _.keys(field.channels).length >= 2 and ownerIDs.length is 1
       @renderer.changeOwnership x2, y2, owner.id
-    #@terrain.generateRoad x, y, x2, y2
-    #field = @game.map.getField(x2,y2)
-    #plOwner = field.platform?.state?.owner.id
-    #for k in [0..5]
-    #  if k isnt nK and field.channels[k]?.state?
-    #    chOwner = field.channels[k]?.state?.owner.id
-    #    break
-    #console.log "[NEGOTIATOR]: ownership clause", plOwner, owner.id, not (plOwner?), chOwner?, owner.id, not (chOwner?)
-    #if (plOwner is owner.id) or (not (plOwner?) and chOwner? is owner.id) or (not (chOwner?))
-    #    @renderer.changeOwnership x2, y2, owner.id
 
   nonUserId: ( user ) ->
     @game.map.nonUser.id

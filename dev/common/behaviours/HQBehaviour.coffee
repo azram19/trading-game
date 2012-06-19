@@ -9,6 +9,7 @@ else
 class HQBehaviour
 
     constructor: ( @eventBus ) ->
+      @resourceCounter = 0
 
     actionMenu: ( state ) ->
       possibleRoutes = []
@@ -28,12 +29,13 @@ class HQBehaviour
         if state.field.resource.type?
             state.field.resource.trigger 'produce'
         production = =>
-                (
-                    if not state.field.platform.state.owner
-                        console.log ["Missing owner - HQ"], state.field
-                    state.owner.addResource(S.SignalFactory.build S.Types.Entities.Signal, @eventBus, state.extraction, S.Types.Resources[res], state.field.platform)
-                    #@eventBus.trigger 'resource:produce', state.field.xy, state.extraction, S.Types.Resources[res]
-                ) for res in S.Types.Resources.Names
+          if not state.field.platform.state.owner
+              console.log ["Missing owner - HQ"], state.field
+          # dirty hack, but what else should i do?
+          type = S.Types.Resources.Gold + (@resourceCounter % S.Types.Resources.Names.length)
+          state.owner.addResource(S.SignalFactory.build S.Types.Entities.Signal, @eventBus, state.extraction, type, state.field.platform)
+          @eventBus.trigger 'resource:receive', state.field.xy, state.extraction, type
+          @resourceCounter++
 
         setInterval production, state.delay
 
