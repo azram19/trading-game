@@ -24,17 +24,20 @@ class Negotiator
       @ui.showTextBubble "Channel full", x1, y1, color: [159, 17, 27, 1]
 
     @on 'owner:channel', (dest, src, ownerid) ->
+      console.log "OWNING SHIT"
       #console.debug 'owner:channel', xy, dir, state.owner
       field = (_.intersection dest, src)[0]
       field2 = (_.difference dest, src)[0]
       #console.log "NEG: field", field, dest, src
-      @renderer.captureOwnership field.xy[0], field.xy[1], ownerid, true
+      console.log "[NEG]: FIELD", field
+      @renderer.captureOwnership field.xy[0], field.xy[1], ownerid, 1
       if not (field2.platform.type?)
-        @renderer.captureOwnership field2.xy[0], field2.xy[1], ownerid, false
+        console.log "[NEG]: FIELD2", field2
+        @renderer.captureOwnership field2.xy[0], field2.xy[1], ownerid, 2
 
     @on 'owner:platform', (xy, ownerid) ->
       #console.debug 'owner:platform', xy, state
-      @renderer.captureOwnership xy[0], xy[1], ownerid, true
+      @renderer.captureOwnership xy[0], xy[1], ownerid, 1
 
     @on 'player:lost', (player) ->
       #console.debug 'lost', player
@@ -55,12 +58,12 @@ class Negotiator
 
 
     @on 'build:platform', (x, y, type, owner) =>
-      @buildPlatform x, y, type, owner
-      @communicator.trigger 'send:build:platform', x, y, type, owner
+      @buildPlatform x, y, type, @myPlayer
+      @communicator.trigger 'send:build:platform', x, y, type, @myPlayer
 
     @on 'build:channel', (x, y, k, owner) =>
-      @buildChannel x, y, k, owner
-      @communicator.trigger 'send:build:channel', x, y, k, owner
+      @buildChannel x, y, k, @myPlayer
+      @communicator.trigger 'send:build:channel', x, y, k, @myPlayer
 
     @on 'routing', (obj, routing) =>
       _.extend obj.platform.state.routing, routing
@@ -246,6 +249,14 @@ class Negotiator
     [x2 ,y2] = @game.map.directionModificators(x, y, k)
     nK = (k + 3) % 6
     @renderer.buildChannel x2, y2, nK, channel
+    ownerIDs = []
+    field = @getField(x2,y2)
+    for k in [0..5]
+      channel = field.channels[k]
+      if channel?
+        ownerIDs = _.union ownerIDs, [channel.state.owner.id]
+    if _.keys(field.channels).length >= 2 and ownerIDs.length is 1
+      @renderer.changeOwnership x2, y2, owner.id
     #@terrain.generateRoad x, y, x2, y2
     #field = @game.map.getField(x2,y2)
     #plOwner = field.platform?.state?.owner.id  
