@@ -29,17 +29,12 @@ class Negotiator
       console.log "[NEGOTIATOR]: FULL FULL CHANNEL": x1, y1
       @ui.showTextBubble "Channel full", x1, y1, color: [159, 17, 27, 1]
 
-    @on 'owner:channel', (dest, src, ownerid) ->
-      console.log "OWNING SHIT"
-      #console.debug 'owner:channel', xy, dir, state.owner
-      field = (_.intersection dest, src)[0]
-      field2 = (_.difference dest, src)[0]
-      #console.log "NEG: field", field, dest, src
-      console.log "[NEG]: FIELD", field
-      @renderer.captureOwnership field.xy[0], field.xy[1], ownerid, 1
-      if not (field2.platform.type?)
-        console.log "[NEG]: FIELD2", field2
-        @renderer.captureOwnership field2.xy[0], field2.xy[1], ownerid, 2
+    @on 'owner:channel', (dest, src, ownerid, status) ->
+        field = (_.intersection dest, src)[0]
+        field2 = (_.difference dest, src)[0]
+        @renderer.captureOwnership field.xy[0], field.xy[1], ownerid, 1
+        if not (field2.platform.type?)
+          @renderer.captureOwnership field2.xy[0], field2.xy[1], ownerid, 2
 
     @on 'owner:platform', (xy, ownerid) ->
       #console.debug 'owner:platform', xy, state

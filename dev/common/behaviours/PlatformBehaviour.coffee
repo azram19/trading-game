@@ -39,7 +39,7 @@ class PlatformBehaviour
 
     accept: ( signal, state, callback, ownObject ) ->
         callback signal
-        if signal.owner?.id is state.owner.id or S.Types.Resources.Gold <= signal.type <= S.Types.Resources.Food
+        if signal.owner?.id is state.owner.id
             addSignal = (signal) =>
                 ownObject.state.signals.push signal
                 ownObject.trigger 'route'
