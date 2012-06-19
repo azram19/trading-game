@@ -148,6 +148,7 @@ class Negotiator
       [x,y] = position
       @renderer.buildPlatform x, y, HQ
       @renderer.changeOwnership x, y, playerObject.id
+      #@renderer.loading.notify 250
 
     @communicator.on 'foreign:build:platform', (x, y, type, owner) =>
       if owner.id isnt @myPlayer.id
@@ -244,7 +245,7 @@ class Negotiator
 
   startGame: ->
     @game.startGame()
-    @communicator.trigger 'sync:time', @user.id
+    #@communicator.trigger 'sync:time', @user.id
 
     requestSync = =>
       mapState = JSON.stringify @game.map.extractGameState()
@@ -255,7 +256,7 @@ class Negotiator
       hash = shaObj.getHash "SHA-512", "B64"
       @communicator.trigger 'get:state:sync', @gameInfo.name, hash
 
-    @syncID = setInterval requestSync, 11*1000
+    #@syncID = setInterval requestSync, 11*1000
 
   #setScroll: ( x, y ) ->
     #@renderer.setScroll x, y
@@ -283,6 +284,7 @@ class Negotiator
       @terrain.draw()
 
       @renderer.loading.notify 500
+      #@renderer.loading.notify 250
 
       @ui.start()
 

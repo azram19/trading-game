@@ -1,10 +1,10 @@
 class Terrain extends S.Drawer
   constructor: ( @events, id, @minRow, @maxRow, map, useAWorker ) ->
-    canvas = document.getElementById id
-    @stage = new Stage canvas
+    @canvas = document.getElementById id
+    @stage = new Stage @canvas
 
-    canvas2 = document.getElementById 'water'
-    @waterStage = new Stage canvas2
+    @canvas2 = document.getElementById 'water'
+    @waterStage = new Stage @canvas2
 
     if useAWorker
       @worker = new Worker '/js/TerrainWorker.js'
@@ -862,9 +862,24 @@ class Terrain extends S.Drawer
 
     @stage.update()
 
+    @hideWater()
+    @hideTerrain()
+
     @readyDefer.resolve()
 
   t: 0
+
+  showWater: () ->
+    $( @canvas2 ).show()
+
+  showTerrain: () ->
+    $( @canvas ).show()
+
+  hideWater: () ->
+    $( @canvas2 ).hide()
+
+  hideTerrain: () ->
+    $( @canvas ).hide()
 
   drawField: ( image, i, j, type, n=1 ) ->
     if type is 'Water'
