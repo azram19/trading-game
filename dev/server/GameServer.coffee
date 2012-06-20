@@ -110,7 +110,7 @@ class GameServer
         @startGame game.name
 
   tick: () =>
-    _.each @games, ( game ) ->
+    _.each @games, ( game ) =>
       if game?
         if game.started
           game.time--
