@@ -13,7 +13,6 @@ class Negotiator
     @timer.setTime 900
 
     $.when( @loader.start() ).then ->
-      self.timer.start()
 
     @loading = new $.Deferred()
 
@@ -42,7 +41,7 @@ class Negotiator
       @renderer.captureOwnership xy[0], xy[1], ownerid, 1
 
     @on 'player:lost', (player) ->
-      #console.debug 'lost', player
+      @communicator.trigger 'end:game', player
 
     @on 'time:out', () ->
       own1 = 0
@@ -159,7 +158,7 @@ class Negotiator
       [x,y] = position
       @renderer.buildPlatform x, y, HQ
       @renderer.changeOwnership x, y, playerObject.id
-      #@renderer.loading.notify 250
+      @renderer.loading.notify 250
 
     @communicator.on 'foreign:build:platform', (x, y, type, owner) =>
       if owner.id isnt @myPlayer.id
@@ -178,9 +177,7 @@ class Negotiator
           routes[dir].out = route.out
 
     @communicator.on 'state:sync', (players, startingPoints, state) =>
-      console.log '[Negotiator] importing map state', state
       @game.map.importGameState state
-      console.log '[Negotiator] after import', @game.map
       for id, player of players
         pObject = S.ObjectFactory.build S.Types.Entities.Player, null, null
         myPlayer = _.extend pObject, player
@@ -190,12 +187,25 @@ class Negotiator
         field = @getField x, y
         @game.map.fields[y][x].platform.state.owner = @game.players[(+i)]
       @game.startingPoints = startingPoints
-      #@game.startGame()
       @renderer.setupBoard @game.map
+
+    @communicator.on 'game:over', (player) =>
+      console.log 'GameOver', player
+      if player.id is @myPlayer.id
+        @ui.gameOver()
+      else
+        @ui.gameWon()
+
+    @communicator.on 'time:sync', ( time ) =>
+      lag = 0
+      if @communicator.lag?
+        lag = (+@communicator.lag)/1000
+      @timer.setTime time - Math.round(2 * lag)
 
     @communicator.on 'players:all:ready', =>
       console.log '[Negotiator] all players loaded'
       @startGame()
+      self.timer.start()
 
     initiate = new $.Deferred()
     uiLoaded = new $.Deferred()
@@ -221,9 +231,9 @@ class Negotiator
     getGame.done (game) =>
       lag = 0
       if @communicator.lag?
-        lag = (+@communicator.lag)
-      @timer.setTime game.time - Math.round(2 * lag)
+        lag = (+@communicator.lag)/1000
       console.log '[Negotitator] timer time ', game.time - Math.round(2 * lag)
+      @timer.setTime game.time - Math.round(2 * lag)
       @gameInfo = game
       playerObject = S.ObjectFactory.build S.Types.Entities.Player
       @myPlayer = @gameInfo.players[@user.id].playerObject
@@ -234,9 +244,6 @@ class Negotiator
 
     @communicator.on 'user', ( user ) =>
       getUser.resolve user
-
-    @communicator.on 'time:sync', ( time ) =>
-      @timer.setTime time - 2 * @communicator.lag
 
     @communicator.on 'user:game', (game) =>
       getGame.resolveWith @, [game]
@@ -268,7 +275,10 @@ class Negotiator
 
   startGame: ->
     @game.startGame()
-    #@communicator.trigger 'sync:time', @user.id
+    sync = =>
+      @communicator.trigger 'sync:time', @user.id
+
+    setInterval sync, 5000
 
     requestSync = =>
       mapState = JSON.stringify @game.map.extractGameState()
@@ -307,8 +317,9 @@ class Negotiator
 
         @terrain.draw()
 
-        @renderer.loading.notify 500
-        #@renderer.loading.notify 250
+        @renderer.loading.notify 250
+        if _.keys(@game.players).length is 2
+          @renderer.loading.notify 250
 
         @ui.start()
         dfd.resolveWith @

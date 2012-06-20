@@ -92,6 +92,14 @@ class GameServer
     instance.addHQ HQ, position
     name
 
+  endGame: (name, player) ->
+    game = @games[name]
+    for userId, playerObj of game.players
+      @playersGame[userId] = {}
+    @games[name] = {}
+    @gameInstances[name] = {}
+    @trigger 'game:over', name, player
+
   setUserReady: ( userId ) ->
     game = @getUserGame userId
     maxPlayers = game.typeData.numberOfSides * game.typeData.playersOnASide
@@ -102,11 +110,12 @@ class GameServer
 
   tick: () =>
     _.each @games, ( game ) ->
-      if game.started
-        game.time--
-
-        if game.time <= 0
-          @trigger 'time:out', game
+      if game?
+        if game.started
+          game.time--
+          console.log '[GameServer] current time', game.time
+          if game.time <= 0
+            @trigger 'time:out', game
 
   startGame: ( name ) ->
     @trigger 'all:ready', name

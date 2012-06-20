@@ -89,6 +89,10 @@ class UI extends S.Drawer
     $( '<div id="gameover"><h1>Game Tied</h1></div>' )
       .appendTo( '#canvasWrapper' )
 
+  gameWon: () ->
+    $( '<div id="gameover"><h1>You won</h1></div>' )
+      .appendTo( '#canvasWrapper' )
+
   showTextBubble: ( text, x, y, options ) ->
     config =
       vy: 100
