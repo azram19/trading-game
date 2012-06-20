@@ -574,7 +574,6 @@ class SignalsDrawer extends Drawer
             @stage.update()
 
     tick: () ->
-
         for signal in @stage.children
             if signal.isSignal and signal.isVisible
                 signal.visible = true
@@ -584,7 +583,6 @@ class SignalsDrawer extends Drawer
                     signal.x += signal.tickSizeX
                     signal.y += signal.tickSizeY
                     signal.k += 1
-
         @fpsLabel.text = Math.round(Ticker.getMeasuredFPS())+" fps"
         @stage.update()
 
