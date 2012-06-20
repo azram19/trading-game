@@ -92,14 +92,14 @@ class GameServer
     instance.addHQ HQ, position
     name
 
-  endGame: (name, player) ->
+  endGame: (name, player, status) ->
     game = @games[name]
     if game?
       for userId, playerObj of game.players
         @playersGame[userId] = {}
       @games[name] = {}
       @gameInstances[name] = {}
-    -@trigger 'game:over', name, player
+    -@trigger 'game:over', name, player, status
 
   setUserReady: ( userId ) ->
     game = @getUserGame userId

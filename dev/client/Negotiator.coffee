@@ -47,19 +47,19 @@ class Negotiator
     @on 'time:out', () ->
       own1 = 0
       own2 = 0
-      for j in [0 ... (2*@diffRows + 1)]
-            for i in [0 ... @maxRow - Math.abs(@diffRows - j)]
-              if (@events.renderer.boardDR.owner[i]?[j]? and not @contains @events.renderer.boardDR.ownership, [i,j])
+      @game.map.iterateFields (field, i, j) =>
+              if (@renderer.boardDR.owner[i]?[j]? and not @renderer.boardDR.contains @renderer.boardDR.ownership, [i,j])
                 own2++
-              else if @contains @events.renderer.boardDR.ownership, [i,j]
+              else if @renderer.boardDR.contains @renderer.boardDR.ownership, [i,j]
                 own1++
-      if own1 > own2
-        @communicator.trigger 'end:game', @myPlayer
+      console.log "chuj", own1, own2
+      if own1 < own2
+        @communicator.trigger 'end:game', @myPlayer, "lose"
       else if own1 is own2
-        @communicator.trigger 'end:game', null
+        @communicator.trigger 'end:game', @myPlayer, "tie"
       else
         player = _filter @game.players, (a) -> a.id isnt @myPlayer.id
-        @communicator.trigger 'end:game', player
+        @communicator.trigger 'end:game', player, "win"
 
     @on 'resource:produce', (xy, amount, type) ->
       p = @ui.getPoint xy[0], xy[1]
@@ -191,9 +191,9 @@ class Negotiator
       @game.startingPoints = startingPoints
       @renderer.setupBoard @game.map
 
-    @communicator.on 'game:over', (player) =>
+    @communicator.on 'game:over', (player, status) =>
       console.log 'GameOver', player
-      if player is null
+      if status is "tie"
         @ui.gameTied()
       else if player.id is @myPlayer.id
         @ui.gameOver()

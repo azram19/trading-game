@@ -66,8 +66,8 @@ class Communicator
     app.gameServer.on 'player:ready', ( game, userId ) =>
       @app.io.sockets.in(game).emit 'player:ready', userId
 
-    app.gameServer.on 'game:over', (game, player) =>
-      @app.io.sockets.in(game).emit 'game:over', player
+    app.gameServer.on 'game:over', (game, player, status) =>
+      @app.io.sockets.in(game).emit 'game:over', player, status
 
     app.gameServer.on 'player:joined', ( game, player, position, HQ ) =>
       console.log '[Communicator] new player on ', game
@@ -115,9 +115,9 @@ class Communicator
           .then ( messages ) ->
             socket.emit 'chat:load', messages
 
-      socket.on 'end:game', (player) =>
+      socket.on 'end:game', (player, status) =>
         game = @app.gameServer.getUserGame player.userId
-        @app.gameServer.endGame game.name, player
+        @app.gameServer.endGame game.name, player, status
 
       socket.on 'message:add', ( data ) =>
         @app.saveChatMessage data
