@@ -257,13 +257,13 @@ class BoardDrawer extends Drawer
         point = @getPoint(x, y)
         switch status
             when 1
-                @addOwner x, y, @drawOwnership(point, ownerid) 
+                @addOwner x, y, @drawOwnership(point, ownerid)
                 if ownerid is @myPlayer.id
                     if not (@contains @ownership, [x,y])
                         @ownership.push [x,y]
                 else
                     @ownership = @without @ownership, [x,y]
-                @setVisibility [x, y], false, ownerid  
+                @setVisibility [x, y], false, ownerid
             when 2
                 if ownerid is @myPlayer.id
                     @setVisibility [x, y], false, ownerid
@@ -421,7 +421,7 @@ class BoardDrawer extends Drawer
             @addElement x, y, @drawPlatform point, field.platform.type()
             ownerid = field.platform.state.owner.id
             @addOwner x, y, @drawOwnership point, ownerid
-            if ownerid is @myPlayer.id 
+            if ownerid is @myPlayer.id
                 if not (@contains @ownership, [x, y])
                     @ownership.push [x, y]
                 if not (@contains @roads, [x,y])
@@ -574,7 +574,7 @@ class SignalsDrawer extends Drawer
             @stage.update()
 
     tick: () ->
-        
+
         for signal in @stage.children
             if signal.isSignal and signal.isVisible
                 signal.visible = true
@@ -584,7 +584,7 @@ class SignalsDrawer extends Drawer
                     signal.x += signal.tickSizeX
                     signal.y += signal.tickSizeY
                     signal.k += 1
-        
+
         @fpsLabel.text = Math.round(Ticker.getMeasuredFPS())+" fps"
         @stage.update()
 

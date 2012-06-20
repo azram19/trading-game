@@ -26,6 +26,10 @@ class Chat extends Backbone.View
     console.log '[Chat] joined' + channel
     @communicator.trigger "fetch:messages"
 
+  handleServerMessage: ( data ) =>
+    msg = new S.Models.Message data
+    @collection.add msg
+
   #Add new message to the chat
   addMessage: ( model ) =>
     msg = model.toJSON()
