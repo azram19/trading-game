@@ -39,7 +39,7 @@ class PlatformBehaviour
 
     accept: ( signal, state, callback, ownObject ) ->
         callback signal
-        if signal.owner?.id is state.owner.id
+        if signal.owner?.id is state.owner.id or signal.owner.id is @eventBus.nonUserId state.owner
             addSignal = (signal) =>
                 ownObject.state.signals.push signal
                 ownObject.trigger 'route'

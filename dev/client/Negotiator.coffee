@@ -26,8 +26,9 @@ class Negotiator
       p2 = @ui.getPoint fields[1].xy[0], fields[1].xy[1]
       x1 = (p2.x+p1.x)/2
       y1 = ((p2.y+p1.y)/2) + 10
-      console.log "[NEGOTIATOR]: FULL FULL CHANNEL": x1, y1
-      @ui.showTextBubble "Channel full", x1, y1, color: [159, 17, 27, 1]
+      #console.log "[NEGOTIATOR]: FULL FULL CHANNEL": x1, y1
+      if @renderer.boardDR.contains @renderer.boardDR.roads, fields[0] or @renderer.boardDR.contains @renderer.boardDR.roads, fields[1]
+        @ui.showTextBubble "Channel full", x1, y1, color: [159, 17, 27, 1]
 
     @on 'owner:channel', (dest, src, ownerid, status) ->
         field = (_.intersection dest, src)[0]
@@ -48,14 +49,15 @@ class Negotiator
 
     @on 'resource:produce', (xy, amount, type) ->
       p = @ui.getPoint xy[0], xy[1]
-      @ui.showTextBubble "-#{amount}",  p.x+40,  p.y+20
+      if @renderer.boardDR.contains @renderer.boardDR.roads, xy
+        @ui.showTextBubble "-#{amount}",  p.x+40,  p.y+20
 
     @on 'resource:receive', (xy, amount, type) ->
       p = @ui.getPoint xy[0], xy[1]
 
       name = S.Types.Resources.Names[type-6]
-
-      @ui.showTextBubble "+#{amount} #{name}", p.x+40, p.y+20
+      if @renderer.boardDR.contains @renderer.boardDR.roads, xy
+        @ui.showTextBubble "+#{amount} #{name}", p.x+40, p.y+20
       @ui.showResources amount, type
 
 
@@ -72,7 +74,8 @@ class Negotiator
         i = 0
         _.each cost, ( v, k ) =>
           @myPlayer.spendResources k, v
-          @ui.showTextBubble "-#{v} #{ k }", p.x+40, p.y+20+i*20
+          if @renderer.boardDR.contains @renderer.boardDR.roads, [x,y]
+            @ui.showTextBubble "-#{v} #{ k }", p.x+40, p.y+20+i*20
           i++
 
         @buildPlatform x, y, type, @myPlayer
@@ -80,7 +83,7 @@ class Negotiator
 
         @ui.showResources 0, 6
         @ui.showResources 0, 7
-      else
+      else if @renderer.boardDR.contains @renderer.boardDR.roads, [x,y]
         @ui.showTextBubble "Not enough resources", p.x+40, p.y+20, color: [159, 17, 27, 1]
 
     @on 'build:channel', (x, y, k, owner) =>
@@ -96,7 +99,8 @@ class Negotiator
         i = 0
         _.each cost, ( v, k ) =>
           @myPlayer.spendResources k, v
-          @ui.showTextBubble "-#{v} #{ k }", p.x+40, p.y+20+i*20
+          if @renderer.boardDR.contains @renderer.boardDR.roads, [x,y]
+            @ui.showTextBubble "-#{v} #{ k }", p.x+40, p.y+20+i*20
           i++
 
         @buildChannel x, y, k, @myPlayer
@@ -104,7 +108,7 @@ class Negotiator
 
         @ui.showResources 0, 6
         @ui.showResources 0, 7
-      else
+      else if @renderer.boardDR.contains @renderer.boardDR.roads, [x,y]
         @ui.showTextBubble "Not enough resources", p.x+40, p.y+20, color: [159, 17, 27, 1]
 
     @on 'routing', (obj, routing) =>
@@ -335,7 +339,7 @@ class Negotiator
       if field.platform.actionMenu?
         field.platform.actionMenu()
       else
-        console.log field
+        #console.log field
         if _.isEmpty field.channels
           null
         else if (_.keys field.channels).length > 1 and not field.platform.type?
