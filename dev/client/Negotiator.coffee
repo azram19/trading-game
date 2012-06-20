@@ -2,7 +2,7 @@ class Negotiator
 
   constructor: ( @communicator ) ->
     self= @
-
+    @started = false
     _.extend @, Backbone.Events
     @myPlayer = {}
     @game = {}
@@ -34,6 +34,7 @@ class Negotiator
         field2 = (_.difference dest, src)[0]
         @renderer.captureOwnership field.xy[0], field.xy[1], ownerid, 1
         if not (field2.platform.type?)
+          console.log "field2", field2
           @renderer.captureOwnership field2.xy[0], field2.xy[1], ownerid, 2
 
     @on 'owner:platform', (xy, ownerid) ->
@@ -53,11 +54,12 @@ class Negotiator
               else if @contains @events.renderer.boardDR.ownership, [i,j]
                 own1++
       if own1 > own2
-        @ui.gamWon()
+        @communicator.trigger 'end:game', @myPlayer
       else if own1 is own2
-        @ui.gameTied()
+        @communicator.trigger 'end:game', null
       else
-        @ui.gameOver()
+        player = _filter @game.players, (a) -> a.id isnt @myPlayer.id
+        @communicator.trigger 'end:game', player
 
     @on 'resource:produce', (xy, amount, type) ->
       p = @ui.getPoint xy[0], xy[1]
@@ -191,7 +193,9 @@ class Negotiator
 
     @communicator.on 'game:over', (player) =>
       console.log 'GameOver', player
-      if player.id is @myPlayer.id
+      if player is null
+        @ui.gameTied()
+      else if player.id is @myPlayer.id
         @ui.gameOver()
       else
         @ui.gameWon()
@@ -204,6 +208,7 @@ class Negotiator
 
     @communicator.on 'players:all:ready', =>
       console.log '[Negotiator] all players loaded'
+      @started = true
       @startGame()
       self.timer.start()
 

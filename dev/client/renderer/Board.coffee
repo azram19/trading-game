@@ -267,7 +267,9 @@ class BoardDrawer extends Drawer
             when 2
                 if ownerid isnt @myPlayer.id
                     @ownership = @without @ownership, point
-                @setVisibility [x, y], false, ownerid
+                else
+                    @setVisibility [x, y], false, ownerid
+                @owner[x][y].visible = false
                 @owner[x][y] = null
         @updateAll()
 
@@ -377,6 +379,7 @@ class BoardDrawer extends Drawer
         array = []
         for i in [0..6]
             array.push (@modifyCoords point[0], point[1], i)
+        console.log "ARRAY", array
         if ownerid is @myPlayer.id
             for p in array
                 @setFog p, false
@@ -393,8 +396,11 @@ class BoardDrawer extends Drawer
                 @roads = @without @roads, point
                 @visibility = @getVisibility @roads
                 @setElements point, true
-                for p in (@difference array, @visibility)
+                console.log "[BOARD] Visbility", @visibility
+                tab = (@difference array, @visibility)
+                for p in (tab)
                     @setFog p, true
+                console.log "[BOARD] DIFF", tab
 
     getVisibility: (ownership) ->
         visibility = []

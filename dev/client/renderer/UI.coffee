@@ -82,7 +82,7 @@ class UI extends S.Drawer
   setLoadingStage: ( @loading ) ->
 
   gameOver: () ->
-    $( '<div id="gameover"><h1>Game Over</h1></div>' )
+    $( '<div id="gameover"><h1>You Lost</h1></div>' )
       .appendTo( '#canvasWrapper' )
 
   gameTied: () ->
@@ -90,7 +90,7 @@ class UI extends S.Drawer
       .appendTo( '#canvasWrapper' )
 
   gameWon: () ->
-    $( '<div id="gameover"><h1>You won</h1></div>' )
+    $( '<div id="gameover"><h1>You Won</h1></div>' )
       .appendTo( '#canvasWrapper' )
 
   showTextBubble: ( text, x, y, options ) ->
@@ -428,34 +428,36 @@ class UI extends S.Drawer
 
 
   handleClick: ( event ) =>
-    [x, y] = @getXY event
+    if @events.started
+      [x, y] = @getXY event
 
-    if event.button != 2
-      return
+      if event.button != 2
+        return
 
-    p = @getCoords (new Point x, y)
+      p = @getCoords (new Point x, y)
 
-    if @curMenu? and @curMenu.hitTest x, y, true
-     if @curMenu.positionI == p.x and @curMenu.positionJ == p.y
-        @curMenu.hide @curMenu.destroy
-        @curMenu = null
-      return
-    else
-      @handleClickOnField p.x, p.y
+      if @curMenu? and @curMenu.hitTest x, y, true
+       if @curMenu.positionI == p.x and @curMenu.positionJ == p.y
+          @curMenu.hide @curMenu.destroy
+          @curMenu = null
+        return
+      else
+        @handleClickOnField p.x, p.y
 
     event.preventDefault()
 
   handleClickOnField: ( i, j ) =>
-    if @curMenu?
-      @destroyMenu @curMenu
+    if @events.started
+      if @curMenu?
+        @destroyMenu @curMenu
 
-    @curMenu = @createMenu i, j
+      @curMenu = @createMenu i, j
 
-    if @curMenu?
-      @curMenu.positionI = i
-      @curMenu.positionJ = j
-      @curMenu.show()
-      @curMenu.click()
+      if @curMenu?
+        @curMenu.positionI = i
+        @curMenu.positionJ = j
+        @curMenu.show()
+        @curMenu.click()
 
   destroyMenu: ( menu ) ->
     if menu?

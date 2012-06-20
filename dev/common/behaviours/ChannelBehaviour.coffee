@@ -50,6 +50,7 @@ class ChannelBehaviour
                 state.life  = S.Properties.channel.life
                 #console.log "[ChannelBehaviour]: source", signal.source
                 if signal.source.type is S.Types.Entities.Channel
+                  console.log "owning channel"
                   @eventBus.trigger 'owner:channel', state.fields, signal.source.fields, signal.owner.id
                 else
                   @eventBus.trigger 'owner:channel', state.fields, [signal.source.field], signal.owner.id

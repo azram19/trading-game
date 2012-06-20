@@ -94,11 +94,12 @@ class GameServer
 
   endGame: (name, player) ->
     game = @games[name]
-    for userId, playerObj of game.players
-      @playersGame[userId] = {}
-    @games[name] = {}
-    @gameInstances[name] = {}
-    @trigger 'game:over', name, player
+    if game?
+      for userId, playerObj of game.players
+        @playersGame[userId] = {}
+      @games[name] = {}
+      @gameInstances[name] = {}
+    -@trigger 'game:over', name, player
 
   setUserReady: ( userId ) ->
     game = @getUserGame userId
