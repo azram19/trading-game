@@ -45,7 +45,20 @@ class Negotiator
       #console.debug 'lost', player
 
     @on 'time:out', () ->
-      @ui.gameOver()
+      own1 = 0
+      own2 = 0
+      for j in [0 ... (2*@diffRows + 1)]
+            for i in [0 ... @maxRow - Math.abs(@diffRows - j)]
+              if (@events.renderer.boardDR.owner[i]?[j]? and not @contains @events.renderer.boardDR.ownership, [i,j])
+                own2++
+              else if @contains @events.renderer.boardDR.ownership, [i,j]
+                own1++
+      if own1 > own2
+        @ui.gamWon()
+      else if own1 is own2
+        @ui.gameTied()
+      else
+        @ui.gameOver()
 
     @on 'resource:produce', (xy, amount, type) ->
       p = @ui.getPoint xy[0], xy[1]
