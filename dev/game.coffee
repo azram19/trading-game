@@ -2,6 +2,7 @@ express = require 'express'
 hbs = require 'hbs'
 app = module.exports = express.createServer()
 _ = require( 'underscore' )._
+Logger = require './server/util/Logger'
 app.io = require( 'socket.io' ).listen( app )
 app.everyauth = require 'everyauth'
 
@@ -14,6 +15,15 @@ Promise = require "promised-io/promise"
 request = require 'request'
 
 app.Mongoose = require 'mongoose'
+
+#log = new Logger
+    #level: 5
+
+#log.error 'massive error'
+#log.warn 'not so massive warning'
+#log.info 'some info'
+#log.debug 'crazy debug output'
+#log.trace 'for really keen'
 
 app.sessionStore = new MemoryStore()
 
