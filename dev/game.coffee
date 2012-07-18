@@ -16,14 +16,16 @@ request = require 'request'
 
 app.Mongoose = require 'mongoose'
 
-#log = new Logger
-    #level: 5
+Logger.defaults
+  level: 5
+  name: 'Main'
+log = Logger.Logger()
 
-#log.error 'massive error'
-#log.warn 'not so massive warning'
-#log.info 'some info'
-#log.debug 'crazy debug output'
-#log.trace 'for really keen'
+log.error 'massive error'
+log.warn 'not so massive warning'
+log.info 'some info'
+log.debug 'crazy debug output'
+log.trace 'for really keen'
 
 app.sessionStore = new MemoryStore()
 

@@ -1,7 +1,8 @@
 Promise = require "promised-io/promise"
 request = require 'request'
+_ = require('underscore')._
 
-module.exports = ( app, express ) ->
+module.exports = exports = ( app, express ) ->
   config = @
 
   app.facebookAppId = '381600771875818'
@@ -20,8 +21,6 @@ module.exports = ( app, express ) ->
   app.usersByFbId = {}
 
   app.mongoURL = 'mongodb://signal:signals11@ds033097.mongolab.com:33097/heroku_app4770943'
-
-  _ = require('underscore')._
 
   Schema = app.Mongoose.Schema
   ObjectId = Schema.ObjectId
