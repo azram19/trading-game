@@ -2,6 +2,7 @@ _ = require('underscore')._
 Backbone = require 'backbone'
 S = {}
 S.Types = require '../common/config/Types'
+S.Logger = require '../common/util/Logger'
 S.ObjectFactory = require '../common/config/ObjectFactory'
 S.Map = require '../common/engine/Map'
 S.GameManager = require '../common/engine/GameManager'
@@ -9,6 +10,7 @@ S.GameManager = require '../common/engine/GameManager'
 class GameServer
 
   constructor: ->
+    @log = S.Logger.createLogger name: 'GameServer'
     @games = {}
     createdGame = @createGame 0
     @games[createdGame.name] = createdGame
@@ -52,7 +54,7 @@ class GameServer
     game = @games[name]
     instance = @gameInstances[name]
     if not (instance?)
-      console.log '[GameServer] game created - ', name
+      @log.info '[GameServer] game created - ', name
       minWidth = game.typeData.minWidth
       maxWidth = game.typeData.maxWidth
       player = S.ObjectFactory.build S.Types.Entities.Player, 0
@@ -76,7 +78,7 @@ class GameServer
 
     numberPlayers =  _.keys(gameToJoin.players).length
     name = gameToJoin.name
-    console.log '[Game Server] user: ' + user + ' joined ' + name
+    @log.info '[Game Server] user: ' + user + ' joined ' + name
     playerObject = S.ObjectFactory.build S.Types.Entities.Player, user
     position = gameToJoin.typeData.startingPoints[numberPlayers]
     instance = @getGameInstance name
@@ -99,7 +101,7 @@ class GameServer
         @playersGame[userId] = {}
       @games[name] = {}
       @gameInstances[name] = {}
-    -@trigger 'game:over', name, player, status
+    @trigger 'game:over', name, player, status
 
   setUserReady: ( userId ) ->
     game = @getUserGame userId
@@ -114,7 +116,7 @@ class GameServer
       if game?
         if game.started
           game.time--
-          console.log '[GameServer] current time', game.time
+          log.info 'current time', game.time
           if game.time <= 0
             @trigger 'time:out', game
 

@@ -2,7 +2,7 @@
 # level threshold
 
 S = {}
-if requrire?
+if require?
   _ = require('underscore')._
 else
   _ = window._
@@ -21,8 +21,8 @@ class Logger
     @colorCodes = [
       31 # Red
       33 # Yellow
-      32 # Cyan
-      35 # Green
+      36 # Cyan
+      35 # Magenta
       90 # Grey
     ]
 
@@ -53,8 +53,8 @@ class Logger
       return @
 
     console.log.apply console,
-      [ '[' + @name + '] -'
-        if @colors and @browser then '\x1B[' + @colorCodes[index] + 'm' + @pad(type) + ' -\x1B[39m'
+      [ '[' + @name + ']'
+        if @colors and @browser then '\x1B[' + @colorCodes[index] + 'm' + '- ' + @pad(type) + ' -\x1B[39m'
         else type + ':'
       ].concat _.toArray(arguments)[1..]
 
@@ -69,8 +69,10 @@ defaults =
 publicApi =
   defaults: (config) ->
     _.extend defaults, config
-  Logger: (config) ->
-    new Logger (config || defaults)
+  createLogger: (config) ->
+    defCopy = _.clone defaults
+    _.extend defCopy, config
+    new Logger defCopy
 
 if module? and module.exports
   exports = module.exports = publicApi

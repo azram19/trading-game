@@ -2,15 +2,18 @@ S = {}
 if require?
   _ = require 'underscore'
   S.Types = require '../config/Types'
+  S.Logger = require '../util/Logger'
   S.Properties = require '../config/Properties'
 else
   _ = window._
   S.Types = window.S.Types
+  S.Logger = window.S.Logger
   S.Properties = window.S.Properties
 
 class PlatformBehaviour
 
     constructor: ( @eventBus ) ->
+        @log = S.Logger.createLogger name: 'PlatformBehaviour'
 
     actionMenu: ( state ) ->
           possibleRoutes = []
@@ -46,11 +49,11 @@ class PlatformBehaviour
             _.delay addSignal, state.delay, signal
         else
             state.life -= signal.strength
-            console.log "[PlatformBehaviour]: signal dealt damage, life is:", state.life
+            @log.debug "signal dealt damage, life is:", state.life
             if state.life <= 0
                 state.owner = signal.owner
                 state.life = S.Properties.platform.life
-                #console.log "[PlatformBehaviour]: source", signal.source
+                #@log.debug "[PlatformBehaviour]: source", signal.source
                 @eventBus.trigger 'owner:platform', state.field.xy, signal.owner.id
 
     depleted: ( state ) ->
@@ -66,7 +69,7 @@ class PlatformBehaviour
               destNum = state.routeCounter%availableRoutes.length
               state.routeCounter++
               destination = availableRoutes[destNum]
-              #console.log "[PlatformBehaviour]: availableRoutes", availableRoutes
+              #@log.debug "availableRoutes", availableRoutes
               origOwner = signal.owner
               origSource = signal.source
 
@@ -74,7 +77,7 @@ class PlatformBehaviour
               signal.owner = state.owner
               if destination[0].object.requestAccept signal
                 @eventBus.trigger 'move:signal', state.field.xy, destination[1]
-                # console.log '[PlatformBehaviour] triggering accept on channel', new Date()
+                # @log.debug 'triggering accept on channel', new Date()
                 destination[0].object.trigger 'accept', signal, (signal) ->
                   if ownObject.state.signals.length > 0
                     ownObject.trigger 'route'

@@ -2,14 +2,17 @@ S = {}
 if require?
     S.SignalFactory = require '../config/SignalFactory'
     S.Types = require '../config/Types'
+    S.Logger = require '../util/Logger'
 else
     S.Types = window.S.Types
     S.SignalFactory = window.S.SignalFactory
+    S.Logger = window.S.Logger
 
 class HQBehaviour
 
     constructor: ( @eventBus ) ->
       @resourceCounter = 0
+      @log = S.Logger.createLogger name: 'HQBehaviour'
 
     actionMenu: ( state ) ->
       possibleRoutes = []
@@ -30,7 +33,7 @@ class HQBehaviour
             state.field.resource.trigger 'produce'
         production = =>
           if not state.field.platform.state.owner
-              console.log ["Missing owner - HQ"], state.field
+              @log.error "Missing owner", state.field
           # dirty hack, but what else should i do?
           type = S.Types.Resources.Gold + (@resourceCounter % S.Types.Resources.Names.length)
           state.owner.addResource(S.SignalFactory.build S.Types.Entities.Signal, @eventBus, state.extraction, type, state.field.platform)

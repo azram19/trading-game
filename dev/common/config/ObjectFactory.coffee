@@ -15,6 +15,7 @@ if require? #server
     S.ChannelBehaviour = require '../behaviours/ChannelBehaviour'
     S.PlatformBehaviour = require '../behaviours/PlatformBehaviour'
     S.ResourceBehaviour = require '../behaviours/ResourceBehaviour'
+    S.Logger = require '../util/Logger'
 else #client
     _ = window._
     S.Properties = window.S.Properties
@@ -27,11 +28,14 @@ else #client
     S.ChannelBehaviour = window.S.ChannelBehaviour
     S.PlatformBehaviour = window.S.PlatformBehaviour
     S.ResourceBehaviour = window.S.ResourceBehaviour
+    S.Logger = window.S.Logger
 
 class ObjectFactory
 
     # change those crazy clone, extend to _.defaults
     constructor: ->
+        @log = S.Logger.createLogger name: 'ObjectFactory'
+
         @builders = {}
         @builders[S.Types.Entities.Platforms.Normal] = (id, args) =>
             events = args[0]
@@ -126,7 +130,7 @@ class ObjectFactory
 
     build: ( kind, args... ) ->
         if not kind
-            console.error "kind is undefined"
+            @log.error "kind is undefined"
         if not _.isFunction @builders[kind]
             throw Error kind + " is not a valid Entity type"
 

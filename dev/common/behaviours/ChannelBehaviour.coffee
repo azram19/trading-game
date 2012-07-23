@@ -2,10 +2,12 @@ S = {}
 if require?
   S.Types = require '../config/Types'
   S.Properties = require '../config/Properties'
+  S.Logger = require '../util/Logger'
   _ = require 'underscore'
 else
   S.Properties = window.S.Properties
   S.Types = window.S.Types
+  S.Logger = window.S.Logger
   _ = window._
 
 class ChannelBehaviour
@@ -25,7 +27,7 @@ class ChannelBehaviour
 
         if signal.owner.id is state.owner.id
             availableRoutes = _.filter state.routing, (route) ->
-                #console.log "[ChannelBehaviour] availableRoutes", route.object.state, signal.source
+                #@log.debug "availableRoutes", route.object.state, signal.source
                 route.in and route.object?.state?.id is signal.source.id
             availableRoutes.length > 0 and state.capacity > state.signals.length
         else
@@ -39,18 +41,18 @@ class ChannelBehaviour
         if state.owner.id is signal.owner.id
             addSignal = (signal) =>
                 ownObject.state.signals.push signal
-                #console.log "[ChannelBehaviour]: now i will call @route", new Date()
+                #@log.trace "now i will call @route", new Date()
                 ownObject.trigger 'route'
             _.delay addSignal, state.delay, signal
         else
             state.life -= signal.strength
-            console.log "[ChannelBehaviour]: signal dealt damage, life is:", state.life
+            @log.debug "signal dealt damage, life is:", state.life
             if state.life <= 0
                 state.owner = signal.owner
                 state.life  = S.Properties.channel.life
-                #console.log "[ChannelBehaviour]: source", signal.source
+                #@log.trace "source", signal.source
                 if signal.source.type is S.Types.Entities.Channel
-                  console.log "owning channel"
+                  @log.debug "owning channel"
                   @eventBus.trigger 'owner:channel', state.fields, signal.source.fields, signal.owner.id
                 else
                   @eventBus.trigger 'owner:channel', state.fields, [signal.source.field], signal.owner.id
@@ -59,12 +61,12 @@ class ChannelBehaviour
       signal = ownObject.state.signals.shift()
       if signal?
         availableRoutes = []
-        #console.log "[ChannelBehaviour]: state.routing", state.routing
+        #@log.debug "state.routing", state.routing
         _.each state.routing, (route, direction) ->
-          #console.log "[ChannelBehaviour]: channel", route.object?.state?.id, signal.source.id, direction
+          #@log.debug "channel", route.object?.state?.id, signal.source.id, direction
           if route.object.type? and route.object?.state?.name isnt signal.source.name
             availableRoutes.push [route, direction]
-            #console.log "[ChannelBehaviour]: availableRoutes", availableRoutes
+            #@log.debug "availableRoutes", availableRoutes
         if availableRoutes.length > 0
           destination = availableRoutes[0]
           origSource = signal.source
@@ -73,14 +75,14 @@ class ChannelBehaviour
           signal.source = state
           signal.owner = state.owner
           if destination[0].object.requestAccept signal
-            #console.log "[ChannelBehaviour]: object.type", destination[0].object.type()
+            #@log.debug "object.type", destination[0].object.type()
             if destination[0].object.type() is S.Types.Entities.Channel
-              #console.log '[ChannelBehaviour] fields references', state.fields, destination[0].object.state.fields
+              #@log.trace 'fields references', state.fields, destination[0].object.state.fields
               field = _.intersection state.fields, destination[0].object.state.fields
               field2 = _.difference destination[0].object.state.fields, state.fields
-              #console.log "[ChannelBehaviour]: eventBus", @eventBus
+              #@log.trace "eventBus", @eventBus
               dest = @eventBus.directionGet state.owner, field[0].xy[0], field[0].xy[1], field2[0].xy[0], field2[0].xy[1]
-              #console.log "[ChannelBehaviour]: moving", field[0].xy, dest
+              #@log.trace "moving", field[0].xy, dest
               @eventBus.trigger 'move:signal', field[0].xy, dest
  
             destination[0].object.trigger 'accept', signal, (signal) ->

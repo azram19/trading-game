@@ -6,6 +6,7 @@ Promise = require "promised-io/promise"
 parseCookie = require('connect').utils.parseCookie
 util = require 'util'
 crypto = require 'crypto'
+Logger = require '../common/util/Logger'
 
 ###
 Stores information about all connected clients, and handles actual
@@ -23,6 +24,8 @@ class Communicator
     @connectionTimeOut = 1000 # 1sec
 
     @sockets = if @channel? then @app.io.of channel else @app.io.sockets
+
+    @log = Logger.createLogger name: 'Communicator'
 
     ###
     Configure authorization and shared session between Express and
@@ -53,11 +56,9 @@ class Communicator
         accept 'No cookie transmitted', false
 
     app.gameServer.on 'update:lobby:game', (game) =>
-      #console.dir 'new games arrived'
       @app.io.sockets.in('lobby').emit 'game:change', game
 
     app.gameServer.on 'new:lobby:game', (game) =>
-      #console.dir 'new games arrived'
       @app.io.sockets.in('lobby').emit 'game:new', game
 
     app.gameServer.on 'all:ready', ( game ) =>
@@ -70,7 +71,7 @@ class Communicator
       @app.io.sockets.in(game).emit 'game:over', player, status
 
     app.gameServer.on 'player:joined', ( game, player, position, HQ ) =>
-      console.log '[Communicator] new player on ', game
+      @log.info 'new player on ', game
       @app.io.sockets.in(game).emit 'new:player', player, position, HQ
 
     app.gameServer.on 'platform:built', ( game, x, y, type, owner ) =>
@@ -80,7 +81,6 @@ class Communicator
       @app.io.sockets.in(game).emit 'foreign:build:channel', x, y, k, owner
 
     app.gameServer.on 'routing:changed', ( game, x, y, routing, owner ) =>
-      console.log game
       @app.io.sockets.in(game).emit 'foreign:routing', x, y, routing, owner
 
     @sockets.on 'connection', ( socket ) =>
@@ -162,7 +162,7 @@ class Communicator
         startingPoints = game.startingPoints
         hashOwn.update JSON.stringify(startingPoints), 'ascii'
         hashOwn = hashOwn.digest 'base64'
-        console.log '[Communicator] game hash - ', name, hashOwn
+        log.debug 'game hash - ', name, hashOwn
         if hash isnt hashOwn
           socket.emit 'state:sync', game.players, game.startingPoints, state
 

@@ -3,14 +3,18 @@ if require?
     _ = require('underscore')._
     S.Types = require './Types'
     S.Signal = require '../objects/Signal'
+    S.Logger = require '../util/Logger'
 else
     _ = window._
     S.Signal = window.S.Signal
     S.Types = window.S.Types
+    S.Logger = window.S.Logger
 
 class SignalFactory
 
     constructor: ->
+        @log = S.Logger.createLogger name: 'SignalFactory'
+
         @builders = {}
         @builders[S.Types.Entities.Signal] = (id, args) =>
             events = args[0]
@@ -23,7 +27,7 @@ class SignalFactory
 
     build: ( kind, args... ) ->
         if not kind
-            console.error "kind is undefined"
+            @log.error "kind is undefined"
         if not _.isFunction @builders[kind]
             throw Error kind + " is not a valid Entity type"
 

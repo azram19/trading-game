@@ -1,31 +1,27 @@
 express = require 'express'
-hbs = require 'hbs'
+
 app = module.exports = express.createServer()
-_ = require( 'underscore' )._
-Logger = require './server/util/Logger'
 app.io = require( 'socket.io' ).listen( app )
 app.everyauth = require 'everyauth'
 
 MemoryStore = express.session.MemoryStore
 Communicator = require './server/communicator'
 GameServer = require './server/GameServer'
-
-Promise = require "promised-io/promise"
-
-request = require 'request'
-
-app.Mongoose = require 'mongoose'
+Logger = require './common/util/Logger'
+hbs = require 'hbs'
+_ = require( 'underscore' )._
 
 Logger.defaults
   level: 5
   name: 'Main'
-log = Logger.Logger()
 
-log.error 'massive error'
-log.warn 'not so massive warning'
-log.info 'some info'
-log.debug 'crazy debug output'
-log.trace 'for really keen'
+log = Logger.createLogger name: 'Server'
+
+#log.error 'massive error'
+#log.warn 'not so massive warning'
+#log.info 'some info'
+#log.debug 'crazy debug output'
+#log.trace 'for really keen'
 
 app.sessionStore = new MemoryStore()
 
@@ -34,6 +30,10 @@ app.everyauth.helpExpress app
 #config the app
 config = require('./config.coffee')(app, express)
 
+# establish database connection and import all necessary models
+db = require('./server/db.coffee')(app)
+
+# initialize game server and communication layer
 app.gameServer = new GameServer
 app.communicator = new Communicator app
 
@@ -145,7 +145,7 @@ app.get '/', ( req, res ) ->
 port =  process.env.PORT || process.env['PORT_WWW']  || 3000
 
 app.listen port, ->
-  console.log "Listening on " + port
+  log.info "Listening on " + port
 
 app.on 'close', ->
   done()

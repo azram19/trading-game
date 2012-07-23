@@ -8,6 +8,7 @@ if require?
   S.HeightMap = require './HeightMap'
   cloneextend = require 'cloneextend'
   util = require 'util'
+  S.Logger = require '../util/Logger'
 else
   _ = window._
   S.Field = window.S.Field
@@ -15,10 +16,12 @@ else
   S.Types = window.S.Types
   S.HeightMap = window.S.HeightMap
   cloneextend = window.cloneextend
+  S.Logger = window.S.Logger
 
 class Map
 
   constructor: ( @eventBus, @minWidth, @maxWidth, @nonUser, @startingFields ) ->
+    @log = S.Logger.createLogger name: 'Map'
     @fields = {}
     @diffRows = @maxWidth - @minWidth
     @directionModUpper = [[-1, -1], [0, -1], [1, 0], [1, 1], [0, 1], [-1, 0]]
@@ -40,7 +43,7 @@ class Map
     #generate fields
     initializeField = ( o, x, y ) =>
       @fields[y][x] = new S.Field(x, y)
-      #console.log x + " " + y + ":field"
+      #@log.trace x + " " + y + ":field"
 
     @iterateFields initializeField
 
@@ -256,7 +259,7 @@ class Map
     platform.behaviour.eventBus = @eventBus
     platform.state.field = @fields[y][x]
     @fields[y][x].platform = platform
-    #console.log x + " " + y + " add pl"
+    #@log.trace x + " " + y + " add pl"
     (
       nDir = (+dir + 3) % 6
       platform.state.routing[dir].object = channel
@@ -288,17 +291,17 @@ class Map
     channelRouting = (x, y, k) =>
       if not (@fields[y][x].platform.type?)
         channels = []
-        #console.log '[Map] field channels on add', @getField(x, y).channels
+        #@log.trace 'field channels on add', @getField(x, y).channels
         _.each @getField(x, y).channels, (route, index) ->
           if (+index) isnt k
             channels.push [route, index]
         dest = channels[0]
-        #console.log "[Map] built channel destination", dest
+        #@log.debug "built channel destination", dest
         if dest?
           dest[1] = (+dest[1])
           nK = (k + 3) % 6
           nIndex = (dest[1] + 3) % 6
-          #console.log "[Map] routing indices", dest[1], nIndex
+          #@log.trace "routing indices", dest[1], nIndex
           dest[0].state.routing[nIndex].object = channel
           dest[0].trigger 'route'
           channel.state.routing[nK].object = dest[0]
@@ -364,21 +367,21 @@ class Map
     @heightMap.map = gameState.heightMap
     initializeField = ( o, x, y ) =>
       @fields[y][x] = new S.Field(x, y)
-      #console.log x + " " + y + ":field"
+      #@log.trace x + " " + y + ":field"
 
     @iterateFields initializeField
 
     @iterateFields ( field, x, y ) =>
       newField = gameState[y][x]
       @addTerrain newField.terrain, x, y
-      #console.log x, y
+      #@log.trace x, y
       if newField.platform.id?
-        #console.log 'platform'
+        #@log.debug 'platform'
         platform = S.ObjectFactory.build newField.platform.type, @eventBus, {}
         _.extend platform.state, newField.platform
         @addPlatform platform, x, y
       if newField.resource.id?
-        #console.log 'resource'
+        #@log.debug 'resource'
         resource = S.ObjectFactory.build newField.resource.type, @eventBus, {}
         _.extend resource.state, newField.resource
         @addResource resource, x, y
