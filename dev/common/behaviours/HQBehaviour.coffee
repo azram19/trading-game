@@ -42,10 +42,10 @@ class HQBehaviour
 
         setInterval production, state.delay
 
-    accept: ( signal, state, callback, ownObject ) ->
+    accept: ( signal, state, callback ) ->
         callback signal
         if signal.owner.id is state.owner.id
-            console.log "[HQBehaviour]: I accept a signal"
+            console.log "Signal accepted"
             state.owner.addResource signal
             @eventBus.trigger 'resource:receive', state.field.xy, signal.strength, signal.type
         else
@@ -53,7 +53,7 @@ class HQBehaviour
             if state.life <= 0
                 @eventBus.trigger 'player:lost', state.owner
 
-    route: ( state, ownObject ) ->
+    route: ( state ) ->
 
 if module? and module.exports
   exports = module.exports = HQBehaviour

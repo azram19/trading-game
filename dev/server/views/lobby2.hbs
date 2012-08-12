@@ -48,18 +48,15 @@
           <div class='row-fluid'>
             <div class='span12 tab-content'>
               <div class='tab-pane' id='history'>
-                {{#each history}}
-                  {{#with this}}
+                {{#history}}
                     <div class='row-fluid'>
                       <div class='span8 name'><span>vs</span> {{name}}</div>
                       <div class='span4 status status-{{result}}'>{{result}}</div>
                     </div>
-                  {{/with}}
-                {{/each}}
+                {{/history}}
               </div>
               <div class='tab-pane' id='highscores'>
-                {{#each highscores}}
-                  {{#with this}}
+                {{#highscores}}
                     <div class='row-fluid'>
                       <div class='span1 position'>
                         {{#if position}}
@@ -69,12 +66,10 @@
                       <div class='span7 name'>{{name}}</div>
                       <div class='span4 status'>{{points}}</div>
                     </div>
-                  {{/with}}
-                {{/each}}
+                {{/highscores}}
               </div>
               <div class='tab-pane active games' id='gameMenu'>
-                {{#each games}}
-                  {{#with this}}
+                {{#games}}
                     <div class='row-fluid'>
                       <div class='span12 game'>
                           <div class='name'>
@@ -90,8 +85,7 @@
                           </div>
                       </div>
                     </div>
-                  {{/with}}
-                {{/each}}
+                {{/games}}
                 <div class='row-fluid'>
                   <div class='span12 options'>
                     <a class='btn playBtn' data-id='{{name}}' href='/game/join'>Play</a>

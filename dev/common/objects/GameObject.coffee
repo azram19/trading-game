@@ -26,13 +26,13 @@ class GameObject
         @behaviour.actionMenu @state
 
     accept: ( signal, callback ) ->
-        @behaviour.accept signal, @state, callback, @
+        @behaviour.accept signal, @state, callback
 
     produce: ->
         @behaviour.produce @state
 
     route: ->
-        @behaviour.route @state, @
+        @behaviour.route @state
 
 if module? and module.exports
     exports = module.exports = GameObject

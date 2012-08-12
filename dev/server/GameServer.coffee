@@ -116,7 +116,7 @@ class GameServer
       if game?
         if game.started
           game.time--
-          log.info 'current time', game.time
+          @log.info 'current time', game.time
           if game.time <= 0
             @trigger 'time:out', game
 
@@ -151,7 +151,11 @@ class GameServer
   setRouting: ( game, x, y, routing, owner ) ->
     instance = @gameInstances[game]
     field = instance.map.getField x, y
-    _.extend field.platform.state.routing, routing
+    routes = field.platform.state.routing
+    @log.info "What kind of routing is that? ", routing
+    @log.info "What kind of routing we have? ", routes
+    for dir, route of routing
+        _.extend routes[dir], route
     @trigger 'routing:changed', game, x, y, routing, owner
 
 module.exports = exports = GameServer

@@ -1,4 +1,4 @@
-debug#node.js requirements
+#node.js requires
 S = {}
 if require?
   _ = require 'underscore'
@@ -21,9 +21,9 @@ class ResourceBehaviour
 
     requestAccept: ( signal, state ) ->
 
-    accept: ( signal, state, callback, ownObject ) ->
+    accept: ( signal, state, callback ) ->
 
-    route: ( state, ownObject ) ->
+    route: ( state ) ->
 
     produce: ( state ) ->
         production = =>
@@ -31,13 +31,14 @@ class ResourceBehaviour
             #@log.trace state.life
             #check if we have engough resources to extract
             if state.life <= 0
-                #resource depleted
+                @log.debug "Resource", @resourceType, "depleted at", state.field.xy
                 if @PID?
                     clearInterval @PID
             else
                 #we have enough resources, mining...
                 if not state.field.platform.state.owner
                   @log.error "Missing owner", state.field
+
                 extractAmount = if state.life >= state.extraction then state.extraction else state.life
                 newSignal = S.SignalFactory.build S.Types.Entities.Signal, @eventBus, extractAmount, @resourceType, state
                 @eventBus.trigger 'resource:produce', state.field.xy, state.extraction, @resourceType
@@ -49,10 +50,9 @@ class ResourceBehaviour
                     state.life -= extractAmount
                     #@log.debug 'triggering accept on platform', new Date()
                     state.field.platform.trigger "accept", newSignal, (signal) ->
-        #production()
-        @PID = setInterval ( ->
-          #@log.trace 'Trigger resource production', new Date()
-          production()
+        @PID = setInterval ( =>
+            @log.trace 'Trigger resource production', Date.now()
+            production()
         ), state.delay
 
 if module? and module.exports

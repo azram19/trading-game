@@ -40,13 +40,11 @@ class PlatformBehaviour
         if state.field.resource.type?
           state.field.resource.trigger 'produce'
 
-    accept: ( signal, state, callback, ownObject ) ->
+    accept: ( signal, state, callback ) ->
         callback signal
         if signal.owner?.id is state.owner.id or signal.owner.id is @eventBus.nonUserId state.owner
-            addSignal = (signal) =>
-                ownObject.state.signals.push signal
-                ownObject.trigger 'route'
-            _.delay addSignal, state.delay, signal
+            state.signals.push { signal: signal, ready: Date.now()+state.delay }
+            _.delay (-> state.field.platform.trigger 'route'), state.delay
         else
             state.life -= signal.strength
             @log.debug "signal dealt damage, life is:", state.life
@@ -59,35 +57,43 @@ class PlatformBehaviour
     depleted: ( state ) ->
 
 
-    route: ( state, ownObject ) ->
-        signal = ownObject.state.signals.shift()
-        if signal?
-          availableRoutes = []
-          _.each state.routing, (route, direction) -> if route.out and route.object?.type?
-              availableRoutes.push [route, direction]
-          if availableRoutes.length > 0
-              destNum = state.routeCounter%availableRoutes.length
-              state.routeCounter++
-              destination = availableRoutes[destNum]
-              #@log.debug "availableRoutes", availableRoutes
-              origOwner = signal.owner
-              origSource = signal.source
+    route: ( state ) ->
+        signalObj = state.signals.shift()
+        if signalObj?
+          if signalObj.ready >= Date.now()
+            signal = signalObj.signal
+            availableRoutes = []
+            _.each state.routing, (route, direction) =>
+                @log.debug "What happened to object in route", route.object, route
+                if route.out and route.object.type?
+                    availableRoutes.push [route, direction]
+            if availableRoutes.length > 0
+                destNum = state.routeCounter % availableRoutes.length
+                state.routeCounter++
+                destination = availableRoutes[destNum]
 
-              signal.source = state
-              signal.owner = state.owner
-              if destination[0].object.requestAccept signal
-                @eventBus.trigger 'move:signal', state.field.xy, destination[1]
-                # @log.debug 'triggering accept on channel', new Date()
-                destination[0].object.trigger 'accept', signal, (signal) ->
-                  if ownObject.state.signals.length > 0
-                    ownObject.trigger 'route'
-              else
-                signal.source = origSource
-                signal.owner = origOwner
-                ownObject.state.signals.push signal
+                @log.debug "availableRoutes", availableRoutes
+                origOwner = signal.owner
+                origSource = signal.source
 
+                signal.source = state
+                signal.owner = state.owner
+                if destination[0].object.requestAccept signal
+                  @eventBus.trigger 'move:signal', state.field.xy, destination[1]
+                  @log.trace 'triggering accept on channel', Date.now()
+                  destination[0].object.trigger 'accept', signal, (signal) =>
+                    if state.signals.length > 0
+                      state.field.platform.trigger 'route'
+                else
+                  signal.source = origSource
+                  signal.owner = origOwner
+                  state.signals.push signalObj
+
+            else
+              state.signals.push signalObj
           else
-            ownObject.state.signals.push signal
+            state.signals.push signalObj
+            _.delay (-> state.field.platform.trigger 'route'), 20
 
 if module? and module.exports
   exports = module.exports = PlatformBehaviour

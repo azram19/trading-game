@@ -1,4 +1,6 @@
 Logger = require './../common/util/Logger'
+Promise = require "promised-io/promise"
+request = require 'request'
 
 # Hell a lot of mess
 # Needs cleanup

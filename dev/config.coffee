@@ -1,13 +1,17 @@
 Promise = require "promised-io/promise"
-request = require 'request'
 _ = require('underscore')._
 
 module.exports = exports = ( app, express ) ->
   config = @
 
+  RedisStore = require('connect-redis')(express)
   # have a great time impersonating this page
-  app.facebookAppId = '381600771875818'
-  app.facebookAppSecret = '1cb71dd07064e3d110f0d76695961664'
+  # I am hijacking this app
+  #app.facebookAppId = '381600771875818'
+  #app.facebookAppSecret = '1cb71dd07064e3d110f0d76695961664'
+
+  app.facebookAppId = '403369609724719'
+  app.facebookAppSecret = 'fd3611515a2d737bfb74608cd485d58d'
   app.facebookScope = 'email'
 
   app.googleAppId = '1045311658397.apps.googleusercontent.com'
@@ -22,6 +26,8 @@ module.exports = exports = ( app, express ) ->
   app.usersByFbId = {}
 
   app.mongoURL = 'mongodb://signal:signals11@ds033097.mongolab.com:33097/heroku_app4770943'
+
+  app.redisURL = 'redis://redistogo:f0501b04ed9b9e6844332fce3f878d5a@lab.redistogo.com:9445/'
 
   #Everyauth - Facebook
   app.everyauth.facebook
@@ -64,6 +70,9 @@ module.exports = exports = ( app, express ) ->
       Promise.when( app.getUserImgSrc( docs ) ).then ( imgSrc ) =>
         docs.imgsrc = imgSrc
         callback err, docs
+
+  app.redis = require('redis-url').createClient app.redisURL
+  app.sessionStore = new RedisStore client: app.redis
 
   #generic config
   app.configure ->

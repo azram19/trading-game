@@ -1,6 +1,7 @@
 class Negotiator
 
   constructor: ( @communicator ) ->
+    @log = S.Logger.createLogger name: "Negotiator"
     self= @
     @started = false
     _.extend @, Backbone.Events
@@ -126,6 +127,8 @@ class Negotiator
         @ui.showTextBubble "Not enough resources", p.x+40, p.y+20, color: [159, 17, 27, 1]
 
     @on 'routing', (obj, routing) =>
+      @log.debug "We're about to inject routing ", routing
+      @log.debug "Object we're injecting to ", obj
       _.extend obj.platform.state.routing, routing
       obj.platform.trigger 'route'
       _.each routing, ( route ) ->
@@ -174,9 +177,9 @@ class Negotiator
       if owner.id isnt @myPlayer.id
         field = @getField x, y
         routes = field.platform.state.routing
+        @log.trace "some mysterious routes ", routes
         for dir, route of routing
-          routes[dir].in = route.in
-          routes[dir].out = route.out
+          _.extend routes[dir], route
 
     @communicator.on 'state:sync', (players, startingPoints, state) =>
       @game.map.importGameState state

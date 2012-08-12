@@ -333,8 +333,8 @@ class Map
               newChannel.routing[dir].object = {}
             newChannel.fields = []
             for signal, i in newChannel.signals
-              signal.source.field = {}
-              signal.events = {}
+              signal.signal.source.field = {}
+              signal.signal.events = {}
             channels[direction] = newChannel
           else
             channels[direction] = {}
@@ -346,8 +346,8 @@ class Map
           platform.routing[dir].object = {}
         platform.field = {}
         for signal in platform.signals
-          signal.source.field = {}
-          signal.events = {}
+          signal.signal.source.field = {}
+          signal.signal.events = {}
       resource = {}
       if field.resource.type?
         resource = cloneextend.cloneuptolevel field.resource.state, 3

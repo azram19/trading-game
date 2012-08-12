@@ -1,10 +1,10 @@
 express = require 'express'
+util = require 'util'
 
 app = module.exports = express.createServer()
 app.io = require( 'socket.io' ).listen( app )
 app.everyauth = require 'everyauth'
 
-MemoryStore = express.session.MemoryStore
 Communicator = require './server/communicator'
 GameServer = require './server/GameServer'
 Logger = require './common/util/Logger'
@@ -16,14 +16,6 @@ Logger.defaults
   name: 'Main'
 
 log = Logger.createLogger name: 'Server'
-
-#log.error 'massive error'
-#log.warn 'not so massive warning'
-#log.info 'some info'
-#log.debug 'crazy debug output'
-#log.trace 'for really keen'
-
-app.sessionStore = new MemoryStore()
 
 app.everyauth.helpExpress app
 
