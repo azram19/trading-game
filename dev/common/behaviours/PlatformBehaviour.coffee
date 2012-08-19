@@ -60,7 +60,8 @@ class PlatformBehaviour
     route: ( state ) ->
         signalObj = state.signals.shift()
         if signalObj?
-          if signalObj.ready >= Date.now()
+          @log.error Date.now(), (Date.now()-signalObj.ready)
+          if signalObj.ready <= Date.now()
             signal = signalObj.signal
             availableRoutes = []
             _.each state.routing, (route, direction) =>

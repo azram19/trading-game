@@ -65,7 +65,7 @@ class ChannelBehaviour
         channelObj = _.filter state.fields[0].channels, (channel) ->
             channel.type? and channel.state.id is state.id
 
-        if signalObj.ready >= Date.now()
+        if signalObj.ready <= Date.now()
           signal = signalObj.signal
           availableRoutes = []
           @log.debug "state.routing", state.routing
