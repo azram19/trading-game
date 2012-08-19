@@ -556,10 +556,10 @@ class SignalsDrawer extends Drawer
             @stage.addChild signal
         signal.x = point.x
         signal.y = point.y
-        signal.tickSizeX = @offsetX[dir]/Ticker.getMeasuredFPS()
-        signal.tickSizeY = @offsetY[dir]/Ticker.getMeasuredFPS()
+        signal.startX = point.x
+        signal.startY = point.y
         signal.visible = true
-        signal.k = 0
+        signal.dir = dir
 
     drawWorker: (x, y, direction) ->
         if @contains @boardDR.visibility, [x, y]
@@ -580,16 +580,12 @@ class SignalsDrawer extends Drawer
 
     tick: () ->
         for signal in @stage.children
-            if signal.isSignal and signal.isVisible
-                signal.visible = true
-                signal.tickSizeX = @offsetX[dir]/Ticker.getMeasuredFPS()
-                signal.tickSizeY = @offsetY[dir]/Ticker.getMeasuredFPS()
-                if @getDistance(signal.k * signal.tickSizeX, signal.k * signal.tickSizeY) >= @distance
+            if signal.isSignal
+                if @getDistance(signal.x - signal.startX, signal.y - signal.startY) >= @distance
                     signal.visible = false
                 else
-                    signal.x += signal.tickSizeX
-                    signal.y += signal.tickSizeY
-                    signal.k += 1
+                    signal.x += @offsetX[signal.dir]/Ticker.getMeasuredFPS()
+                    signal.y += @offsetY[signal.dir]/Ticker.getMeasuredFPS()
         @fpsLabel.text = Math.round(Ticker.getMeasuredFPS())+" fps"
         @stage.update()
 
