@@ -9,13 +9,8 @@ class Negotiator
     @game = {}
     @renderer = {}
 
-    window.loader = @loader = new S.Loader()
     @timer = new S.Timer @
     @timer.setTime 900
-
-    $.when( @loader.start() ).then ->
-
-    @loading = new $.Deferred()
 
     @on 'move:signal', (xy, dir) ->
       #console.debug 'move:signal', xy, dir
@@ -163,7 +158,6 @@ class Negotiator
       [x,y] = position
       @renderer.buildPlatform x, y, HQ
       @renderer.changeOwnership x, y, playerObject.id
-      @renderer.loading.notify 250
 
     @communicator.on 'foreign:build:platform', (x, y, type, owner) =>
       if owner.id isnt @myPlayer.id
@@ -210,7 +204,7 @@ class Negotiator
       @timer.setTime time - Math.round(2 * lag)
 
     @communicator.on 'players:all:ready', =>
-      console.log '[Negotiator] all players loaded'
+      console.log '[Negotiator] all players loaded', Date.now()
       @started = true
       @startGame()
       self.timer.start()
@@ -312,22 +306,10 @@ class Negotiator
       @terrain = new S.Terrain @, 'background', minWidth, maxWidth
       @renderer = new S.Renderer @, minWidth, maxWidth, _.pluck(@game.players, 'id'), @myPlayer
 
-      @loader.register @terrain.loading.promise(), 400
-      @loader.register @renderer.loading.promise(), 100
-      @loader.register @loading.promise(), 100
-
       $.when(@renderer.boardLoaded.promise()).done =>
-        @renderer.loading.notify 50
-
         @renderer.setupBoard @game.map
 
-        @renderer.loading.notify 50
-
         @terrain.draw()
-
-        @renderer.loading.notify 250
-        if _.keys(@game.players).length is 2
-          @renderer.loading.notify 250
 
         @ui.start()
         dfd.resolveWith @

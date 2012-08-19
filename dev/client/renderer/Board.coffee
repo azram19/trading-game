@@ -266,7 +266,7 @@ class BoardDrawer extends Drawer
                 @setVisibility [x, y], false, ownerid
             when 2
                 if ownerid isnt @myPlayer.id
-                    @ownership = @without @ownership, point
+                    @ownership = @without @ownership, [x,y]
                 else
                     @setVisibility [x, y], false, ownerid
                 @owner[x][y].visible = false
@@ -582,6 +582,8 @@ class SignalsDrawer extends Drawer
         for signal in @stage.children
             if signal.isSignal and signal.isVisible
                 signal.visible = true
+                signal.tickSizeX = @offsetX[dir]/Ticker.getMeasuredFPS()
+                signal.tickSizeY = @offsetY[dir]/Ticker.getMeasuredFPS()
                 if @getDistance(signal.k * signal.tickSizeX, signal.k * signal.tickSizeY) >= @distance
                     signal.visible = false
                 else
@@ -604,8 +606,6 @@ class Renderer
         canvasBitmaps = document.getElementById "bitmaps"
         @bitmaps = ["/img/Food.png", "/img/Gold.png", "/img/hq.png", "/img/iron.png", "/img/platform.png", "/img/road.png"]
         @boardLoaded = $.Deferred()
-
-        @loading = $.Deferred()
 
         if canvasOwnership?
             @ownershipST = new Stage canvasOwnership
