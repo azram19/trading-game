@@ -76,7 +76,7 @@ module.exports = exports = ( app, express ) ->
 
   #generic config
   app.configure ->
-    app.set 'views', __dirname + '/server/views'
+    app.set 'views', __dirname + '/views'
     app.set 'view engine', 'hbs'
 
     app.use express.bodyParser()
@@ -90,7 +90,7 @@ module.exports = exports = ( app, express ) ->
 
     app.use app.everyauth.middleware()
     app.use express.methodOverride()
-    app.use express.static(__dirname + '/webroot')
+    app.use express.static(__dirname + '/../webroot')
 
   #env specific config
   app.configure 'development', ->

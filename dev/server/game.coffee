@@ -5,9 +5,9 @@ app = module.exports = express.createServer()
 app.io = require( 'socket.io' ).listen( app )
 app.everyauth = require 'everyauth'
 
-Communicator = require './server/communicator'
-GameServer = require './server/GameServer'
-Logger = require './common/util/Logger'
+Communicator = require './communicator'
+GameServer = require './GameServer'
+Logger = require '../common/util/Logger'
 hbs = require 'hbs'
 _ = require( 'underscore' )._
 
@@ -23,7 +23,7 @@ app.everyauth.helpExpress app
 config = require('./config.coffee')(app, express)
 
 # establish database connection and import all necessary models
-db = require('./server/db.coffee')(app)
+db = require('./db.coffee')(app)
 
 # initialize game server and communication layer
 app.gameServer = new GameServer
