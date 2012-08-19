@@ -862,8 +862,8 @@ class Terrain extends S.Drawer
 
     @stage.update()
 
-    @hideWater()
-    @hideTerrain()
+    #@hideWater()
+    #@hideTerrain()
 
     @readyDefer.resolve()
 
