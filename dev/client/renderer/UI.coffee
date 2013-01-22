@@ -1,7 +1,7 @@
 class UI extends S.Drawer
   constructor: ( @events, @minRow, @maxRow ) ->
     @canvas = document.getElementById "UI"
-    @stage = new Stage @canvas
+    @stage = new createjs.Stage @canvas
     @stage.autoclear = false
 
     super @minRow, @maxRow
@@ -75,7 +75,7 @@ class UI extends S.Drawer
     $( window ).resize @resizeViewport
 
     #Start listening to the ticker
-    Ticker.addListener @
+    createjs.Ticker.addListener @
 
 
   getLoadingStage: ( @loading ) ->
@@ -110,7 +110,7 @@ class UI extends S.Drawer
         return {}
 
     if i < 0
-      bubble = new Text()
+      bubble = new createjs.Text()
       bubble.textAlign = 'center'
       bubble.baseline = ''
       bubble.font = "bold 13px 'Cabin', Helvetica,Arial,sans-serif"
@@ -121,7 +121,7 @@ class UI extends S.Drawer
       i = @bubble.length - 1
 
     bubble = @bubble[i]
-    tInv = config.t/Ticker.getInterval()
+    tInv = config.t/createjs.Ticker.getInterval()
 
     bubble.alpha = 1
 
@@ -142,7 +142,7 @@ class UI extends S.Drawer
     @stage.update()
 
   tick: () ->
-    interval = Ticker.getInterval()
+    interval = createjs.Ticker.getInterval()
     update = false
 
     (
@@ -434,7 +434,7 @@ class UI extends S.Drawer
       if event.button != 2
         return
 
-      p = @getCoords (new Point x, y)
+      p = @getCoords (new createjs.Point x, y)
 
       if @curMenu? and @curMenu.hitTest x, y, true
        if @curMenu.positionI == p.x and @curMenu.positionJ == p.y

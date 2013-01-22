@@ -27,11 +27,11 @@ class RadialMenu
     Get the context and stage we will be drawing to. Only for the root it will be the actuall context, for every other element it will get
     overwritten by root's context and stage.
     ###
-    @stage = new Stage @canvas
+    @stage = new createjs.Stage @canvas
     @stage.autoclear = false
 
     #Container where we store all our children
-    @container = new Container()
+    @container = new createjs.Container()
 
     #My parent
     @parent = null
@@ -94,13 +94,13 @@ class RadialMenu
       This is a title displayed next to the menu item. It is hidden by
       default and shown only when menu item is in visibile state
       ###
-      @$title = new Text @text,
+      @$title = new createjs.Text @text,
         "bold 13px 'Cabin', Helvetica,Arial,sans-serif",
         "#FFF"
 
       @$title.visible = false
 
-      @$actionTitle = new Text @positive_action,
+      @$actionTitle = new createjs.Text @positive_action,
         "bold 13px 'Cabin', Helvetica,Arial,sans-serif",
         "#FFF"
 
@@ -201,7 +201,7 @@ class RadialMenu
 
     @drawn = true
 
-    @button = new Shape()
+    @button = new createjs.Shape()
 
     @button =
       if @children.length < 1
@@ -212,21 +212,21 @@ class RadialMenu
     if not @root
       @button.onClick = @click
 
-    @circle = new Shape()
+    @circle = new createjs.Shape()
     @circle.visible = false
     @circle.graphics
       .setStrokeStyle(2)
       .beginStroke( "rgba(0,0,0,#{@fadedOutOpacity/4})" )
       .drawCircle( @x_o, @y_o, @expand_length )
 
-    @circleC = new Shape()
+    @circleC = new createjs.Shape()
     @circleC.visible = false
     @circleC.graphics
       .setStrokeStyle(2)
       .beginStroke( "rgba(0,0,0,#{@fadedOutOpacity/4})" )
       .drawCircle( @x_o, @y_o, @compact_length )
 
-    @actionButton = new Shape()
+    @actionButton = new createjs.Shape()
     @actionButton.onClick = @action
 
     if @children.length < 1
@@ -268,7 +268,7 @@ class RadialMenu
     @button.cache @x_o-@radius, @y_o-@radius, (@radius) * 2, (@radius) * 2
     @actionButton.cache @x_o-@radius, @y_o-@radius, (@radius) * 2, (@radius) * 2
 
-    Ticker.addListener @, false
+    createjs.Ticker.addListener @, false
 
   destroy: () ->
     child.destroy() for child in @children
@@ -285,7 +285,7 @@ class RadialMenu
     $( @canvas ).unbind "contextmenu", ( e ) ->
       e.preventDefault()
 
-    Ticker.removeListener @
+    createjs.Ticker.removeListener @
 
   drawButtonOrange: ( button ) ->
     button.graphics
@@ -316,7 +316,7 @@ class RadialMenu
     [x,y] = @computeP @length_base
 
     if not @root and @x != x and @y != y
-      @steps = @showTime/Ticker.getInterval()
+      @steps = @showTime/createjs.Ticker.getInterval()
       @stepX = (x-@x)/@steps
       @stepY = (y-@y)/@steps
       @stepOpacity = (1-@opacity)/@steps
@@ -345,7 +345,7 @@ class RadialMenu
       @hideFn = () ->
 
     if not @root and @x != x and @y != y
-      @steps = @showTime/Ticker.getInterval()
+      @steps = @showTime/createjs.Ticker.getInterval()
       @stepX = @x/@steps
       @stepY = @y/@steps
       @stepOpacity = (-@opacity)/@steps
@@ -394,7 +394,7 @@ class RadialMenu
     [x,y] = @computeP @expand_length
 
     if not @root and @x != x and @y != y
-      @steps = @showTime/Ticker.getInterval()
+      @steps = @showTime/createjs.Ticker.getInterval()
       @stepX = (x-@x)/@steps
       @stepY = (y-@y)/@steps
       @stepOpacity = (@fadedInOpacity-@opacity)/@steps
@@ -438,7 +438,7 @@ class RadialMenu
     [x,y] = @computeP @compact_length
 
     if not @root  and @x != x and @y != y
-      @steps = @showTime/Ticker.getInterval()
+      @steps = @showTime/createjs.Ticker.getInterval()
       @stepX = (@x-x)/@steps
       @stepY = (@y-y)/@steps
       @stepOpacity = (@fadedOutOpacity-@opacity)/@steps
@@ -559,7 +559,7 @@ class RadialMenu
 
     @rotationFn = fn
 
-    @rotateSteps = @showTime/Ticker.getInterval()
+    @rotateSteps = @showTime/createjs.Ticker.getInterval()
     @rotateStep = angle / @rotateSteps
     @rotateStepXY = full
 

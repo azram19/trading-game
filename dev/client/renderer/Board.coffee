@@ -82,12 +82,12 @@ class Drawer
     # Returns canvas coordinates in pixels
     getPoint: (x, y) ->
         offset = @margin + Math.abs(@diffRows - y)*@horIncrement
-        new Point(offset + 2*x*@horIncrement, @margin + y*@verIncrement)
+        new createjs.Point(offset + 2*x*@horIncrement, @margin + y*@verIncrement)
 
     # Arguments: point with canvas coordinates and direction (0..5)
     # Returns canvas coordinates of destination point in particular direction
     getDestination: (point, direction) ->
-        new Point(point.x + @offsetX[direction], point.y + @offsetY[direction])
+        new createjs.Point(point.x + @offsetX[direction], point.y + @offsetY[direction])
 
     # Arguments: point with canvas coordinates (which is a center of a particular hex)
     # Returns board coordinates of a particular point
@@ -95,12 +95,12 @@ class Drawer
         y = (point.y - @margin) / @verIncrement
         offset = @margin + Math.abs(@diffRows-y)*@horIncrement
         x = (point.x - offset) / (2*@horIncrement)
-        new Point Math.round(x), Math.round(y)
+        new createjs.Point Math.round(x), Math.round(y)
 
     # Arguments: direction
     # Returns point with tick sizes for particular direction
     getTicks: (direction) ->
-        p = new Point(@ticksX[direction], @ticksY[direction])
+        p = new createjs.Point(@ticksX[direction], @ticksY[direction])
 
     # Calculates hypotenuse of a triangle with side lengths x, y
     getDistance: (x, y) ->
@@ -162,28 +162,28 @@ class BoardDrawer extends Drawer
 #--------------------#
     setShapes: () ->
         drawFog = () =>
-            g1 = new Graphics()
+            g1 = new createjs.Graphics()
             g1.beginFill("#000000")
              .drawPolyStar(0, 0, @size*1.008, 6, 0, 90)
-            fog = new Shape g1
+            fog = new createjs.Shape g1
             fog.alpha = 0.6
             fog.regX = @horIncrement
             fog.regY = @size
             @shapes[0] = fog
             @shapes[0].cache(-@horIncrement, -@size, (@distance), (@size)*2)
         drawGrid = () =>
-            g2 = new Graphics()
+            g2 = new createjs.Graphics()
             g2.setStrokeStyle(3)
              .beginStroke("#616166")
              .drawPolyStar(0, 0, @size, 6, 0, 90)
-            grid = new Shape g2
+            grid = new createjs.Shape g2
             grid.regX = @horIncrement
             grid.regY = @size
             @shapes[1] = grid
             @shapes[1].cache(-@horIncrement, -@size, (@distance), (@size)*2)
         drawChannel = (point, direction) =>
             destination = @getDestination(point, direction)
-            g = new Graphics()
+            g = new createjs.Graphics()
             g.moveTo(point.x, point.y)
              .setStrokeStyle(8,1)
              .beginStroke("#564334")
@@ -203,11 +203,11 @@ class BoardDrawer extends Drawer
              .beginStroke("#564334")
              .beginFill("#CFB590")
              .drawCircle(destination.x, destination.y, 4)
-            ch = new Shape g
+            ch = new createjs.Shape g
             @shapes[2] = ch
         drawFog()
         drawGrid()
-        drawChannel(new Point(0,0), 0)
+        drawChannel(new createjs.Point(0,0), 0)
 
     addElement: (x, y, e) ->
         @elements[x] ?= []
@@ -300,11 +300,11 @@ class BoardDrawer extends Drawer
 
     drawOwnership: (point, ownerid) ->
         draw = (ownerid) =>
-            g = new Graphics()
+            g = new createjs.Graphics()
             g.setStrokeStyle(4)
              .beginStroke(@colors[_.indexOf(@players, ownerid)])
              .drawPolyStar(0, 0, @size*0.93, 6, 0, 90)
-            new Shape g
+            new createjs.Shape g
         owner = draw(ownerid)
         if @fogON
             owner.visible = false
@@ -501,14 +501,14 @@ class OffSignals
         @setupSignalTable()
 
     drawSignal: () ->
-        g = new Graphics()
+        g = new createjs.Graphics()
         g.setStrokeStyle(2)
             #.beginStroke("#C7F66F")
             #.beginFill("#84B22D")
             .beginStroke("#0F4DA8")
             .beginFill("#437DD4")
             .drawCircle(0, 0, @signalRadius)
-        shape = new Shape g
+        shape = new createjs.Shape g
         shape.snapToPixel = true
         shape.visible = false
         shape.isSignal = true
@@ -536,10 +536,10 @@ class SignalsDrawer extends Drawer
             distance: 80
             time: S.Properties.channel.delay
 
-        Ticker.addListener this
+        createjs.Ticker.addListener @
 
     setupFPS: () ->
-        @fpsLabel = new Text "-- fps", "bold 18px Arial", "#FFF"
+        @fpsLabel = new createjs.Text "-- fps", "bold 18px Arial", "#FFF"
         @stage.addChild @fpsLabel
         @fpsLabel.x = 10
         @fpsLabel.y = 20
@@ -578,15 +578,15 @@ class SignalsDrawer extends Drawer
             @drawSignal(point, direction)
             @stage.update()
 
-    tick: () ->
+    tick: (delay, paused) ->
         for signal in @stage.children
             if signal.isSignal
                 if @getDistance(signal.x - signal.startX, signal.y - signal.startY) >= @distance
                     signal.visible = false
                 else
-                    signal.x += @offsetX[signal.dir]/Ticker.getMeasuredFPS()
-                    signal.y += @offsetY[signal.dir]/Ticker.getMeasuredFPS()
-        @fpsLabel.text = Math.round(Ticker.getMeasuredFPS())+" fps"
+                    signal.x += @offsetX[signal.dir]/createjs.Ticker.getMeasuredFPS()
+                    signal.y += @offsetY[signal.dir]/createjs.Ticker.getMeasuredFPS()
+        @fpsLabel.text = Math.round(createjs.Ticker.getMeasuredFPS())+" fps"
         @stage.update()
 
 class Renderer
@@ -604,21 +604,21 @@ class Renderer
         @boardLoaded = $.Deferred()
 
         if canvasOwnership?
-            @ownershipST = new Stage canvasOwnership
+            @ownershipST = new createjs.Stage canvasOwnership
         if canvasResources?
-            @resourcesST = new Stage canvasResources
+            @resourcesST = new createjs.Stage canvasResources
         if canvasPlatforms?
-            @platformsST = new Stage canvasPlatforms
-            @bitmapsST = new Stage canvasBitmaps
+            @platformsST = new createjs.Stage canvasPlatforms
+            @bitmapsST = new createjs.Stage canvasBitmaps
         if canvasGrid?
-            @gridST = new Stage canvasGrid
+            @gridST = new createjs.Stage canvasGrid
         if canvasChannels?
-            @channelsST = new Stage canvasChannels
+            @channelsST = new createjs.Stage canvasChannels
         if canvasFog?
-            @fogST = new Stage canvasFog
+            @fogST = new createjs.Stage canvasFog
         if canvasSignals?
-            @signalsST = new Stage canvasSignals
-            @offST = new Stage canvasOff
+            @signalsST = new createjs.Stage canvasSignals
+            @offST = new createjs.Stage canvasOff
 
         @stages = [@gridST, @fogST, @ownershipST, @resourcesST, @platformsST, @channelsST, @signalsST]
 
@@ -641,7 +641,7 @@ class Renderer
                 -1
 
         setImg = (event) =>
-            bitmap = new Bitmap event.target
+            bitmap = new createjs.Bitmap event.target
             bitmap.visible = false
             bitmap.regX = 35
             bitmap.regY = 40
@@ -709,8 +709,8 @@ class Renderer
         @boardDR.clearData()
         @signalsDR.setupOffSignals()
         @boardDR.setupBoard(boardState)
-        Ticker.useRAF = true
-        Ticker.setFPS 60
+        createjs.Ticker.useRAF = true
+        createjs.Ticker.setFPS 60
         @updateAll()
 
 window.S.Drawer = Drawer

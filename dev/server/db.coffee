@@ -1,6 +1,7 @@
 Logger = require './../common/util/Logger'
-Promise = require "promised-io/promise"
+Promise = require 'promised-io/promise'
 request = require 'request'
+_ = require('underscore')._
 
 # Hell a lot of mess
 # Needs cleanup
@@ -112,10 +113,10 @@ module.exports = exports = ( app ) ->
     userModel = app.Mongoose.model 'User'
     userModel
       .find()
-      .desc( 'highscore' )
+      .sort( '-highscore' )
       .limit( 10 )
       .select( 'name highscore' )
-      .run handleHighscores
+      .exec handleHighscores
 
     defer.promise
 
@@ -174,8 +175,8 @@ module.exports = exports = ( app ) ->
         userModel
           .where( 'id' )
           .in( friendsIds )
-          .desc( 'highscore' )
-          .run handleFriends
+          .sort( '-highscore' )
+          .exec handleFriends
 
     handleGooglePlusFriends = ( friends ) ->
 

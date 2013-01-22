@@ -1,8 +1,8 @@
 express = require 'express'
 util = require 'util'
 
-app = module.exports = express.createServer()
-app.io = require( 'socket.io' ).listen( app )
+app = module.exports = express()
+server = require('http').createServer app
 app.everyauth = require 'everyauth'
 
 Communicator = require './communicator'
@@ -17,17 +17,17 @@ Logger.defaults
 
 log = Logger.createLogger name: 'Server'
 
-app.everyauth.helpExpress app
+app.io = require( 'socket.io' ).listen server
+
+# initialize game server and communication layer
+app.gameServer = new GameServer
+app.communicator = new Communicator app
 
 #config the app
 config = require('./config.coffee')(app, express)
 
 # establish database connection and import all necessary models
 db = require('./db.coffee')(app)
-
-# initialize game server and communication layer
-app.gameServer = new GameServer
-app.communicator = new Communicator app
 
 app.get '/lobby2', ( req, res ) ->
   if app.requireAuth and not req.loggedIn
@@ -136,7 +136,7 @@ app.get '/', ( req, res ) ->
 
 port =  process.env.PORT || process.env['PORT_WWW']  || 3000
 
-app.listen port, ->
+server.listen port, ->
   log.info "Listening on " + port
 
 app.on 'close', ->

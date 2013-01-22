@@ -1,10 +1,10 @@
 class Terrain extends S.Drawer
   constructor: ( @events, id, @minRow, @maxRow, map, useAWorker ) ->
     @canvas = document.getElementById id
-    @stage = new Stage @canvas
+    @stage = new createjs.Stage @canvas
 
     @canvas2 = document.getElementById 'water'
-    @waterStage = new Stage @canvas2
+    @waterStage = new createjs.Stage @canvas2
 
     if useAWorker
       @worker = new Worker '/js/TerrainWorker.js'
@@ -62,7 +62,7 @@ class Terrain extends S.Drawer
 
     @previousHitTest = [0, 0]
 
-    @hitHexMap = new Shape()
+    @hitHexMap = new createjs.Shape()
     @hitHexMap.graphics
       .beginFill( "#FFF" )
       .drawPolyStar(0, 0, @size, 6, 0, 90)
@@ -163,7 +163,7 @@ class Terrain extends S.Drawer
 
     maskCanvas = @createBitmapCanvas cwidth, cheight
     maskContext = maskCanvas.getContext '2d'
-    maskStage = new Stage maskCanvas
+    maskStage = new createjs.Stage maskCanvas
     maskStage.addChild mask
     maskStage.update()
     maskData = maskContext.getImageData 0, 0, cwidth, cheight
@@ -174,7 +174,7 @@ class Terrain extends S.Drawer
     blendTerrain = @getFieldBitmap terrain
     blendCanvas = @createBitmapCanvas cwidth, cheight
     blendContext = blendCanvas.getContext '2d'
-    blendStage = new Stage blendCanvas
+    blendStage = new createjs.Stage blendCanvas
     blendStage.addChild blendTerrain
     blendTerrain.x = x
     blendTerrain.y = y
@@ -316,7 +316,7 @@ class Terrain extends S.Drawer
     context = bitmapCanvas.getContext '2d'
     bitmapCanvas.getContext('2d').putImageData bitmap, 0, 0
 
-    bitmapObj = new Bitmap bitmapCanvas
+    bitmapObj = new createjs.Bitmap bitmapCanvas
 
     $( bitmapCanvas ).remove()
 
@@ -586,7 +586,7 @@ class Terrain extends S.Drawer
     context.clearRect 0, 0, @bitmapWidth, @bitmapHeight
     bitmapCanvas.getContext('2d').putImageData bitmap, 0, 0
 
-    @bitmaps[type] = new Bitmap bitmapCanvas
+    @bitmaps[type] = new createjs.Bitmap bitmapCanvas
 
     $( bitmapCanvas ).remove()
 
@@ -796,7 +796,7 @@ class Terrain extends S.Drawer
     context = terrainCanvas.getContext '2d'
     terrainCanvas.getContext('2d').putImageData terrainData, 0, 0
 
-    terrain = new Bitmap terrainCanvas
+    terrain = new createjs.Bitmap terrainCanvas
 
     $( terrainCanvas ).remove()
 

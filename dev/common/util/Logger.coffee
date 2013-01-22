@@ -4,6 +4,7 @@
 S = {}
 if require?
   _ = require('underscore')._
+  colors = require 'colors'
 else
   _ = window._
 
@@ -11,32 +12,22 @@ class Logger
 
   constructor: (opts) ->
     opts = opts or {}
-    @colors = false isnt opts.colors
     @level = if opts.level? then opts.level else 3
     @enabled = false isnt opts.enabled
     @name = if opts.name? then opts.name else 'Global'
     @browser = require?
 
-    # Colors for log levels.
-    @colorCodes = [
-      31 # Red
-      33 # Yellow
-      36 # Cyan
-      35 # Magenta
-      90 # Grey
-    ]
+    @levels =
+      trace: 'grey'
+      debug: 'cyan'
+      info: 'green'
+      warn: 'yellow'
+      error: 'red'
 
-    @levels = [
-      'error'
-      'warn'
-      'info'
-      'debug'
-      'trace'
-    ]
+    @maxLevelLength = _.max(@levels, (v, k) -> k.length).length
 
-    @maxLevelLength = _.max(@levels, (v) -> v.length).length
     # Generate methods
-    _.each @levels, (name) =>
+    _.each @levels, (color, name) =>
       @[name] = ->
         @log.apply @, [name].concat _.toArray(arguments)
 
@@ -46,27 +37,52 @@ class Logger
 
     str
 
+  prep: (numb, n) ->
+    ("000" + numb)[-n..]; # works for n <= 3
+
+  getDate: ->
+      d = new Date()
+      d.toLocaleTimeString() + '.' + @prep d.getMilliseconds(), 3
+
+  prepareMessage: (type) ->
+    index = _.keys(@levels).indexOf type
+    levelColor = _.values(@levels)[index]
+
+    if @browser
+      [
+        @getDate().grey
+        '-'[levelColor]
+        @pad(type)[levelColor].bold
+        '-'[levelColor]
+        @name.bold
+        '-'[levelColor]
+      ]
+    else
+      [ @getDate()
+        '-'
+        @pad(type)
+        '-'
+        @name
+        '-'
+      ]
+
   log: (type) ->
-    index = @levels.indexOf type
+    index = _.keys(@levels).indexOf type
 
     if index > @level or not @enabled
       return @
 
     console.log.apply console,
-      [ '[' + @name + ']'
-        if @colors and @browser then '\x1B[' + @colorCodes[index] + 'm' + '- ' + @pad(type) + ' -\x1B[39m'
-        else type + ':'
-      ].concat _.toArray(arguments)[1..]
+      @prepareMessage(type).concat _.toArray(arguments)[1..]
 
     @
 
 defaults =
   name: 'Global'
   level: 3
-  colors: true
   enabled: true
 
-publicApi =
+log =
   defaults: (config) ->
     _.extend defaults, config
   createLogger: (config) ->
@@ -75,6 +91,6 @@ publicApi =
     new Logger defCopy
 
 if module? and module.exports
-  exports = module.exports = publicApi
+  exports = module.exports = log
 else
-  window.S.Logger = publicApi
+  window.S.Logger = log

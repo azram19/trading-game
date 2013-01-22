@@ -4,7 +4,7 @@ class Human
 
     if not stage?
       canvas2 = document.getElementById 'animations'
-      @stage = new Stage canvas2
+      @stage = new createjs.Stage canvas2
     else
       @stage = stage
 
@@ -77,11 +77,11 @@ class Human
 
     $.when( @ready ).then ->
       console.log "[Human] ready"
-      @spriteSheet = new SpriteSheet @data
-      @animation = new BitmapAnimation @spriteSheet
+      @spriteSheet = new createjs.SpriteSheet @data
+      @animation = new createjs.BitmapAnimation @spriteSheet
       @stage.addChild @animation
 
-      Ticker.addListener @
+      createjs.Ticker.addListener @
 
   clear: () ->
 

@@ -3,7 +3,8 @@ ComClient = require './communicationClient'
 _ = require( 'underscore' )._
 Backbone = require( 'backbone' )
 Promise = require "promised-io/promise"
-parseCookie = require('connect').utils.parseCookie
+cookie = require('cookie')
+parseSignedCookie = require('connect').utils.parseSignedCookie
 util = require 'util'
 crypto = require 'crypto'
 Logger = require '../common/util/Logger'
@@ -26,24 +27,22 @@ class Communicator
     @sockets = if @channel? then @app.io.of channel else @app.io.sockets
 
     @log = Logger.createLogger name: 'Communicator'
-
     ###
     Configure authorization and shared session between Express and
     Socket.io
     ###
     @app.io.set 'log level', 1
 
-    @app.io.set 'authorization', ( data, accept ) ->
+    @app.io.set 'authorization', ( data, accept ) =>
       #checks if there is a cookie
       if data.headers.cookie
 
         #if there is parse it
-        data.cookie = parseCookie data.headers.cookie
+        data.cookie = cookie.parse data.headers.cookie
         #get session id
-        data.sessionID = data.cookie['express.sid']
-
+        data.sessionID = parseSignedCookie data.cookie['express.sid'], @app.sessionSecret
         #get data from the store
-        app.sessionStore.get data.sessionID, ( err, session ) ->
+        app.sessionStore.get data.sessionID, ( err, session ) =>
           if err or not session
             #we cannot grab the session so turn the connection down
             accept 'Error', false

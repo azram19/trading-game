@@ -4,7 +4,7 @@ class People
     @time = options.time + 5
 
     canvas2 = document.getElementById 'animations'
-    @stage = new Stage canvas2
+    @stage = new createjs.Stage canvas2
 
     @buffer = []
     @moving = {}
@@ -17,7 +17,7 @@ class People
     for i in [0...3]
       @create()
 
-    Ticker.addListener @
+    createjs.Ticker.addListener @
 
   create: () ->
     h = new S.Human @events, @images[0], @stage, @distance, @time

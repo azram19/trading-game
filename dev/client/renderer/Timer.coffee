@@ -4,7 +4,7 @@ class Timer
 
     setInterval @tick, 1000
 
-    @counter = new Text()
+    @counter = new createjs.Text()
     @counter.textBaseline  = "middle"
     @counter.textAlign = "center"
     @counter.color = "#fff"
@@ -13,7 +13,7 @@ class Timer
     @counter.y = 25
 
     @canvas = document.getElementById 'timer'
-    @stage = new Stage @canvas
+    @stage = new createjs.Stage @canvas
     @stage.addChild @counter
 
   setTime: ( time ) ->

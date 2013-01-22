@@ -35,7 +35,7 @@ module.exports = exports = ( app, express ) ->
     .appSecret( app.facebookAppSecret )
     .scope( app.facebookScope )
     .findOrCreateUser( (session, accessToken, accessTokExtra, fbUserMetadata) ->
-      userPromise = this.Promise()
+      userPromise = @Promise()
       userData =
         name: fbUserMetadata.name
         userName: fbUserMetadata.username
@@ -47,12 +47,13 @@ module.exports = exports = ( app, express ) ->
     )
     .redirectPath( '/lobby2' )
 
+  #Everyauth - Google+
   app.everyauth.google
     .appId( app.googleAppId )
     .appSecret( app.googleAppSecret )
     .scope( app.googleScope )
     .findOrCreateUser( (session, accessToken, extra, googleUser) ->
-      userPromise = this.Promise()
+      userPromise = @Promise()
       userData =
         name: googleUser.name
         userName: googleUser.id

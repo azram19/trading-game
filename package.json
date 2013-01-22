@@ -1,32 +1,31 @@
 {
   "name": "singnals",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "engines": {
-    "node": "0.6.x",
-    "npm":  "1.0.x"
+    "node": "0.8.x",
+    "npm":  "1.1.x"
   },
   "dependencies": {
-    "express": "2.5.9",
-    "connect" : "2.3.0",
-    "socket.io": "0.9.0",
-    "redis": "0.7.1",
-    "coffee-script": "1.3.3",
-    "hbs" : "1.0.2",
-    "handlebars": "1.0.5beta",
-    "connect-redis": "1.3.0",
+    "express": "3.0.6",
+    "connect" : "2.7.2",
+    "socket.io": "0.9.13",
+    "coffee-script": "1.4.0",
+    "hbs" : "2.0.1",
+    "handlebars": "1.0.8",
     "backbone" : "0.9.2",
     "underscore" : "1.3.3",
-    "less" : "1.3.0",
-    "everyauth" : "0.2.32",
-    "docco" : "0.3.0",
-    "mongoose" : "2.5.10",
+    "less" : "1.3.3",
+    "everyauth" : "0.3.0",
+    "docco" : "0.4.0",
+    "mongoose" : "3.5.4",
     "promised-io" : "0.3.0",
-    "request" : "2.9.202",
+    "request" : "2.10.0",
     "cloneextend" : "0.0.3",
-    "connect-redis" : "1.3.0",
+    "connect-redis" : "1.4.1",
     "hiredis" : "0.1.14",
-    "redis" : "0.7.2",
-    "redis-url" : "latest",
-    "logule" : "latest"
+    "redis" : "0.8.2",
+    "redis-url" : "0.1.0",
+    "cookie" : "0.0.4",
+    "colors" : "0.6.0-1"
   }
 }

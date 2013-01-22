@@ -1,7 +1,7 @@
 class MapHelper extends S.Drawer
   constructor: ( @events, @minRow, @maxRow ) ->
     @canvas = document.getElementById "helpers"
-    @stage = new Stage @canvas
+    @stage = new createjs.Stage @canvas
     @stage.mouseEventsEnabled = true
     @stage.enableMouseOver 20
 
@@ -70,20 +70,20 @@ class MapHelper extends S.Drawer
                 @fieldsObjs[i+":"+j+":"+(k+3)] = tr
                 @stage.addChild tr
 
-                textContainer = new Container()
+                textContainer = new createjs.Container()
                 @stage.addChild textContainer
                 textContainer.x = p.x
                 textContainer.y = p.y
                 textContainer.rotation = angle
 
-                text = new Text "in", "bold 13px 'Cabin', Helvetica,Arial,sans-serif", '#fff'
+                text = new createjs.Text "in", "bold 13px 'Cabin', Helvetica,Arial,sans-serif", '#fff'
                 text.textAlign = 'center'
                 text.textBaseline = 'middle'
                 text.x = -15
                 text.rotation = -angle
                 textContainer.addChild text
 
-                text = new Text "out", "bold 13px 'Cabin', Helvetica,Arial,sans-serif", '#fff'
+                text = new createjs.Text "out", "bold 13px 'Cabin', Helvetica,Arial,sans-serif", '#fff'
                 text.textAlign = 'center'
                 text.textBaseline = 'middle'
                 text.x = 15
@@ -208,7 +208,7 @@ class MapHelper extends S.Drawer
 
     @.on 'all', @parseAndPrepareEvent
 
-    Ticker.addListener @
+    createjs.Ticker.addListener @
 
   isLegal: ( i, j, ci, cj ) ->
 
@@ -222,7 +222,7 @@ class MapHelper extends S.Drawer
     return [mi, mj]
 
   acceptShow: ( io, jo ) ->
-    c = new Container()
+    c = new createjs.Container()
 
     tr = @drawHex io+3, jo, 0, @colours.positive, @colours.stroke
     tr.onClick = @accept
@@ -230,7 +230,7 @@ class MapHelper extends S.Drawer
     tr.onMouseOut = null
 
     p = @getPoint io+3, jo
-    text = new Text 'Execute', "bold 13px 'Cabin', Helvetica,Arial,sans-serif", '#fff'
+    text = new createjs.Text 'Execute', "bold 13px 'Cabin', Helvetica,Arial,sans-serif", '#fff'
     text.textAlign = 'center'
     text.textBaseline = 'middle'
     text.y = p.y
@@ -243,7 +243,7 @@ class MapHelper extends S.Drawer
     @stage.addChild c
 
   cancelShow: ( io, jo ) ->
-    c = new Container()
+    c = new createjs.Container()
 
     tr = @drawHex io+4, jo, 0, @colours.negative, @colours.stroke
     tr.onClick = @cancel
@@ -251,7 +251,7 @@ class MapHelper extends S.Drawer
     tr.onMouseOut = null
 
     p = @getPoint io+4, jo
-    text = new Text "Cancel", "bold 13px 'Cabin', Helvetica,Arial,sans-serif", '#fff'
+    text = new createjs.Text "Cancel", "bold 13px 'Cabin', Helvetica,Arial,sans-serif", '#fff'
     text.textAlign = 'center'
     text.textBaseline = 'middle'
     text.y = p.y
@@ -267,7 +267,7 @@ class MapHelper extends S.Drawer
     if h?
       hex = h
     else
-      hex = new Shape()
+      hex = new createjs.Shape()
 
     g = hex.graphics
     g.clear()
@@ -293,7 +293,7 @@ class MapHelper extends S.Drawer
     if tr?
       triangle = tr
     else
-      triangle = new Shape()
+      triangle = new createjs.Shape()
 
     g = triangle.graphics
     g.clear()
@@ -329,7 +329,7 @@ class MapHelper extends S.Drawer
     if hh?
       halfHex = hh
     else
-      halfHex = new Shape()
+      halfHex = new createjs.Shape()
       #halfHex.cache 0, 0, @size, @size
 
     g = halfHex.graphics

@@ -19,8 +19,8 @@ class Loader
     @endColour = [250,105,0]
     @currentColour = @startColour
 
-    @loader = new Shape()
-    @text = new Text()
+    @loader = new createjs.Shape()
+    @text = new createjs.Text()
 
   register: ( promise, weight ) ->
     self = @
@@ -59,7 +59,7 @@ class Loader
 
   start: () ->
     canvas = document.getElementById 'loader'
-    @stage = new Stage canvas
+    @stage = new createjs.Stage canvas
     @stage.addChild @loader
     @stage.addChild @text
 
